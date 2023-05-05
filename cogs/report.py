@@ -2,11 +2,21 @@ from discord import app_commands
 from discord.ext import commands
 import discord
 import csv
-import os
+
+# Use TYPE_CHECKING to avoid circular import from bot
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from bot import Bot
 
 
 class Report(commands.Cog):
-    def __init__(self, bot) -> None:
+    def __init__(self, bot: "Bot") -> None:
+        """Creates the /report command using a cog.
+
+        Args:
+            bot (Bot): A reference to the original Bot instantiation.
+        """
         self.bot = bot
         
         if '/' in self.bot.file_path:
@@ -17,11 +27,18 @@ class Report(commands.Cog):
 
     @app_commands.command(description = "Generate a report of cases logged.")
     async def report(self, interaction: discord.Interaction, user: discord.Member = None, month: str = None):
+        """Creates a report of all cases, optionally within a certain month and optionally
+        for one specific user.
+
+        Args:
+            interaction (discord.Interaction): Interaction that the slash command originated from.
+            user (discord.Member, optional): The user that the report will correspond to. Defaults to None.
+            month (str, optional): The month that all of the cases comes from. Defaults to None.
+        """
         #check to see if user contains the @Lead role
         guild = interaction.user.guild
         lead_role = discord.utils.get(guild.roles, name="Lead")
-        #if lead_role in interaction.user.roles:
-        if True:
+        if lead_role in interaction.user.roles:
             try:
                 #special case where the user asks for neither the user or the month
                 if (user == None and month == None):
@@ -103,7 +120,19 @@ class Report(commands.Cog):
             color=discord.Color.yellow())
             await interaction.response.send_message(embed=bad_user_embed, ephemeral=True)
 
-    def month_string_to_number(self, string):
+
+    def month_string_to_number(self, month_name: str) -> str:
+        """Converts the name of a month to the corresponding number
+
+        Args:
+            month_name (str): The full name or abbreviation of a month.
+
+        Raises:
+            ValueError: When the provided month_name isn't valid.
+
+        Returns:
+            str: The number of the actual month (e.g. "jan" -> "01")
+        """
         m = {
             'jan': '01',
             'feb': '02',
@@ -116,9 +145,21 @@ class Report(commands.Cog):
             'sep': '09',
             'oct': '10',
             'nov': '11',
-            'dec': '12'
+            'dec': '12',
+            'january': '01',
+            'february': '02',
+            'march': '03',
+            'april': '04',
+            'may': '05',
+            'june': '06',
+            'july': '07',
+            'august': '08',
+            'september': '09',
+            'october': '10',
+            'november': '11',
+            'december': '12'
         }
-        s = string.strip()[:3].lower()
+        s = month_name.strip()[:3].lower()
         try:
             out = m[s]
             return out

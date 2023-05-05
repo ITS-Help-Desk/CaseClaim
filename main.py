@@ -3,6 +3,13 @@ import json
 
 
 def main():
+    """Reads the bot's token from token.txt, reads the config
+    info from config.json, and starts the bot according to
+    these values.
+
+    Raises:
+        ValueError: when config.json doesn't exist
+    """
     # Create token.txt if it doesn't already exist
     try:
         f = open('token.txt', 'x')
@@ -42,6 +49,7 @@ def main():
     except FileExistsError:
         pass
 
+    # Read the values from config.json
     with open('config.json', 'r') as f:
         config_data = json.load(f)
         cases_channel = config_data["cases_channel"]

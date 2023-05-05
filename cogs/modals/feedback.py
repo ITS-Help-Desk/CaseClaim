@@ -2,9 +2,24 @@ import discord
 import discord.ui as ui
 from datetime import datetime
 
+from typing import Union
+# Use TYPE_CHECKING to avoid circular import from bot
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from bot import Bot
+
 
 class FeedbackModal(ui.Modal, title='Feedback Form'):
-    def __init__(self, bot, original_user, case_num):
+    def __init__(self, bot: "Bot", original_user: Union[discord.User, discord.Member], case_num: str):
+        """Creates a feedback form for the LeadView whenever a lead would
+        like to flag a case and provide feedback.
+
+        Args:
+            bot (Bot): A reference to the original Bot instantiation.
+            original_user (Union[discord.User, discord.Member]): The user who sent the command to show the TechView.
+            case_num (str): The case number in Salesforce (e.g. "00960979")
+        """
         super().__init__()
         self.bot = bot
         self.original_user = original_user #tech that originally claimed the case
@@ -14,6 +29,12 @@ class FeedbackModal(ui.Modal, title='Feedback Form'):
     description = ui.TextInput(label='Description of Issue', style=discord.TextStyle.paragraph)
 
     async def on_submit(self, interaction: discord.Interaction):
+        """Creates a private thread with the tech and sends a message
+        with the feedback from the lead.
+
+        Args:
+            interaction (discord.Interaction): Interaction that the slash command originated from.
+        """
         fb_embed = discord.Embed(description=f"<@{self.original_user.id}>, this case has been flagged by <@{interaction.user.id}>\n The reason for the flag is as follows:\n{self.description}",
                         colour=discord.Color.yellow(),
                         timestamp=datetime.now())
