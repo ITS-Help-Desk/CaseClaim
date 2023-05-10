@@ -58,7 +58,7 @@ class Report(commands.Cog):
                         reader = csv.reader(csvfile)
                         rows = []
                         for row in reader:
-                            if row[3] == f'{user.display_name}':
+                            if row[3] == f'{user.display_name}' or row[3] == str(user.id):
                                 rows.append(row)
 
                     report_embed = discord.Embed(
@@ -90,7 +90,7 @@ class Report(commands.Cog):
                         reader = csv.reader(csvfile)
                     rows = []
                     for row in reader:
-                        if row[0][5:7] == month_num and row[3] == f'{user.display_name}':
+                        if row[0][5:7] == month_num and row[3] == f'{user.display_name}' or row[3] == str(user.id):
                             rows.append(row)
                     report_embed = discord.Embed(
                     description=
@@ -108,7 +108,7 @@ class Report(commands.Cog):
             except:
                 exception_embed = discord.Embed(
                     description=
-                    f"<@{interaction.user.id}>, an error occured when trying to pull this report!",
+                    f"<@{interaction.user.id}>, an error occurred when trying to pull this report!",
                     color=discord.Color.yellow())
                 await interaction.response.send_message(embed=exception_embed, ephemeral=True)
 

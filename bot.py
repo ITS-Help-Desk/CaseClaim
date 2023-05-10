@@ -6,17 +6,20 @@ from cogs import report
 from cogs import claim
 import os
 import csv
-import datetime
+from cogs.case import Case
 
 
 class Bot(commands.Bot):
     cases_channel: int
     claims_channel: int
+    active_cases: dict[int, Case]
 
     def __init__(self, **options):
         """Initializes the bot (doesn't start it), and initializes some
         instance variables relating to file locations.
         """
+        self.active_cases = {}
+
         intents = discord.Intents.default()
         intents.message_content = True  
         super().__init__(intents=intents, command_prefix='/')
@@ -28,26 +31,52 @@ class Bot(commands.Bot):
             self.log_file_path = f"{self.file_path}\\log.csv"
 
 
+    def add_case(self, case: Case) -> None:
+        """Adds a case to the list of actively worked on cases.
 
-    def log_case(self, timestamp: datetime.datetime, casenum: int, status: str, lead: str, tech: str):
+        Args:
+            case (Case): The case that is being added
+        """
+        if case.message_id == None:
+            raise ValueError("Case message ID not provided!")
+        
+        self.active_cases[case.message_id] = case
+    
+    def check_if_claimed(self, case_num: str) -> bool:
+        """Checks if a case has already been claimed or not by
+        looking it up in the active_cases dict.
+
+        Args:
+            case_num (str): The number of the case trying to be claimed
+
+        Returns:
+            bool: True or False if the case has been claimed or not
+        """
+        for message_id in list(self.active_cases.keys()):
+            case = self.active_cases[message_id]
+            if case.case_num == case_num:
+                return True
+        return False
+
+    def remove_case(self, message_id: int) -> None:
+        """Removes a case from the list of actively worked on cases.
+
+        Args:
+            case (Case): The case that is being removed.
+        """
+        del self.active_cases[message_id]
+
+    
+    def log_case(self, case: Case) -> None:
         """Logs the case to the logfile.
 
         Args:
-            timestamp (datetime.datetime): Time of the case being logged
-            casenum (int): The case number in Salesforce (e.g. 00960979)
-            status (str): The status of the case (any comments written by ITS leads)
-            lead (str): The username of the lead who reviewed the case
-            tech (str): The username of the tech who handled the case
+            case (Case): The case object
         """
-        time_string = str(timestamp)
-        date_and_time = time_string.split(" ")
-        truncated_time = date_and_time[1][:5]
-        info = [[date_and_time[0], truncated_time, casenum, tech, status, lead]]
+        
         with open(self.log_file_path, 'a', newline='') as csvfile:
             writer = csv.writer(csvfile)
-            for element in info:
-                writer.writerow(element)
-        return
+            writer.writerow(case.log_format())
             
         
     async def on_ready(self):
