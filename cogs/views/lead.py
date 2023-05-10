@@ -31,8 +31,8 @@ class LeadView(ui.View):
     async def button_check(self, interaction: discord.Interaction, button):
         #Log the case as checked, then delete it
         self.case.status = "Checked"
-        self.case.lead = interaction.user.id
-        self.bot.log_case(self.case)
+        self.case.lead_id = interaction.user.id
+        self.case.log()
         
         await interaction.message.delete()
     

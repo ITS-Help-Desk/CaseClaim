@@ -5,7 +5,6 @@ from cogs import help
 from cogs import report
 from cogs import claim
 import os
-import csv
 from cogs.case import Case
 
 
@@ -29,6 +28,8 @@ class Bot(commands.Bot):
             self.log_file_path = f"{self.file_path}/log.csv"
         else:
             self.log_file_path = f"{self.file_path}\\log.csv"
+        
+        Case.log_file_path = self.log_file_path
 
 
     def add_case(self, case: Case) -> None:
@@ -42,6 +43,7 @@ class Bot(commands.Bot):
         
         self.active_cases[case.message_id] = case
     
+
     def check_if_claimed(self, case_num: str) -> bool:
         """Checks if a case has already been claimed or not by
         looking it up in the active_cases dict.
@@ -58,6 +60,7 @@ class Bot(commands.Bot):
                 return True
         return False
 
+
     def remove_case(self, message_id: int) -> None:
         """Removes a case from the list of actively worked on cases.
 
@@ -65,18 +68,6 @@ class Bot(commands.Bot):
             case (Case): The case that is being removed.
         """
         del self.active_cases[message_id]
-
-    
-    def log_case(self, case: Case) -> None:
-        """Logs the case to the logfile.
-
-        Args:
-            case (Case): The case object
-        """
-        
-        with open(self.log_file_path, 'a', newline='') as csvfile:
-            writer = csv.writer(csvfile)
-            writer.writerow(case.log_format())
             
         
     async def on_ready(self):

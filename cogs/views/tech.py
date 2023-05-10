@@ -44,9 +44,9 @@ class TechView(ui.View):
             
             # Update case information
             self.case.status = "Complete"
-            self.case.lead = self.bot.user.id
+            self.case.lead_id = self.bot.user.id
 
-            self.bot.log_case(self.case)
+            self.case.log()
 
             self.bot.remove_case(interaction.message.id)
             await interaction.message.delete()

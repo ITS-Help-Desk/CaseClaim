@@ -56,6 +56,8 @@ class FeedbackModal(ui.Modal, title='Feedback Form'):
         await thread.add_user(self.original_user)
         await thread.send(embed=fb_embed)
         await interaction.response.send_message(content="Flagged", delete_after=0)
-        self.case.status = f"Flagged, Reason: {self.description}"
-        self.case.lead = interaction.user.id
-        self.bot.log_case(self.case)
+        self.case.status = f"Flagged"
+        self.case.flag_severity = self.severity
+        self.case.comments = self.description
+        self.case.lead_id = interaction.user.id
+        self.case.log()
