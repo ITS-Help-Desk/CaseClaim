@@ -74,7 +74,7 @@ class ReportCommand(commands.Cog):
                         reader = csv.reader(csvfile)
                         rows = []
                         for row in reader:
-                            if row[0][5:7] == month_num:
+                            if row[1][5:7] == month_num or row[0][5:7] == month_num :
                                 rows.append(row)
 
                     report_embed = discord.Embed(
@@ -88,10 +88,10 @@ class ReportCommand(commands.Cog):
                     month_num = self.month_string_to_number(month)
                     with open(self.bot.log_file_path, 'r') as csvfile:
                         reader = csv.reader(csvfile)
-                    rows = []
-                    for row in reader:
-                        if row[0][5:7] == month_num and row[3] == f'{user.display_name}' or row[3] == str(user.id):
-                            rows.append(row)
+                        rows = []
+                        for row in reader:
+                            if (row[1][5:7] == month_num or row[0][5:7] == month_num) and (row[3] == f'{user.display_name}' or row[3] == str(user.id)):
+                                rows.append(row)
                     report_embed = discord.Embed(
                     description=
                     f"<@{interaction.user.id}>, here is the report for <@{user.id}> for the month of {month}",
@@ -105,7 +105,8 @@ class ReportCommand(commands.Cog):
 
                 tech_report = discord.File(self.temp_file_path)
                 await interaction.response.send_message(embed=report_embed, file=tech_report)
-            except:
+            except Exception as e:
+                print(e)
                 exception_embed = discord.Embed(
                     description=
                     f"<@{interaction.user.id}>, an error occurred when trying to pull this report!",
