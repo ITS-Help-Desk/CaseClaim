@@ -3,10 +3,10 @@
 1. Download dependencies
 
     On Windows:
-    python -m pip3 install -r requirements.txt
+    `python -m pip3 install -r requirements.txt`
 
     On Mac:
-    python3 -m pip3 install -r requirements.txt
+    `python3 -m pip3 install -r requirements.txt`
 
 2. Run the `main.py` file
 3. Add required information to `config.json`
