@@ -44,7 +44,7 @@ def main():
 
         with open("config.json", "w") as f:
             data = {"cases_channel": 0, "claims_channel": 0}
-            json.dump(f, data)
+            json.dump(data, f)
             raise ValueError("Please add the required config information into config.csv")
     except FileExistsError:
         pass
