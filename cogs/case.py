@@ -5,11 +5,11 @@ import csv
 class InvalidCaseError(Exception):
     pass
 
-class Case:
+class Claim:
     log_file_path: str # Passed in during instantiation of Bot
 
     def __init__(self, case_num: str, tech_id: int):
-        """Creates a Case class to store all information about a case
+        """Creates a Claim class to store all information about a case
 
         Instance Variables:
             case_num (str): The case number in Salesforce (e.g. "00960979")

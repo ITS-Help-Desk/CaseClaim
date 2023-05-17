@@ -3,7 +3,7 @@ import discord.ui as ui
 from datetime import datetime
 import random
 from .lead import LeadView
-from ..case import Case
+from ..case import Claim
 
 from typing import Union
 # Use TYPE_CHECKING to avoid circular import from bot
@@ -14,14 +14,14 @@ if TYPE_CHECKING:
 
 
 class TechView(ui.View):
-    def __init__(self, bot: "Bot", original_user: Union[discord.User, discord.Member], case: Case):
+    def __init__(self, bot: "Bot", original_user: Union[discord.User, discord.Member], case: Claim):
         """Creates the case claim embed with the Complete and Unclaim buttons. Also sends a
         embed to the lead claims channel with a LeadView embed.
 
         Args:
             bot (Bot): A reference to the original Bot instantiation.
             original_user (Union[discord.User, discord.Member]): The user who sent the command to show the TechView.
-            case (Case): The case object.
+            case (Claim): The case object.
         """
         super().__init__(timeout=None)
         self.bot = bot

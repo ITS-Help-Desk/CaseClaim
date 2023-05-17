@@ -5,13 +5,13 @@ from cogs import help
 from cogs import report
 from cogs import claim
 import os
-from cogs.case import Case
+from cogs.case import Claim
 
 
 class Bot(commands.Bot):
     cases_channel: int
     claims_channel: int
-    active_cases: dict[int, Case]
+    active_cases: dict[int, Claim]
 
     def __init__(self, **options):
         """Initializes the bot (doesn't start it), and initializes some
@@ -29,14 +29,14 @@ class Bot(commands.Bot):
         else:
             self.log_file_path = f"{self.file_path}\\log.csv"
         
-        Case.log_file_path = self.log_file_path
+        Claim.log_file_path = self.log_file_path
 
 
-    def add_case(self, case: Case) -> None:
+    def add_case(self, case: Claim) -> None:
         """Adds a case to the list of actively worked on cases.
 
         Args:
-            case (Case): The case that is being added
+            case (Claim): The case that is being added
         """
         if case.message_id == None:
             raise ValueError("Case message ID not provided!")
@@ -65,7 +65,7 @@ class Bot(commands.Bot):
         """Removes a case from the list of actively worked on cases.
 
         Args:
-            case (Case): The case that is being removed.
+            message_id (int): The message id of the case that is being removed.
         """
         del self.active_cases[message_id]
             
@@ -77,10 +77,10 @@ class Bot(commands.Bot):
         print(f'Logged in as {self.user}!')
 
         # Load all commands
-        await self.add_cog(mickie.Mickie(self))
-        await self.add_cog(help.Help(self))
-        await self.add_cog(report.Report(self))
-        await self.add_cog(claim.Claim(self))
+        await self.add_cog(mickie.MickieCommand(self))
+        await self.add_cog(help.HelpCommand(self))
+        await self.add_cog(report.ReportCommand(self))
+        await self.add_cog(claim.ClaimCommand(self))
         
         synced = await self.tree.sync()
         print("{} commands synced".format(len(synced)))

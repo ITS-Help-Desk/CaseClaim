@@ -3,7 +3,7 @@ from discord.ext import commands
 import discord
 from datetime import datetime
 from .views.tech import TechView
-from .case import Case, InvalidCaseError
+from .case import Claim, InvalidCaseError
 
 # Use TYPE_CHECKING to avoid circular import from bot
 from typing import TYPE_CHECKING
@@ -12,7 +12,7 @@ if TYPE_CHECKING:
     from bot import Bot
 
 
-class Claim(commands.Cog):
+class ClaimCommand(commands.Cog):
     def __init__(self, bot: "Bot") -> None:
         """Creates the /claim command using a cog.
 
@@ -38,7 +38,7 @@ class Claim(commands.Cog):
 
         # Create a Case object, checks to see if it's valid
         try:
-            case = Case(case_num, interaction.user.id)
+            case = Claim(case_num, interaction.user.id)
         except InvalidCaseError:
             invalid = discord.Embed(description=f"**{case_num}** is an invalid case number!", colour=discord.Color.yellow())
             await interaction.response.send_message(embed=invalid, ephemeral=True, delete_after=300)

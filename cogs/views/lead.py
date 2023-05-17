@@ -2,7 +2,7 @@ import discord
 import discord.ui as ui
 from datetime import datetime
 from ..modals.feedback import FeedbackModal
-from ..case import Case
+from ..case import Claim
 
 from typing import Union
 # Use TYPE_CHECKING to avoid circular import from bot
@@ -13,14 +13,14 @@ if TYPE_CHECKING:
 
 
 class LeadView(ui.View):
-    def __init__(self, bot: "Bot", original_user: Union[discord.User, discord.Member], case: Case):
+    def __init__(self, bot: "Bot", original_user: Union[discord.User, discord.Member], case: Claim):
         """Creates a lead view in the lead case claim channel for submitting
         feedback on a completed case submitted by a tech.
 
         Args:
             bot (Bot): A reference to the original Bot instantiation.
             original_user (Union[discord.User, discord.Member]): The user who sent the command to show the TechView.
-            case_num (Case): The case object.
+            case (Claim): The case object.
         """
         super().__init__(timeout=None)
         self.bot = bot

@@ -9,7 +9,7 @@ if TYPE_CHECKING:
     from bot import Bot
 
 
-class Help(commands.Cog):
+class HelpCommand(commands.Cog):
     def __init__(self, bot: "Bot") -> None:
         """Creates the /help command using a cog.
 

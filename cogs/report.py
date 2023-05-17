@@ -10,7 +10,7 @@ if TYPE_CHECKING:
     from bot import Bot
 
 
-class Report(commands.Cog):
+class ReportCommand(commands.Cog):
     def __init__(self, bot: "Bot") -> None:
         """Creates the /report command using a cog.
 
