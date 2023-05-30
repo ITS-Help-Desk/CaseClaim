@@ -28,7 +28,7 @@ class ReportCommand(commands.Cog):
     @app_commands.command(description = "Generate a report of cases logged.")
     @app_commands.describe(user="The user the report will be generated for.")
     @app_commands.describe(month="The month for the report (e.g. \"march\").")
-    async def report(self, interaction: discord.Interaction, user: discord.Member = None, month: str = None):
+    async def report(self, interaction: discord.Interaction, user: discord.Member = None, month: str = None, flagged: bool = False):
         """Creates a report of all cases, optionally within a certain month and optionally
         for one specific user.
 
@@ -36,6 +36,7 @@ class ReportCommand(commands.Cog):
             interaction (discord.Interaction): Interaction that the slash command originated from.
             user (discord.Member, optional): The user that the report will correspond to. Defaults to None.
             month (str, optional): The month that all of the cases comes from. Defaults to None.
+            flagged (bool, optional): Whether or not the case has been flagged. Defaults to False.
         """
         # Check if user is a lead
         guild = interaction.user.guild
@@ -49,7 +50,7 @@ class ReportCommand(commands.Cog):
                     color=discord.Color.teal()
                 )
 
-                report = self.get_report(user, month)
+                report = self.get_report(user, month, flagged)
 
                 await interaction.response.send_message(embed=report_embed, file=report)
             except Exception as e:
@@ -69,7 +70,7 @@ class ReportCommand(commands.Cog):
             await interaction.response.send_message(embed=bad_user_embed, ephemeral=True)
 
 
-    def get_report(self, user: Optional[discord.Member]=None, month: Optional[str]=None) -> discord.File:
+    def get_report(self, user: Optional[discord.Member]=None, month: Optional[str]=None, flagged: bool=False) -> discord.File:
         """Generated a report for a given user and month. If neither if these values are provided, this
         function will return a general report for a month, or a general report for a user.
 
@@ -78,12 +79,13 @@ class ReportCommand(commands.Cog):
         Args:
             user (Optional[discord.Member], optional): The user the report will be generated for. Defaults to None.
             month (Optional[str], optional): The month the report will be generated for (e.g. "march"). Defaults to None.
+            flagged (bool, optional): Whether or not the cae has been flagged. Defaults to None.
 
         Returns:
             discord.File: The csv file saved on Discord.
         """
         # All time report
-        if user is None and month is None:
+        if user is None and month is None and not flagged:
             return discord.File(self.bot.log_file_path)
         
         # Open file and record all data requested
@@ -91,23 +93,30 @@ class ReportCommand(commands.Cog):
             reader = csv.reader(csvfile)
             rows = []
 
-            # All time user report
-            if month is None:
-                for row in reader:
-                    if row[3] == f'{user.display_name}' or row[3] == str(user.id):
-                        rows.append(row)
-            # Month report
-            elif user is None:
+            try:
                 month_num = self.month_string_to_number(month)
-                for row in reader:
-                    if row[1][5:7] == month_num or row[0][5:7] == month_num:
-                        rows.append(row)
-            # User's report for the month
-            else:
-                month_num = self.month_string_to_number(month)
-                for row in reader:
-                    if (row[1][5:7] == month_num or row[0][5:7] == month_num) and (row[3] == f'{user.display_name}' or row[3] == str(user.id)):
-                        rows.append(row)
+            except ValueError:
+                pass
+            for row in reader:
+                # Check for correct month
+                if month is not None:
+                    if row[1][5:7] != month_num and row[0][5:7] != month_num:
+                        continue
+                    
+                # Check for correct user
+                if user is not None:
+                    if row[3] != f'{user.display_name}' and row[3] != str(user.id):
+                        continue
+                
+                # Check if flagged
+                if flagged:
+                    if row[4] != 'flagged' and row[5] != 'Flagged':
+                        continue
+                
+                # If all tests pass, add row
+                row.pop(0) # Remove message_id
+                rows.append(row)
+
         
         # Save to a temp file, then upload to Discord.
         return self.save_to_tempfile(rows)
@@ -168,8 +177,8 @@ class ReportCommand(commands.Cog):
             'november': '11',
             'december': '12'
         }
-        s = month_name.strip()[:3].lower()
         try:
+            s = month_name.strip()[:3].lower()
             out = m[s]
             return out
         except:
