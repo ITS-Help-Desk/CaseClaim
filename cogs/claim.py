@@ -33,8 +33,11 @@ class ClaimCommand(commands.Cog):
             interaction (discord.Interaction): Interaction that the slash command originated from
             case_num (str): The case number in Salesforce (e.g. "00960979")
         """
-        #defining the cases channel and the claims channel
-        channel = interaction.user.guild.get_channel(self.bot.cases_channel) #cases channel
+        # Ensure user is claiming case in the correct channel
+        if interaction.channel.id != self.bot.cases_channel:
+            claimed = discord.Embed(description=f"Cases cannot be claimed in this channel. Please go to <#{self.bot.cases_channel}>", colour=discord.Color.yellow())
+            await interaction.response.send_message(embed=claimed, ephemeral=True,  delete_after=300)
+            return
 
         # Create a Case object, checks to see if it's valid
         try:
@@ -43,12 +46,13 @@ class ClaimCommand(commands.Cog):
             invalid = discord.Embed(description=f"**{case_num}** is an invalid case number!", colour=discord.Color.yellow())
             await interaction.response.send_message(embed=invalid, ephemeral=True, delete_after=300)
             return
-
+        
         # Check to see if the case claimed has already been claimed and is in progress.
         if self.bot.check_if_claimed(case.case_num):
             claimed = discord.Embed(description=f"{case.case_num} has already been claimed.", colour=discord.Color.yellow())
             await interaction.response.send_message(embed=claimed, ephemeral=True,  delete_after=300)
             return
+
 
         # User has claimed the case successfully, create the embed and techview.
         message_embed = discord.Embed(
@@ -62,8 +66,7 @@ class ClaimCommand(commands.Cog):
 
         message_view = TechView(self.bot, interaction.user, case)
 
-        
-
+        # Send message, add case to the list of cases
         await interaction.response.send_message(embed=message_embed, view=message_view)
         response = await interaction.original_response()
         case.message_id = response.id
