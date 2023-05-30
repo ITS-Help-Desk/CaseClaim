@@ -4,7 +4,7 @@ import discord
 import csv
 
 # Use TYPE_CHECKING to avoid circular import from bot
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Optional
 
 if TYPE_CHECKING:
     from bot import Bot
@@ -22,10 +22,12 @@ class ReportCommand(commands.Cog):
         if '/' in self.bot.file_path:
             self.temp_file_path = f"{self.bot.file_path}/temp.csv"
         else:
-            self.temp_file_path = f"{self.bot.file_path}/temp.csv"
+            self.temp_file_path = f"{self.bot.file_path}\\temp.csv"
     
 
     @app_commands.command(description = "Generate a report of cases logged.")
+    @app_commands.describe(user="The user the report will be generated for.")
+    @app_commands.describe(month="The month for the report (e.g. \"march\").")
     async def report(self, interaction: discord.Interaction, user: discord.Member = None, month: str = None):
         """Creates a report of all cases, optionally within a certain month and optionally
         for one specific user.
@@ -35,76 +37,21 @@ class ReportCommand(commands.Cog):
             user (discord.Member, optional): The user that the report will correspond to. Defaults to None.
             month (str, optional): The month that all of the cases comes from. Defaults to None.
         """
-        #check to see if user contains the @Lead role
+        # Check if user is a lead
         guild = interaction.user.guild
         lead_role = discord.utils.get(guild.roles, name="Lead")
         if lead_role in interaction.user.roles:
             try:
-                #special case where the user asks for neither the user or the month
-                if (user == None and month == None):
-                    print('case1')
-                    report_embed = discord.Embed(
+                # Generate report embed
+                report_embed = discord.Embed(
                     description=
-                    f"<@{interaction.user.id}>, here is the all-time, all-tech report!",
-                    color=discord.Color.teal())
-                    tech_report = discord.File(self.bot.log_file_path)
-                    await interaction.response.send_message(embed=report_embed, file=tech_report)
-                    return
+                    f"<@{interaction.user.id}>, here is your report.",
+                    color=discord.Color.teal()
+                )
 
-                #if the report asks for just the user
-                if (user != None and month == None):
-                    print('case2')
-                    with open(self.bot.log_file_path, 'r') as csvfile:
-                        reader = csv.reader(csvfile)
-                        rows = []
-                        for row in reader:
-                            if row[3] == f'{user.display_name}' or row[3] == str(user.id):
-                                rows.append(row)
+                report = self.get_report(user, month)
 
-                    report_embed = discord.Embed(
-                    description=
-                    f"<@{interaction.user.id}>, here is the report for <@{user.id}>",
-                    color=discord.Color.teal())
-
-                #if the report asks for only the month
-                if (user == None and month != None):
-                    print('case3')
-                    month_num = self.month_string_to_number(month)
-                    with open(self.bot.log_file_path, 'r') as csvfile:
-                        reader = csv.reader(csvfile)
-                        rows = []
-                        for row in reader:
-                            if row[1][5:7] == month_num or row[0][5:7] == month_num :
-                                rows.append(row)
-
-                    report_embed = discord.Embed(
-                    description=
-                    f"<@{interaction.user.id}>, here is the report for the month of {month}",
-                    color=discord.Color.teal())
-
-                #if the report command asks for both!
-                if (user != None and month != None):
-                    print('case4')
-                    month_num = self.month_string_to_number(month)
-                    with open(self.bot.log_file_path, 'r') as csvfile:
-                        reader = csv.reader(csvfile)
-                        rows = []
-                        for row in reader:
-                            if (row[1][5:7] == month_num or row[0][5:7] == month_num) and (row[3] == f'{user.display_name}' or row[3] == str(user.id)):
-                                rows.append(row)
-                    report_embed = discord.Embed(
-                    description=
-                    f"<@{interaction.user.id}>, here is the report for <@{user.id}> for the month of {month}",
-                    color=discord.Color.teal())
-
-                #generates and returns the requested file
-                with open(self.temp_file_path, 'w', newline='') as csvfile:
-                    writer = csv.writer(csvfile)
-                    for row in rows:
-                        writer.writerow(row)
-
-                tech_report = discord.File(self.temp_file_path)
-                await interaction.response.send_message(embed=report_embed, file=tech_report)
+                await interaction.response.send_message(embed=report_embed, file=report)
             except Exception as e:
                 print(e)
                 exception_embed = discord.Embed(
@@ -112,14 +59,74 @@ class ReportCommand(commands.Cog):
                     f"<@{interaction.user.id}>, an error occurred when trying to pull this report!",
                     color=discord.Color.yellow())
                 await interaction.response.send_message(embed=exception_embed, ephemeral=True)
-
         else:
-            #return error message if user is not @Lead
+            # Return error message if user is not Lead
             bad_user_embed = discord.Embed(
             description=
             f"<@{interaction.user.id}>, you do not have permission to pull this report!",
             color=discord.Color.yellow())
             await interaction.response.send_message(embed=bad_user_embed, ephemeral=True)
+
+
+    def get_report(self, user: Optional[discord.Member]=None, month: Optional[str]=None) -> discord.File:
+        """Generated a report for a given user and month. If neither if these values are provided, this
+        function will return a general report for a month, or a general report for a user.
+
+        The log information is saved to a temporary csv and is uploaded to Discord.
+
+        Args:
+            user (Optional[discord.Member], optional): The user the report will be generated for. Defaults to None.
+            month (Optional[str], optional): The month the report will be generated for (e.g. "march"). Defaults to None.
+
+        Returns:
+            discord.File: The csv file saved on Discord.
+        """
+        # All time report
+        if user is None and month is None:
+            return discord.File(self.bot.log_file_path)
+        
+        # Open file and record all data requested
+        with open(self.bot.log_file_path, 'r') as csvfile:
+            reader = csv.reader(csvfile)
+            rows = []
+
+            # All time user report
+            if month is None:
+                for row in reader:
+                    if row[3] == f'{user.display_name}' or row[3] == str(user.id):
+                        rows.append(row)
+            # Month report
+            elif user is None:
+                month_num = self.month_string_to_number(month)
+                for row in reader:
+                    if row[1][5:7] == month_num or row[0][5:7] == month_num:
+                        rows.append(row)
+            # User's report for the month
+            else:
+                month_num = self.month_string_to_number(month)
+                for row in reader:
+                    if (row[1][5:7] == month_num or row[0][5:7] == month_num) and (row[3] == f'{user.display_name}' or row[3] == str(user.id)):
+                        rows.append(row)
+        
+        # Save to a temp file, then upload to Discord.
+        return self.save_to_tempfile(rows)
+        
+    
+    def save_to_tempfile(self, rows: list[list[str]]) -> discord.File:
+        """Saves a given nested list to a temporary csv file.
+
+        Args:
+            rows (list[str]): The nested list containing the log information about the user's cases.
+
+        Returns:
+            discord.File: The csv file saved on Discord.
+        """
+        with open(self.temp_file_path, 'w', newline='') as csvfile:
+            writer = csv.writer(csvfile)
+            for row in rows:
+                writer.writerow(row)
+
+        return discord.File(self.temp_file_path)
 
 
     def month_string_to_number(self, month_name: str) -> str:
