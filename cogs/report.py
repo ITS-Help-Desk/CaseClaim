@@ -62,9 +62,10 @@ class ReportCommand(commands.Cog):
         else:
             # Return error message if user is not Lead
             bad_user_embed = discord.Embed(
-            description=
-            f"<@{interaction.user.id}>, you do not have permission to pull this report!",
-            color=discord.Color.yellow())
+                description=
+                f"<@{interaction.user.id}>, you do not have permission to pull this report!",
+                color=discord.Color.yellow()
+            )
             await interaction.response.send_message(embed=bad_user_embed, ephemeral=True)
 
 
