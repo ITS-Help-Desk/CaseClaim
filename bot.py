@@ -4,6 +4,7 @@ from cogs import mickie
 from cogs import help
 from cogs import report
 from cogs import claim
+from cogs import flag
 import os
 from cogs.case import Claim
 
@@ -81,6 +82,7 @@ class Bot(commands.Bot):
         await self.add_cog(help.HelpCommand(self))
         await self.add_cog(report.ReportCommand(self))
         await self.add_cog(claim.ClaimCommand(self))
+        await self.add_cog(flag.FlagCommand(self))
         
         synced = await self.tree.sync()
         print("{} commands synced".format(len(synced)))
