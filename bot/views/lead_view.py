@@ -33,8 +33,8 @@ class LeadView(ui.View):
         
         await interaction.message.delete()
     
-    @ui.button(label="Flag", style=discord.ButtonStyle.danger, custom_id="flag")
-    async def button_flag(self, interaction: discord.Interaction, button):
+    @ui.button(label="Ping", style=discord.ButtonStyle.danger, custom_id="ping")
+    async def button_ping(self, interaction: discord.Interaction, button):
         self.case = self.bot.get_case(interaction.message.id)
 
         #Prompt with Modal, record the response, create a private thread, then delete

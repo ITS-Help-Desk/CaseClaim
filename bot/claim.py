@@ -7,17 +7,17 @@ class InvalidClaimError(Exception):
     pass
 
 class Claim:
-    def __init__(self, case_num: str, tech_id: int = -1, message_id: int = -1, status: str = "", lead_id: int = -1, flag_severity: str = "", comments: str = ""):
+    def __init__(self, case_num: str, tech_id: int = -1, message_id: int = -1, status: str = "", lead_id: int = -1, severity_level: str = "", comments: str = ""):
         """Creates a Claim class to store all information about a claim
 
         Args:
             case_num (str): The case number in Salesforce (e.g. "00960979")_
             tech_id (int, optional): The Discord id of the tech who claimed the case. Defaults to -1.
             message_id (int, optional): The Discord id of the case claim message. Defaults to -1.
-            status (str, optional): The status of the case ("Completed"/"Checked"/"Flagged"). Defaults to "".
+            status (str, optional): The status of the case ("Completed"/"Checked"/"Pinged"). Defaults to "".
             lead_id (int, optional): The Discord id of the lead who reviewed the case. Defaults to -1.
-            flag_severity (str, optional): The severity of the flag (if flagged). Defaults to "".
-            comments (str, optional): The comments of the flag (if flagged). Defaults to "".
+            severity_level (str, optional): The severity of the ping (if pinged). Defaults to "".
+            comments (str, optional): The comments of the ping (if pinged). Defaults to "".
 
         Raises:
             InvalidClaimError: The case number provided isn't valid (e.i. isn't 8 digits or contains a letter).
@@ -36,7 +36,7 @@ class Claim:
         self.message_id = message_id
         self.status = status
         self.lead_id = lead_id
-        self.flag_severity = flag_severity
+        self.severity_level = severity_level
         self.comments = comments
 
     @classmethod
@@ -55,7 +55,7 @@ class Claim:
             message_id=int(json_file["message_id"]),
             status=json_file["status"],
             lead_id=int(json_file["lead_id"]),
-            flag_severity=json_file["flag_severity"],
+            severity_level=json_file["severity_level"],
             comments=json_file["comments"]
         )
         
@@ -71,7 +71,7 @@ class Claim:
         """Returns all of the information about the claim in the format needed to log the claim in log.csv
 
         Returns:
-            list[str | int]: Returns a list in the format of message_id, timestamp, case_num, tech_user_ID, lead_user_ID, status, flag_severity, comments
+            list[str | int]: Returns a list in the format of message_id, timestamp, case_num, tech_user_ID, lead_user_ID, status, severity_level, comments
         """
         return [
             str(self.message_id),
@@ -80,7 +80,7 @@ class Claim:
             str(self.tech_id),
             str(self.lead_id),
             self.status,
-            self.flag_severity,
+            self.severity_level,
             self.comments
         ]
     
@@ -97,6 +97,6 @@ class Claim:
             "tech_id": self.tech_id,
             "lead_id": self.lead_id,
             "status": self.status,
-            "flag_severity": self.flag_severity,
+            "severity_level": self.severity_level,
             "comments": self.comments
         }

@@ -36,35 +36,35 @@ This repository contains the code to run the USD ITS Help Desk Case Claim bot. T
     ├── claim.py # OOP representation of a claim
     ├── cogs
         ├── claim_command.py # /claim
-        ├── flag_command.py # /flag
+        ├── ping_command.py # /ping
         ├── help_command.py # /help
         ├── mickie_command.py # /mickie
         ├── case_info_command.py # /case_info
         ├── update_percent_command.py # /update_percent
         └── report_command.py # /report
     ├── modals
-        └── feedback_modal.py # Feedback form for flagging
+        └── feedback_modal.py # Feedback form for pings
     └── views
-        ├── lead_view.py # Check and flag buttons
+        ├── lead_view.py # Check and ping buttons
         └── tech_view.py # Complete and unclaim buttons
 ```
 
 ## Commands
 - /claim **<case_num>**
     - Allows a tech to claim a case and ensure that no other techs will work on that case.
-    - Once a case is completed, a lead is able to review that case, and flag it if necessary.
-    - When a lead flags a case, they can provide a description and a severity level.
+    - Once a case is completed, a lead is able to review that case, and ping it if necessary.
+    - When a lead pings a case, they can provide a description and a severity level.
     - This feedback will be shared with the tech in a private thread.
 - /help
     - Shows all of commands for the bot with descriptions.
 - /mickie
     - A fun command that essentially allows users to ping the bot and ensure it's online.
-- /flag **<case_num>** **\<user>**
-    - Allows a lead to manually flag a case and provide feedback to a tech.
+- /ping **<case_num>** **\<user>**
+    - Allows a lead to manually ping a case and provide feedback to a tech.
     - Leads are able to write a description and severity level, which will be shared with the tech in a private thread.
-- /report **\[user]** **\[month]** **\[flagged]**
+- /report **\[user]** **\[month]** **\[pinged]**
     - Allows a lead to instantly create a report on filtered cases.
-    - Leads can filter depending on a user, month, or whether or not the case was flagged.
+    - Leads can filter depending on a user, month, or whether or not the case was pinged.
     - These parameters are optional and can be used in conjunction with one another.
 - /update_percentage **\<percentage>**
     - Allows a lead to change the percentage of cases that are sent to review.
