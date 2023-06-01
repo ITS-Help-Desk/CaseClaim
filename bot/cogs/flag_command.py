@@ -1,15 +1,13 @@
 from discord import app_commands
 from discord.ext import commands
 import discord
+from ..modals.feedback_modal import FeedbackModal
+from ..claim import Claim
 
 # Use TYPE_CHECKING to avoid circular import from bot
 from typing import TYPE_CHECKING
-from cogs.case import Claim
-
-from cogs.modals.feedback import FeedbackModal
-
 if TYPE_CHECKING:
-    from bot import Bot
+    from bot.bot import Bot
 
 
 class FlagCommand(commands.Cog):
@@ -36,17 +34,16 @@ class FlagCommand(commands.Cog):
             case_num (str): The case number that will be flagged.
             user (discord.Member): The user that will be pinged.
         """
-        guild = interaction.user.guild
-        lead_role = discord.utils.get(guild.roles, name="Lead")
-        if lead_role in interaction.user.roles:
-            case = Claim(case_num, user.id)
-            fbModal = FeedbackModal(self.bot, user, case)
+        # Check if user is a lead
+        if self.bot.check_if_lead(interaction.user):
+            case = Claim(case_num=case_num, tech_id=user.id)
+            fbModal = FeedbackModal(self.bot, case)
             await interaction.response.send_modal(fbModal)
         else:
             # Return error message if user is not Lead
             bad_user_embed = discord.Embed(
                 description=
                 f"<@{interaction.user.id}>, you do not have permission to use this command!",
-                color=discord.Color.yellow()
+                color=discord.Color.red()
             )
             await interaction.response.send_message(embed=bad_user_embed, ephemeral=True)

@@ -6,7 +6,7 @@ import discord
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from bot import Bot
+    from ..bot import Bot
 
 
 class MickieCommand(commands.Cog):
