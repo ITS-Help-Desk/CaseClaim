@@ -1,4 +1,4 @@
-from bot import Bot
+from bot.bot import Bot
 import json
 
 
@@ -8,7 +8,7 @@ def main():
     these values.
 
     Raises:
-        ValueError: when config.json doesn't exist
+        ValueError: when config.json doesn't exist or doesn't contain any information.
     """
     # Create token.txt if it doesn't already exist
     try:
@@ -18,14 +18,14 @@ def main():
     except FileExistsError:
         pass
 
-    # Read token, if not found, take user input
+    # Read token, if not found take user input
     with open('token.txt', 'r') as f:
         token = f.readline().strip()
     
     if not token:
         token = input("Paste token here: ")
         with open('token.txt', 'w') as f:
-            f.write(token)
+            f.write(token.strip())
             f.close()
     
     # Create log.csv if it doesn't already exist
@@ -49,13 +49,31 @@ def main():
     except FileExistsError:
         pass
 
-    # Read the values from config.json
-    with open('config.json', 'r') as f:
-        config_data = json.load(f)
-        cases_channel = config_data["cases_channel"]
-        claims_channel = config_data["claims_channel"]
+    # Create active_cases.json if it doesn't already exist
+    try:
+        f = open("active_cases.json", "x")
+        f.close()
+        print('Created active_cases.json')
 
-    
+        with open("active_cases.json", "w") as f:
+            data = {}
+            json.dump(data, f)
+    except FileExistsError:
+        pass
+
+    # Read the values from config.json
+    try:
+        with open('config.json', 'r') as f:
+            config_data = json.load(f)
+            cases_channel = config_data["cases_channel"]
+            claims_channel = config_data["claims_channel"]
+            
+            if cases_channel == 0 or claims_channel == 0:
+                raise ValueError()
+    except:
+        raise ValueError("Please add the required config information into config.csv")
+
+
     # Create bot and run
     bot = Bot()
     bot.cases_channel = cases_channel

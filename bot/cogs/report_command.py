@@ -7,7 +7,7 @@ import csv
 from typing import TYPE_CHECKING, Optional
 
 if TYPE_CHECKING:
-    from bot import Bot
+    from ..bot import Bot
 
 
 class ReportCommand(commands.Cog):
@@ -18,12 +18,6 @@ class ReportCommand(commands.Cog):
             bot (Bot): A reference to the original Bot instantiation.
         """
         self.bot = bot
-        
-        if '/' in self.bot.file_path:
-            self.temp_file_path = f"{self.bot.file_path}/temp.csv"
-        else:
-            self.temp_file_path = f"{self.bot.file_path}\\temp.csv"
-    
 
     @app_commands.command(description = "Generate a report of cases logged.")
     @app_commands.describe(user="The user the report will be generated for.")
@@ -39,15 +33,13 @@ class ReportCommand(commands.Cog):
             flagged (bool, optional): Whether or not the case has been flagged. Defaults to False.
         """
         # Check if user is a lead
-        guild = interaction.user.guild
-        lead_role = discord.utils.get(guild.roles, name="Lead")
-        if lead_role in interaction.user.roles:
+        if self.bot.check_if_lead(interaction.user):
             try:
                 # Generate report embed
                 report_embed = discord.Embed(
                     description=
                     f"<@{interaction.user.id}>, here is your report.",
-                    color=discord.Color.teal()
+                    color=self.bot.embed_color
                 )
 
                 report = self.get_report(user, month, flagged)
@@ -58,14 +50,14 @@ class ReportCommand(commands.Cog):
                 exception_embed = discord.Embed(
                     description=
                     f"<@{interaction.user.id}>, an error occurred when trying to pull this report!",
-                    color=discord.Color.yellow())
+                    color=discord.Color.red())
                 await interaction.response.send_message(embed=exception_embed, ephemeral=True)
         else:
             # Return error message if user is not Lead
             bad_user_embed = discord.Embed(
                 description=
                 f"<@{interaction.user.id}>, you do not have permission to pull this report!",
-                color=discord.Color.yellow()
+                color=discord.Color.red()
             )
             await interaction.response.send_message(embed=bad_user_embed, ephemeral=True)
 
@@ -86,10 +78,10 @@ class ReportCommand(commands.Cog):
         """
         # All time report
         if user is None and month is None and not flagged:
-            return discord.File(self.bot.log_file_path)
+            return discord.File('log.csv')
         
         # Open file and record all data requested
-        with open(self.bot.log_file_path, 'r') as csvfile:
+        with open('log.csv', 'r') as csvfile:
             reader = csv.reader(csvfile)
             rows = []
 
@@ -131,12 +123,12 @@ class ReportCommand(commands.Cog):
         Returns:
             discord.File: The csv file saved on Discord.
         """
-        with open(self.temp_file_path, 'w', newline='') as csvfile:
+        with open('temp.csv', 'w', newline='') as csvfile:
             writer = csv.writer(csvfile)
             for row in rows:
                 writer.writerow(row)
 
-        return discord.File(self.temp_file_path)
+        return discord.File('temp.csv')
 
 
     def month_string_to_number(self, month_name: str) -> str:
