@@ -74,7 +74,7 @@ class Bot(commands.Bot):
         """
         for message_id in list(self.active_cases.keys()):
             case = self.active_cases[message_id]
-            if case.case_num == case_num:
+            if case.case_num == case_num and case.status != "Complete":
                 return True
         return False
 
@@ -85,7 +85,10 @@ class Bot(commands.Bot):
         Args:
             message_id (int): The message id of the case that is being removed.
         """
-        del self.active_cases[message_id]
+        try:
+            del self.active_cases[message_id]
+        except KeyError:
+            pass
         self.store_cases()
     
 

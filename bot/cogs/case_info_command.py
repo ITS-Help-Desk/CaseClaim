@@ -25,14 +25,15 @@ class CaseInfoCommand(commands.Cog):
     @app_commands.command(description="Shows a list of all the previous techs who've worked on a case")
     @app_commands.describe(case_num="Case #")
     async def case_info(self, interaction: discord.Interaction, case_num: str) -> None:
-        """Changes the percent of cases that will be sent to the review channel. If a case isn't sent
-        for review, it will automatically be logged.
+        """_summary_
 
         Args:
-            interaction (discord.Interaction): Interaction that the slash command originated from.
-            percentage (int): The new percent of cases that'll be reviewed.
+            interaction (discord.Interaction): Interaction that the slash command originated from
+            case_num (str): The case number in Salesforce (e.g. "00960979")
         """
-        # Check if user is a lead
+        await interaction.response.defer() # Wait in case process takes a long time
+
+        # Collect rows with this case
         data = []
         with open('log.csv', 'r') as f:
             reader = csv.reader(f)
@@ -40,32 +41,52 @@ class CaseInfoCommand(commands.Cog):
                 if row[2] == case_num:
                     data.append(row)
         
-
+        # Check if user is a lead
         if self.bot.check_if_lead(interaction.user):
-            description = self.rows_to_str(data, include_comments=True)
+            description = await self.rows_to_str(data, include_comments=True)
         else:
-            description = self.rows_to_str(data)
+            description = await self.rows_to_str(data)
         
+        # Send data
         embed = discord.Embed(title=f'History of Case {case_num}')
         embed.colour = self.bot.embed_color
         embed.description = description
 
-        await interaction.response.send_message(embed=embed, ephemeral=True, delete_after=300)
+        await interaction.followup.send(embed=embed, ephemeral=True)
         
         
     async def rows_to_str(self, rows: list[str], include_comments=False) -> str:
+        """Converts the rows provided into a string containing only the times and users
+        and (optionally) case comments.
+
+        Args:
+            rows (list[str]): The list of rows that will be converted.
+            include_comments (bool, optional): Whether or not comments will be included (only for leads). Defaults to False.
+
+        Returns:
+            str: The description containing the list with times, users, and comments.
+        """
         copy = rows[:]
         copy.reverse()
         s = ''
         for row in copy:
-            user = await self.bot.fetch_user(row[3])
+            # Include just ID in case user cannot be found
+            try:
+                user = await self.bot.fetch_user(row[3])
+            except:
+                user = row[3]
+            if user is None:
+                user = row[3]
+            
             t = row[1]
-            t = time.mktime(datetime.datetime.strptime(t, "%Y-%m-%d %H:%M:%S.%f").timetuple())
-            s += f'<t:{t}:f> - {user.name}'
 
+            # Convert timestamp to UNIX
+            t = int(time.mktime(datetime.datetime.strptime(t, "%Y-%m-%d %H:%M:%S.%f").timetuple()))
+            s += f'<t:{t}:f> - {user}'
+
+            # Add comments
             if include_comments and row[5] == "Flagged":
                 s += f' [**{row[6]}**: {row[7]}]'
-
 
             s += '\n'
         

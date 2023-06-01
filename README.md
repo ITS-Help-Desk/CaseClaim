@@ -12,7 +12,7 @@ This repository contains the code to run the USD ITS Help Desk Case Claim bot. T
 2. Download dependencies
 
     On Windows:
-    `python -m pip3 install -r requirements.txt`
+    `python -m pip install -r requirements.txt`
 
     On Mac:
     `python3 -m pip3 install -r requirements.txt`
@@ -35,10 +35,12 @@ This repository contains the code to run the USD ITS Help Desk Case Claim bot. T
     ├── bot.py # Runs main operations for storing cases
     ├── claim.py # OOP representation of a claim
     ├── cogs
-        ├── claim_command.py  # /claim
-        ├── flag_command.py   # /flag
-        ├── help_command.py   # /help
+        ├── claim_command.py # /claim
+        ├── flag_command.py # /flag
+        ├── help_command.py # /help
         ├── mickie_command.py # /mickie
+        ├── case_info_command.py # /case_info
+        ├── update_percent_command.py # /update_percent
         └── report_command.py # /report
     ├── modals
         └── feedback_modal.py # Feedback form for flagging
@@ -64,16 +66,13 @@ This repository contains the code to run the USD ITS Help Desk Case Claim bot. T
     - Allows a lead to instantly create a report on filtered cases.
     - Leads can filter depending on a user, month, or whether or not the case was flagged.
     - These parameters are optional and can be used in conjunction with one another.
-
-
-
-## TODO
-### Commands to Add
-- Add /leaderboard command
-- Add /unflag command
-- Add /caseinfo command
-- Add /mycases command
-- Add /quest command
+- /update_percentage **\<percentage>**
+    - Allows a lead to change the percentage of cases that are sent to review.
+    - Percentage defaults to 100% every restart.
+- /case_info **\<case_num>**
+    - Allows a lead or a tech to see the history of a case and see who's worked on it previously.
+    - Techs can see who's worked on the case and the timestamp.
+    - Leads can see the case comments in addition to who's worked on it and the timestamp.
 
 
 ### Dependencies

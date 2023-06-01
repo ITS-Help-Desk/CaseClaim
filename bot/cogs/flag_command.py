@@ -37,7 +37,7 @@ class FlagCommand(commands.Cog):
         # Check if user is a lead
         if self.bot.check_if_lead(interaction.user):
             case = Claim(case_num=case_num, tech_id=user.id)
-            fbModal = FeedbackModal(self.bot, user, case)
+            fbModal = FeedbackModal(self.bot, case)
             await interaction.response.send_modal(fbModal)
         else:
             # Return error message if user is not Lead

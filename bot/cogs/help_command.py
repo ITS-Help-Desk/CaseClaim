@@ -35,6 +35,7 @@ class HelpCommand(commands.Cog):
         embed.add_field(name='/help', value='Shows all the commands for the bot.')
         embed.add_field(name='/claim <case_num>', value=f'Claims a case in the <#{self.bot.cases_channel}> channel')
         embed.add_field(name='/mickie', value='😉')
+        embed.add_field(name='/case_info <case_num>', value='See the history of who\'s worked on a case.')
         
         # Check if user is not a lead
         if not self.bot.check_if_lead(interaction.user):
@@ -44,4 +45,5 @@ class HelpCommand(commands.Cog):
         
         embed.add_field(name='/report [user] [month]', value=f'Shows a report for an optionally given user and month.')
         embed.add_field(name='/flag', value='Manually flags a case and a user.')
+        embed.add_field(name='/update_percent <percent>', value='Update the percent of cases that\'ll be sent for review.')
         await interaction.response.send_message(embed=embed, ephemeral = True, delete_after=300)
