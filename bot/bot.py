@@ -6,7 +6,7 @@ from .cogs.mickie_command import MickieCommand
 from .cogs.help_command import HelpCommand
 from .cogs.report_command import ReportCommand
 from .cogs.claim_command import ClaimCommand
-from .cogs.flag_command import FlagCommand
+from .cogs.ping_command import PingCommand
 from .cogs.update_percent_command import UpdatePercentCommand
 from .cogs.case_info_command import CaseInfoCommand
 import os
@@ -146,7 +146,7 @@ class Bot(commands.Bot):
         await self.add_cog(HelpCommand(self))
         await self.add_cog(ReportCommand(self))
         await self.add_cog(ClaimCommand(self))
-        await self.add_cog(FlagCommand(self))
+        await self.add_cog(PingCommand(self))
         await self.add_cog(UpdatePercentCommand(self))
         await self.add_cog(CaseInfoCommand(self))
         

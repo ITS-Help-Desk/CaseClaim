@@ -85,7 +85,7 @@ class CaseInfoCommand(commands.Cog):
             s += f'<t:{t}:f> - {user}'
 
             # Add comments
-            if include_comments and row[5] == "Flagged":
+            if include_comments and row[5] == "Pinged":
                 s += f' [**{row[6]}**: {row[7]}]'
 
             s += '\n'
