@@ -31,7 +31,7 @@ class CaseInfoCommand(commands.Cog):
             interaction (discord.Interaction): Interaction that the slash command originated from
             case_num (str): The case number in Salesforce (e.g. "00960979")
         """
-        await interaction.response.defer() # Wait in case process takes a long time
+        await interaction.response.defer(ephemeral=True) # Wait in case process takes a long time
 
         # Collect rows with this case
         data = []
