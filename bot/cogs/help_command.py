@@ -36,7 +36,10 @@ class HelpCommand(commands.Cog):
         embed.add_field(name='/claim <case_num>', value=f'Claims a case in the <#{self.bot.cases_channel}> channel')
         embed.add_field(name='/mickie', value='😉')
         embed.add_field(name='/caseinfo <case_num>', value='See the history of who\'s worked on a case.')
+        embed.add_field(name='/mycases', value='Shows all the cases that a user has worked on.')
+        embed.add_field(name='/leaderboard', value='Shows a leaderboard of all users by case claim amount.')
         
+
         # Check if user is not a lead
         if not self.bot.check_if_lead(interaction.user):
             # Send standard help message

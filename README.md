@@ -34,10 +34,13 @@ This repository contains the code to run the USD ITS Help Desk Case Claim bot. T
 └── bot
     ├── bot.py # Runs main operations for storing cases
     ├── claim.py # OOP representation of a claim
+    ├── paginator.py # Creates embed pages that can be traversed
     ├── cogs
         ├── claim_command.py # /claim
         ├── ping_command.py # /ping
         ├── help_command.py # /help
+        ├── mycases_command.py # /mycases
+        ├── leaderboard_command.py # /leaderboard
         ├── mickie_command.py # /mickie
         ├── case_info_command.py # /caseinfo
         ├── update_percent_command.py # /update_percent
@@ -73,7 +76,12 @@ This repository contains the code to run the USD ITS Help Desk Case Claim bot. T
     - Allows a lead or a tech to see the history of a case and see who's worked on it previously.
     - Techs can see who's worked on the case and the timestamp.
     - Leads can see the case comments in addition to who's worked on it and the timestamp.
-
+- /mycases
+    - Allows a user to see a list of cases they've worked on.
+    - Shows a paginated list containing the time and case numbers.
+- /leaderboard
+    - Allows a user to see a leaderboard of all other users by case claim amount.
+    - Shows a paginated view of each user and how many cases they've claimed.
 
 ### Dependencies
 - discord.py [2.2.2](https://pypi.org/project/discord.py/) 

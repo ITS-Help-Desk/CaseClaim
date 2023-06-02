@@ -9,6 +9,8 @@ from .cogs.claim_command import ClaimCommand
 from .cogs.ping_command import PingCommand
 from .cogs.update_percent_command import UpdatePercentCommand
 from .cogs.case_info_command import CaseInfoCommand
+from .cogs.mycases_command import MyCasesCommand
+from .cogs.leaderboard_command import LeaderboardCommand
 import os
 from bot.claim import Claim
 from .views.lead_view import LeadView
@@ -149,6 +151,8 @@ class Bot(commands.Bot):
         await self.add_cog(PingCommand(self))
         await self.add_cog(UpdatePercentCommand(self))
         await self.add_cog(CaseInfoCommand(self))
+        await self.add_cog(MyCasesCommand(self))
+        await self.add_cog(LeaderboardCommand(self))
         
         synced = await self.tree.sync()
         print("{} commands synced".format(len(synced)))

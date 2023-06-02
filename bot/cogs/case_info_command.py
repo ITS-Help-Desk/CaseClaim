@@ -25,7 +25,8 @@ class CaseInfoCommand(commands.Cog):
     @app_commands.command(description="Shows a list of all the previous techs who've worked on a case")
     @app_commands.describe(case_num="Case #")
     async def caseinfo(self, interaction: discord.Interaction, case_num: str) -> None:
-        """_summary_
+        """Shows a list of all techs who've previously worked on a case, and shows the
+        ping comments if the command sender is a lead.
 
         Args:
             interaction (discord.Interaction): Interaction that the slash command originated from
