@@ -2,7 +2,7 @@
 This repository contains the code to run the USD ITS Help Desk Case Claim bot. This bot is intended to be run with Python [3.11.3](https://www.python.org/downloads/release/python-3113/).
 
 ## How to Run
-1. Verify python version
+1. Verify Python version
 
     On Windows: `python -V`
     
@@ -39,7 +39,7 @@ This repository contains the code to run the USD ITS Help Desk Case Claim bot. T
         ├── ping_command.py # /ping
         ├── help_command.py # /help
         ├── mickie_command.py # /mickie
-        ├── case_info_command.py # /case_info
+        ├── case_info_command.py # /caseinfo
         ├── update_percent_command.py # /update_percent
         └── report_command.py # /report
     ├── modals
@@ -69,7 +69,7 @@ This repository contains the code to run the USD ITS Help Desk Case Claim bot. T
 - /update_percentage **\<percentage>**
     - Allows a lead to change the percentage of cases that are sent to review.
     - Percentage defaults to 100% every restart.
-- /case_info **\<case_num>**
+- /caseinfo **\<case_num>**
     - Allows a lead or a tech to see the history of a case and see who's worked on it previously.
     - Techs can see who's worked on the case and the timestamp.
     - Leads can see the case comments in addition to who's worked on it and the timestamp.
