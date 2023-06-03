@@ -14,7 +14,7 @@ if TYPE_CHECKING:
 
 class CaseInfoCommand(commands.Cog):
     def __init__(self, bot: "Bot") -> None:
-        """Creates the /case_info command using a cog.
+        """Creates the /caseinfo command using a cog.
 
         Args:
             bot (Bot): A reference to the original Bot instantiation.
@@ -24,8 +24,9 @@ class CaseInfoCommand(commands.Cog):
     
     @app_commands.command(description="Shows a list of all the previous techs who've worked on a case")
     @app_commands.describe(case_num="Case #")
-    async def case_info(self, interaction: discord.Interaction, case_num: str) -> None:
-        """_summary_
+    async def caseinfo(self, interaction: discord.Interaction, case_num: str) -> None:
+        """Shows a list of all techs who've previously worked on a case, and shows the
+        ping comments if the command sender is a lead.
 
         Args:
             interaction (discord.Interaction): Interaction that the slash command originated from
@@ -40,6 +41,11 @@ class CaseInfoCommand(commands.Cog):
             for row in reader:
                 if row[2] == case_num:
                     data.append(row)
+        
+        for message_id in self.bot.active_cases.keys():
+            c = self.bot.active_cases[message_id]
+            if c.case_num == case_num:
+                data.append(c.log_format())
         
         # Check if user is a lead
         if self.bot.check_if_lead(interaction.user):
@@ -79,6 +85,9 @@ class CaseInfoCommand(commands.Cog):
                 user = row[3]
             
             t = row[1]
+
+            if row[5] == "":
+                s += "**[ACTIVE]**"
 
             # Convert timestamp to UNIX
             t = int(time.mktime(datetime.datetime.strptime(t, "%Y-%m-%d %H:%M:%S.%f").timetuple()))
