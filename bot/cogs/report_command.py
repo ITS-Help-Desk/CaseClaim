@@ -4,7 +4,7 @@ import discord
 import csv
 
 # Use TYPE_CHECKING to avoid circular import from bot
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING, Optional, Union
 
 if TYPE_CHECKING:
     from ..bot import Bot
@@ -34,6 +34,8 @@ class ReportCommand(commands.Cog):
         """
         # Check if user is a lead
         if self.bot.check_if_lead(interaction.user):
+            await interaction.response.defer(ephemeral=True) # Wait in case process takes a long time
+
             try:
                 # Generate report embed
                 report_embed = discord.Embed(
@@ -42,9 +44,9 @@ class ReportCommand(commands.Cog):
                     color=self.bot.embed_color
                 )
 
-                report = self.get_report(user, month, pinged)
+                report = await self.get_report(interaction.guild, user, month, pinged)
 
-                await interaction.response.send_message(embed=report_embed, file=report)
+                await interaction.followup.send(embed=report_embed, file=report)
             except Exception as e:
                 print(e)
                 exception_embed = discord.Embed(
@@ -62,7 +64,7 @@ class ReportCommand(commands.Cog):
             await interaction.response.send_message(embed=bad_user_embed, ephemeral=True)
 
 
-    def get_report(self, user: Optional[discord.Member]=None, month: Optional[str]=None, pinged: bool=False) -> discord.File:
+    async def get_report(self, guild: discord.Guild, user: Optional[discord.Member]=None, month: Optional[str]=None, pinged: bool=False) -> discord.File:
         """Generated a report for a given user and month. If neither if these values are provided, this
         function will return a general report for a month, or a general report for a user.
 
@@ -76,9 +78,7 @@ class ReportCommand(commands.Cog):
         Returns:
             discord.File: The csv file saved on Discord.
         """
-        # All time report
-        if user is None and month is None and not pinged:
-            return discord.File('log.csv')
+        user_map: dict[int, Union[discord.Member, int]] = {}
         
         # Open file and record all data requested
         with open('log.csv', 'r') as csvfile:
@@ -104,6 +104,22 @@ class ReportCommand(commands.Cog):
                 if pinged:
                     if row[5] != 'Pinged':
                         continue
+                
+                for index in [3,4]:
+                    if not int(row[index]) in user_map.keys():
+                        # Add user to local map
+                        try:
+                            user_map[int(row[index])] = await guild.fetch_member(int(row[index]))
+                        except:
+                            user_map[int(row[index])] = int(row[index])
+                        
+                        if user_map.get(int(row[index]), None) == None:
+                            user_map[int(row[index])] = int(row[index])
+                        
+                    if type(user_map[int(row[index])]) != int:
+                        row[index] = user_map[int(row[index])].display_name
+                
+                row[1] = row[1][0:16] # Fix time
                 
                 # If all tests pass, add row
                 row.pop(0) # Remove message_id
