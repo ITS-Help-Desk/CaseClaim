@@ -79,6 +79,7 @@ class CaseInfoCommand(commands.Cog):
             # Include just ID in case user cannot be found
             try:
                 user = await self.bot.fetch_user(row[3])
+                user = user.display_name
             except:
                 user = row[3]
             if user is None:

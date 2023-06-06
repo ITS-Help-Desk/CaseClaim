@@ -47,7 +47,9 @@ class MyCasesCommand(commands.Cog):
         
         # Send data
         new_data = self.data_to_rowstr(data)
-        title = f'Cases Worked on by {interaction.user} ({len(new_data)})'
+        name = await interaction.guild.fetch_member(interaction.user.id)
+        name = name.display_name
+        title = f'Cases Worked on by {name} ({len(new_data)})'
         if len(new_data) <= 10:
             embed = discord.Embed(title=title)
             embed.colour = self.bot.embed_color

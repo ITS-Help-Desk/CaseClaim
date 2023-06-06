@@ -8,10 +8,9 @@ from .cogs.report_command import ReportCommand
 from .cogs.claim_command import ClaimCommand
 from .cogs.ping_command import PingCommand
 from .cogs.update_percent_command import UpdatePercentCommand
-from .cogs.case_info_command import CaseInfoCommand
+from .cogs.caseinfo_command import CaseInfoCommand
 from .cogs.mycases_command import MyCasesCommand
 from .cogs.leaderboard_command import LeaderboardCommand
-import os
 from bot.claim import Claim
 from .views.lead_view import LeadView
 from .views.tech_view import TechView
@@ -33,23 +32,25 @@ class Bot(commands.Bot):
         self.review_rate = 1.0
         self.embed_color = discord.Color.from_rgb(117, 190, 233)
 
-        # Initialize bot settings#
+        # Initialize bot settings
         intents = discord.Intents.default()
         intents.message_content = True  
         super().__init__(intents=intents, command_prefix='/')
 
 
-    def add_case(self, case: Claim) -> None:
+    def add_case(self, case: Claim, store=True) -> None:
         """Adds a case to the list of actively worked on cases.
 
         Args:
             case (Claim): The case that is being added
+            store (bool): Whether or not to store on file (defaults to True).
         """
         if case.message_id == None:
             raise ValueError("Case message ID not provided!")
         
         self.active_cases[case.message_id] = case
-        self.store_cases()
+        if store:
+            self.store_cases()
     
 
     def get_case(self, message_id: int) -> Optional[Claim]:

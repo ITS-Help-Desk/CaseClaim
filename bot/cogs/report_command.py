@@ -19,6 +19,7 @@ class ReportCommand(commands.Cog):
         """
         self.bot = bot
 
+
     @app_commands.command(description = "Generate a report of cases logged.")
     @app_commands.describe(user="The user the report will be generated for.")
     @app_commands.describe(month="The month for the report (e.g. \"march\").")
@@ -39,8 +40,7 @@ class ReportCommand(commands.Cog):
             try:
                 # Generate report embed
                 report_embed = discord.Embed(
-                    description=
-                    f"<@{interaction.user.id}>, here is your report.",
+                    description= self.build_description(interaction.user, user, month, pinged),
                     color=self.bot.embed_color
                 )
 
@@ -84,10 +84,9 @@ class ReportCommand(commands.Cog):
         with open('log.csv', 'r') as csvfile:
             reader = csv.reader(csvfile)
             rows = []
-
             try:
-                month_num = self.month_string_to_number(month)
-            except ValueError:
+                month_num = self.month_string_to_number(month.lower())
+            except:
                 pass
             for row in reader:
                 # Check for correct month
@@ -191,3 +190,62 @@ class ReportCommand(commands.Cog):
             return out
         except:
             raise ValueError('Not a month')
+
+
+    def month_number_to_name(self, month_number: int) -> str:
+        """Converts a month number to the actual name.
+        (e.g. 1 -> January)
+
+        Args:
+            month_number (int): The number of the month (from 1 to 12)
+
+        Raises:
+            ValueError: If the number provided is < 1 or > 12
+
+        Returns:
+            str: The full name of the month (e.g. "February")
+        """
+        month_names = [
+            "January", "February", "March", "April", "May", "June",
+            "July", "August", "September", "October", "November", "December"
+        ]
+
+        if 1 <= month_number <= 12:
+            return month_names[month_number - 1]
+        else:
+            raise ValueError("Invalid month number")
+
+
+    def build_description(self, requester: discord.User, user: Optional[discord.User], month: Optional[str], pinged: Optional[bool]) -> str:
+        """Builds a description for the /report command depending on the parameters
+        given by the user.
+
+        Args:
+            requester (discord.User): The user requesting the report.
+            user (Optional[discord.User]): The user the report is for.
+            month (Optional[str]): The month the report is for.
+            pinged (Optional[bool]): Whether or not to show only pinged cases.
+
+        Returns:
+            str: The description for the /report command embed.
+        """
+        description = f"<@!{requester.id}>, here is your report for cases"
+
+        if user is not None:
+            description += f" by <@!{user.id}>"
+        
+        try:
+            if month is not None:
+                month_num = int(self.month_string_to_number(month.lower()))
+                description += f" for the month of {self.month_number_to_name(month_num)}"
+        except Exception as e:
+            print(e)
+        
+        if pinged is not None:
+            if pinged:
+                description += " that've been pinged"
+        
+
+        description += "."
+        return description
+        

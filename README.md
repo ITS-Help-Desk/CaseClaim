@@ -4,7 +4,7 @@ This repository contains the code to run the USD ITS Help Desk Case Claim bot. T
 ## How to Run
 1. Verify Python version
 
-    On Windows: `python -V`
+    On Windows: `python -V` OR `py -V`
     
     On Mac: `python3 -V`
 
@@ -12,7 +12,7 @@ This repository contains the code to run the USD ITS Help Desk Case Claim bot. T
 2. Download dependencies
 
     On Windows:
-    `python -m pip install -r requirements.txt`
+    `python -m pip install -r requirements.txt` OR `py -m pip install -r requirements.txt`
 
     On Mac:
     `python3 -m pip3 install -r requirements.txt`
@@ -42,7 +42,7 @@ This repository contains the code to run the USD ITS Help Desk Case Claim bot. T
         ├── mycases_command.py # /mycases
         ├── leaderboard_command.py # /leaderboard
         ├── mickie_command.py # /mickie
-        ├── case_info_command.py # /caseinfo
+        ├── caseinfo_command.py # /caseinfo
         ├── update_percent_command.py # /update_percent
         └── report_command.py # /report
     ├── modals

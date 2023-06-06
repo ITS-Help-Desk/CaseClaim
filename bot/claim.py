@@ -38,6 +38,7 @@ class Claim:
         self.lead_id = lead_id
         self.severity_level = severity_level
         self.comments = comments
+        self.submitted_time = None
 
     @classmethod
     def load_from_json(cls, json_file: dict[str, Any]) -> 'Claim':
@@ -75,7 +76,7 @@ class Claim:
         """
         return [
             str(self.message_id),
-            str(datetime.datetime.now()),
+            str(self.submitted_time),
             self.case_num,
             str(self.tech_id),
             str(self.lead_id),
@@ -92,7 +93,7 @@ class Claim:
         """
         return {
             "message_id": self.message_id,
-            "time": str(datetime.datetime.now()),
+            "time": str(self.submitted_time),
             "case_num": self.case_num,
             "tech_id": self.tech_id,
             "lead_id": self.lead_id,

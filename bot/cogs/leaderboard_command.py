@@ -34,9 +34,14 @@ class LeaderboardCommand(commands.Cog):
 
         # Count the amount of cases worked on by each user
         counts = {}
+        first_date = None
         with open('log.csv', 'r') as f:
             reader = csv.reader(f)
             for row in reader:
+                # Find first date
+                if first_date is None:
+                    first_date = row[1]
+
                 id = int(row[3])
                 if not id in counts.keys():
                     counts[id] = 0
@@ -66,11 +71,16 @@ class LeaderboardCommand(commands.Cog):
             desc += f' ({counts[key]})'
             row_strs.append(desc)
 
-        embeds = self.create_paginator_embeds(row_strs, f'ITS Help Desk Case Leaderboard')
+        titles = f'ITS Help Desk Case Leaderboard'
+        try:
+            start_time = datetime.datetime.strptime(first_date, "%Y-%m-%d %H:%M:%S.%f")  
+        except:
+            start_time = datetime.datetime.now()
+        embeds = self.create_paginator_embeds(row_strs, titles, start_time)
         await paginator.Simple(ephemeral=True).start(interaction, embeds)
 
  
-    def create_paginator_embeds(self, data: list[str], title: str) -> list[discord.Embed]:
+    def create_paginator_embeds(self, data: list[str], title: str, start_time: datetime.datetime) -> list[discord.Embed]:
         """Creates a list of embeds that can be used with a paginator.
 
         Args:
@@ -90,6 +100,8 @@ class LeaderboardCommand(commands.Cog):
             # Create an embed for every 10 cases
             new_embed = discord.Embed(title=title)
             new_embed.colour = self.bot.embed_color
+            new_embed.set_footer(text="Starting from")
+            new_embed.timestamp = start_time
             description = ''
             
             # Add ten (or fewer) cases

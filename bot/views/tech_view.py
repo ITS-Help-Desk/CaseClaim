@@ -22,7 +22,7 @@ class TechView(ui.View):
         super().__init__(timeout=None)
         self.bot = bot
 
-    #if the user is the same as the claimer, 
+    
     @ui.button(label="Complete", style=discord.ButtonStyle.success, custom_id='complete')
     async def button_claim(self, interaction: discord.Interaction, button):
         self.case = self.bot.get_case(interaction.message.id)
@@ -32,6 +32,7 @@ class TechView(ui.View):
             self.case.status = "Complete"
 
             self.bot.remove_case(interaction.message.id)
+            self.case.submitted_time = datetime.now()
             await interaction.message.delete()
 
             completed_embed = discord.Embed(description=f"Has been marked complete by <@{interaction.user.id}>",

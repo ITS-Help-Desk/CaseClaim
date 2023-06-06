@@ -52,15 +52,18 @@ class ClaimCommand(commands.Cog):
             claimed = discord.Embed(description=f"**{case.case_num}** has already been claimed.", colour=discord.Color.red())
             await interaction.response.send_message(embed=claimed, ephemeral=True,  delete_after=300)
             return
-
-
+        
+        # Temporarily add case using the interaction id
+        # To prevent double claims
+        case.message_id = interaction.id
+        self.bot.add_case(case, store=False)
+        
         # User has claimed the case successfully, create the embed and techview.
         message_embed = discord.Embed(
             description=f"Is being worked on by <@{case.tech_id}>",
             colour=self.bot.embed_color,
             timestamp=datetime.now()
         )
-
         message_embed.set_author(name=f"{case.case_num}", icon_url=f'{interaction.user.display_avatar}')
         message_embed.set_footer(text="Claimed")
 
@@ -69,6 +72,9 @@ class ClaimCommand(commands.Cog):
         # Send message, add case to the list of cases
         await interaction.response.send_message(embed=message_embed, view=message_view)
         response = await interaction.original_response()
-        case.message_id = response.id
 
+        # Now that message has been sent, update the active cases
+        # with the new message id
+        case.message_id = response.id
         self.bot.add_case(case)
+        self.bot.remove_case(interaction.id)
