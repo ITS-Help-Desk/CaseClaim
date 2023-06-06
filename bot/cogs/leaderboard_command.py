@@ -30,8 +30,19 @@ class LeaderboardCommand(commands.Cog):
         Args:
             interaction (discord.Interaction): Interaction that the slash command originated from
         """
-        await interaction.response.defer() # Wait in case process takes a long time
+        # Check if user is a lead
+        if self.bot.check_if_lead(interaction.user):
+            await interaction.response.defer() # Wait in case process takes a long time
 
-        embed = LeaderboardView.create_embed(interaction.created_at, self.bot.embed_color)
+            embed = LeaderboardView.create_embed(interaction.created_at, self.bot.embed_color)
+            embed.set_thumbnail(url=interaction.guild.icon.url)
 
-        await interaction.followup.send(embed=embed, view=LeaderboardView(self.bot))
+            await interaction.followup.send(embed=embed, view=LeaderboardView(self.bot))
+        else:
+            # Return error message if user is not Lead
+            bad_user_embed = discord.Embed(
+                description=
+                f"<@{interaction.user.id}>, you do not have permission to use this command!",
+                color=discord.Color.red()
+            )
+            await interaction.response.send_message(embed=bad_user_embed, ephemeral=True)

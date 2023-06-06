@@ -34,7 +34,7 @@ class ClaimCommand(commands.Cog):
             case_num (str): The case number in Salesforce (e.g. "00960979")
         """
         # Ensure user is claiming case in the correct channel
-        if interaction.channel.id != self.bot.cases_channel:
+        if interaction.channel_id != self.bot.cases_channel:
             claimed = discord.Embed(description=f"Cases cannot be claimed in this channel. Please go to <#{self.bot.cases_channel}>", colour=discord.Color.red())
             await interaction.response.send_message(embed=claimed, ephemeral=True,  delete_after=300)
             return

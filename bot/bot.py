@@ -2,6 +2,7 @@ import json
 from typing import Any, Optional, Union
 from discord.ext import commands
 import discord
+
 from .cogs.mickie_command import MickieCommand
 from .cogs.help_command import HelpCommand
 from .cogs.report_command import ReportCommand
@@ -11,9 +12,12 @@ from .cogs.update_percent_command import UpdatePercentCommand
 from .cogs.caseinfo_command import CaseInfoCommand
 from .cogs.mycases_command import MyCasesCommand
 from .cogs.leaderboard_command import LeaderboardCommand
-from bot.claim import Claim
+
 from .views.lead_view import LeadView
 from .views.tech_view import TechView
+from .views.leaderboard_view import LeaderboardView
+
+from bot.claim import Claim
 
 
 class Bot(commands.Bot):
@@ -118,7 +122,7 @@ class Bot(commands.Bot):
                 self.active_cases[int(message_id)] = c
     
 
-    def check_if_lead(self, user: Union[discord.Member, discord.User]) -> bool:
+    def check_if_lead(self, user: discord.Member) -> bool:
         """Checks if a given user is a lead or not.
 
         Args:
@@ -136,6 +140,7 @@ class Bot(commands.Bot):
         """
         self.add_view(TechView(self))
         self.add_view(LeadView(self))
+        self.add_view(LeaderboardView(self))
         
 
     async def on_ready(self):

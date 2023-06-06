@@ -48,6 +48,7 @@ This repository contains the code to run the USD ITS Help Desk Case Claim bot. T
     ├── modals
         └── feedback_modal.py # Feedback form for pings
     └── views
+        ├── leaderboard_view.py # Refresh and My Rank buttons
         ├── lead_view.py # Check and ping buttons
         └── tech_view.py # Complete and unclaim buttons
 ```

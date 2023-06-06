@@ -27,24 +27,62 @@ class LeaderboardView(ui.View):
         await interaction.response.defer(thinking=False) # Acknowledge button press
         
         new_embed = LeaderboardView.create_embed(interaction.created_at, self.bot.embed_color)
+        new_embed.set_thumbnail(url=interaction.guild.icon.url)
 
-        await interaction.message.edit(embed=new_embed)
+        message = interaction.message
+        if message is not None:
+            await message.edit(embed=new_embed)
     
     
     @ui.button(label="My Rank", style=discord.ButtonStyle.secondary, custom_id="myrank")
     async def button_myrank(self, interaction: discord.Interaction, button):
-        pass
-        '''self.case = self.bot.get_case(interaction.message.id)
+        await interaction.response.defer(thinking=False) # Acknowledge button press
 
+        user_id = interaction.user.id
         data = LeaderboardView.get_data(interaction.created_at)
 
+        # Get general counts
         mc = data[0][0]
         sc = data[1][0]
+
+        # Get general ping counts
+        mp = data[2]
+        sp = data[3]
         
+        # Get sorted counts
         mc_sorted_keys = data[0][1]
         sc_sorted_keys = data[1][1]
 
-        await interaction.response.send_message(embed=embed, ephemeral=True)'''
+        # Find ranks
+        month_rank = mc_sorted_keys.index(user_id) + 1
+        semester_rank = sc_sorted_keys.index(user_id) + 1
+
+        # Get user counts
+        month_count = mc[user_id]
+        semester_count = sc[user_id]
+
+        # Get user pings
+        month_pings = mp[user_id]
+        semester_pings = mp[user_id]
+
+        # Get ping rate
+        month_ping_rate = int((month_pings / month_count) * 100)
+        semester_ping_rate = int((semester_pings / semester_count) * 100)
+
+        # Create embed
+        embed = discord.Embed(title=f"{interaction.user.display_name}'s Ranking")
+        embed.color = self.bot.embed_color
+        embed.set_thumbnail(url=interaction.user.avatar.url)
+
+        # Add fields
+        embed.add_field(name="Month Rank", value=f"Rank: **{month_rank}**\nClaims: **{month_count}**\nPing Percent: **{month_ping_rate}%**")
+        embed.add_field(name="Semester Rank", value=f"Rank: **{semester_rank}**\nClaims: **{semester_count}**\nPing Percent: **{semester_ping_rate}%**")
+
+        # Set footer
+        embed.set_footer(text="Last Updated")
+        embed.timestamp = interaction.created_at
+
+        await interaction.followup.send(embed=embed, ephemeral=True)
     
 
     @staticmethod
@@ -67,28 +105,28 @@ class LeaderboardView(ui.View):
 
         embed.add_field(name=f"{LeaderboardView.month_number_to_name(interaction_date.month)} Ranks", value=month_ranking, inline=True)
         embed.add_field(name="Semester Ranks", value=semester_ranking, inline=True)
-        embed.set_footer(text="Last Updated")
+        embed.set_footer(text="Last Updated")
         embed.timestamp = datetime.datetime.now()
 
         return embed
 
 
     @staticmethod
-    def create_rankings(interaction_date: datetime.datetime) -> tuple[str]:
+    def create_rankings(interaction_date: datetime.datetime) -> tuple[str, str]:
         """Creates the ranking strings for monthly and semester ranks.
 
         Args:
             interaction_date (datetime.datetime): The time at which this request is made.
 
         Returns:
-            tuple[str]: Returns a tuple containing ("1. Andrew\n2. James", "1. James\n2. Andrew") where
+            tuple[str, str]: Returns a tuple containing ("1. Andrew\n2. James", "1. James\n2. Andrew") where
             the first element is for monthly and second element is for semester.
         """
         data = LeaderboardView.get_data(interaction_date)
 
         mc = data[0][0]
         sc = data[1][0]
-        
+      
         mc_sorted_keys = data[0][1]
         sc_sorted_keys = data[1][1]
         
@@ -98,14 +136,14 @@ class LeaderboardView(ui.View):
         # Create month written ranking
         for i in range(min(4, len(mc_sorted_keys))):
             month_id = mc_sorted_keys[i]
-            month_ranks.append(f"{i + 1}. <@!{month_id}> ({mc[month_id]})")
+            month_ranks.append(f"**{i + 1}.** <@!{month_id}> ({mc[month_id]})")
         
         month_ranking = "\n".join(user for user in month_ranks)
 
         # Create year written ranking
         for i in range(min(4, len(sc_sorted_keys))):
             semester_id = sc_sorted_keys[i]
-            semester_ranks.append(f"{i + 1}. <@!{semester_id}> ({sc[semester_id]})")
+            semester_ranks.append(f"**{i + 1}.** <@!{semester_id}> ({sc[semester_id]})")
 
         semester_ranking = "\n".join(user for user in semester_ranks)
 
@@ -113,18 +151,29 @@ class LeaderboardView(ui.View):
 
 
     @staticmethod
-    def get_data(interaction_date: datetime.datetime) -> tuple[tuple[dict[int, int], list[int]]]:
-        """Gets the ranking data for all users at a particular time
-
+    def get_data(interaction_date: datetime.datetime) -> tuple[tuple[dict[int, int], list[int]], tuple[dict[int, int], list[int]], dict[int, int], dict[int, int]]:
+        """Collects a large amount of data to be used by various commands and events within this bot.
+        This function collects:
+            - Total amount of cases claimed by each user by month
+            - Total amount of cases claimed by each user by semester
+            - Ranking of cases claimed by each user by month
+            - Ranking of cases claimed by each user by semester
+            - Total amount of pinged cases by each user by month
+            - Total amount of pinged cases by each user by semester
         Args:
-            interaction_date (datetime.datetime): The time at which this request is made
+            interaction_date (datetime.datetime): The time that this data was requested at.
 
         Returns:
-            tuple[tuple[dict[int, int], list[int]]]: A tuple containing ((month counts, sorted keys), (semester counts, semester keys))
+            tuple[tuple[dict[int, int], list[int]], tuple[dict[int, int], list[int]], dict[int, int], dict[int, int]]:
+            Returns the data in the format ((month counts, sorted month keys), (semester counts, sorted semester keys), month ping counts, semester ping counts)
         """
         # Count the amount of cases worked on by each user
-        semester_counts = {}
         month_counts = {}
+        semester_counts = {}
+       
+        month_ping_counts = {}
+        semester_ping_counts = {}
+    
         with open('log.csv', 'r') as f:
             reader = csv.reader(f)
             for row in reader:
@@ -138,22 +187,30 @@ class LeaderboardView(ui.View):
                         month_counts[id] = 0
                     month_counts[id] += 1
 
+                    # Add pinged
+                    if row[5] == "Pinged":
+                        if not id in month_ping_counts.keys():
+                            month_ping_counts[id] = 0
+                        month_ping_counts[id] += 1
+
                 # Organize data for semester
                 if date.year == interaction_date.year:
                     if not id in semester_counts.keys():
                         semester_counts[id] = 0
                     semester_counts[id] += 1
+
+                    # Add pinged
+                    if row[5] == "Pinged":
+                        if not id in semester_ping_counts.keys():
+                            semester_ping_counts[id] = 0
+                        semester_ping_counts[id] += 1
+
                 
         semester_counts_sorted_keys = sorted(semester_counts, key=semester_counts.get, reverse=True)
         month_counts_sorted_keys = sorted(month_counts, key=month_counts.get, reverse=True)
 
-        return ((month_counts, month_counts_sorted_keys), (semester_counts, semester_counts_sorted_keys))
+        return ((month_counts, month_counts_sorted_keys), (semester_counts, semester_counts_sorted_keys), month_ping_counts, semester_ping_counts)
     
-
-    @staticmethod
-    def get_individual_ranking():
-        pass
-
 
     @staticmethod
     def month_number_to_name(month_number: int) -> str:
