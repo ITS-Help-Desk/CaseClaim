@@ -44,14 +44,21 @@ class LeaderboardView(ui.View):
         mc_sorted_keys = data[0][1]
         sc_sorted_keys = data[1][1]
 
-
-
-
         await interaction.response.send_message(embed=embed, ephemeral=True)'''
     
 
     @staticmethod
     def create_embed(interaction_date: datetime.datetime, embed_color: discord.Color) -> discord.Embed:
+        """Creates the leaderboard embed for the /leaderboard command and for the
+        Refresh button.
+
+        Args:
+            interaction_date (datetime.datetime): The time at which this request is made.
+            embed_color (discord.Color): The color of the embed.
+
+        Returns:
+            discord.Embed: The embed object with everything already completed for month and semester rankings.
+        """
         month_ranking, semester_ranking = LeaderboardView.create_rankings(interaction_date)
 
         # Create embed
@@ -68,6 +75,15 @@ class LeaderboardView(ui.View):
 
     @staticmethod
     def create_rankings(interaction_date: datetime.datetime) -> tuple[str]:
+        """Creates the ranking strings for monthly and semester ranks.
+
+        Args:
+            interaction_date (datetime.datetime): The time at which this request is made.
+
+        Returns:
+            tuple[str]: Returns a tuple containing ("1. Andrew\n2. James", "1. James\n2. Andrew") where
+            the first element is for monthly and second element is for semester.
+        """
         data = LeaderboardView.get_data(interaction_date)
 
         mc = data[0][0]
@@ -97,7 +113,15 @@ class LeaderboardView(ui.View):
 
 
     @staticmethod
-    def get_data(interaction_date: datetime.datetime) -> tuple[tuple[dict[int, int]]]:
+    def get_data(interaction_date: datetime.datetime) -> tuple[tuple[dict[int, int], list[int]]]:
+        """Gets the ranking data for all users at a particular time
+
+        Args:
+            interaction_date (datetime.datetime): The time at which this request is made
+
+        Returns:
+            tuple[tuple[dict[int, int], list[int]]]: A tuple containing ((month counts, sorted keys), (semester counts, semester keys))
+        """
         # Count the amount of cases worked on by each user
         semester_counts = {}
         month_counts = {}
