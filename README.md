@@ -50,6 +50,7 @@ This repository contains the code to run the USD ITS Help Desk Case Claim bot. T
         └── feedback_modal.py # Feedback form for pings
     └── views
         ├── leaderboard_view.py # Refresh and My Rank buttons
+        ├── ping_view.py # Affirm and resolve buttons
         ├── lead_view.py # Check and ping buttons
         └── tech_view.py # Complete and unclaim buttons
 ```
@@ -88,5 +89,5 @@ This repository contains the code to run the USD ITS Help Desk Case Claim bot. T
     - Allows a user to see a leaderboard of all other users by case claim amount.
     - Shows a paginated view of each user and how many cases they've claimed.
 
-### Dependencies
+## Dependencies
 - discord.py [2.2.2](https://pypi.org/project/discord.py/) 

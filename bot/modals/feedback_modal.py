@@ -36,7 +36,7 @@ class FeedbackModal(ui.Modal, title='Feedback Form'):
         Args:
             interaction (discord.Interaction): Interaction that the slash command originated from.
         """
-        original_user =  await self.bot.fetch_user(self.case.tech_id)
+        original_user = await self.bot.fetch_user(self.case.tech_id)
         
         fb_embed = discord.Embed(description=f"<@{self.case.tech_id}>, this case has been pinged by <@{interaction.user.id}>.",
                         colour=discord.Color.red(),
@@ -44,6 +44,7 @@ class FeedbackModal(ui.Modal, title='Feedback Form'):
 
         fb_embed.add_field(name="Reason", value=str(self.description), inline=False)
 
+        # Add a to-do message if none is passed in
         if len(str(self.to_do)) == 0:
             fb_embed.add_field(name="To Do", value="Please review these details and let us know if you have any questions!", inline=False)
         else:
@@ -52,6 +53,7 @@ class FeedbackModal(ui.Modal, title='Feedback Form'):
         fb_embed.set_author(name=f"{self.case.case_num}", icon_url=f'{original_user.display_avatar}')
         fb_embed.set_footer(text=f"{self.severity} severity level")
 
+        # Create thread
         channel = interaction.user.guild.get_channel(self.bot.cases_channel) #cases channel
         thread = await channel.create_thread(
             name=f"{self.case.case_num}",
@@ -62,7 +64,7 @@ class FeedbackModal(ui.Modal, title='Feedback Form'):
             invitable=False
         )
 
-        # Create thread and add users
+        # Add users to thread and send message
         await thread.add_user(interaction.user)
         await thread.add_user(original_user)
         message = await thread.send(embed=fb_embed, view=PingView(self.bot))
