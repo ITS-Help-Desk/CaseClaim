@@ -188,6 +188,12 @@ class LeaderboardView(ui.View):
     
                 id = int(row[3])
 
+                # Initialize information as zero
+                if not id in month_ping_counts.keys():
+                    month_ping_counts[id] = 0
+                if not id in semester_ping_counts.keys():
+                    semester_ping_counts[id] = 0
+
                 # Organize data for month
                 if date.month == interaction_date.month:
                     if not id in month_counts.keys():
@@ -196,8 +202,6 @@ class LeaderboardView(ui.View):
 
                     # Add pinged
                     if row[5] == "Pinged":
-                        if not id in month_ping_counts.keys():
-                            month_ping_counts[id] = 0
                         month_ping_counts[id] += 1
 
                 # Organize data for semester
@@ -208,8 +212,6 @@ class LeaderboardView(ui.View):
 
                     # Add pinged
                     if row[5] == "Pinged":
-                        if not id in semester_ping_counts.keys():
-                            semester_ping_counts[id] = 0
                         semester_ping_counts[id] += 1
 
                 
