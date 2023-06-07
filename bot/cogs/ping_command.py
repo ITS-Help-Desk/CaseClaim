@@ -41,7 +41,7 @@ class PingCommand(commands.Cog):
             case = Claim(case_num=case_num, tech_id=user.id)
             case_row = self.find_case(case_num, user.id)
             if len(case_row) == 0:
-                await interaction.followup.send(content="Error! Case couldn't be found. Please ensure it's already been checked and reported in the log file.", ephemeral=True)
+                await interaction.response.send_message(content="Error! Case couldn't be found. Please ensure it's already been checked and reported in the log file.", ephemeral=True)
                 return
             
             case.message_id = int(case_row[0])
