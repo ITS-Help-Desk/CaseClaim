@@ -22,7 +22,7 @@ class LeadView(ui.View):
 
 	
     @ui.button(label="Check", style=discord.ButtonStyle.success, custom_id="check")
-    async def button_check(self, interaction: discord.Interaction, button):
+    async def button_check(self, interaction: discord.Interaction, button: discord.ui.Button):
         self.case = self.bot.get_case(interaction.message.id)
 
         #Log the case as checked, then delete it
@@ -34,7 +34,7 @@ class LeadView(ui.View):
         await interaction.message.delete()
     
     @ui.button(label="Ping", style=discord.ButtonStyle.danger, custom_id="ping")
-    async def button_ping(self, interaction: discord.Interaction, button):
+    async def button_ping(self, interaction: discord.Interaction, button: discord.ui.Button):
         self.case = self.bot.get_case(interaction.message.id)
 
         #Prompt with Modal, record the response, create a private thread, then delete

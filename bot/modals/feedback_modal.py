@@ -1,6 +1,8 @@
 import discord
 import discord.ui as ui
 from datetime import datetime
+
+from bot.views.ping_view import PingView
 from ..claim import Claim
 
 # Use TYPE_CHECKING to avoid circular import from bot
@@ -50,15 +52,22 @@ class FeedbackModal(ui.Modal, title='Feedback Form'):
             reason="Case has been pinged.",
             invitable=False
         )
-    
+
+        # Create thread and add users
         await thread.add_user(interaction.user)
         await thread.add_user(original_user)
-        await thread.send(embed=fb_embed)
-        await interaction.response.send_message(content="Pinged", delete_after=0)
-        self.case.status = f"Pinged"
+        message = await thread.send(embed=fb_embed, view=PingView(self.bot))
+
+        # Send message
+        await interaction.response.send_message(content="Pinged", delete_after=0) # Acknowledge interaction, immediately delete message
+
+        # Update case, re-log it
+        old_message_id = self.case.message_id
+        self.case.message_id = message.id
+        self.case.status = "Pinged"
         self.case.severity_level = self.severity
         self.case.comments = self.description
         self.case.lead_id = interaction.user.id
         self.case.log()
 
-        self.bot.remove_case(self.case.message_id)
+        self.bot.remove_case(old_message_id)

@@ -24,7 +24,7 @@ class TechView(ui.View):
 
     
     @ui.button(label="Complete", style=discord.ButtonStyle.success, custom_id='complete')
-    async def button_claim(self, interaction: discord.Interaction, button):
+    async def button_claim(self, interaction: discord.Interaction, button: discord.ui.Button):
         self.case = self.bot.get_case(interaction.message.id)
 
         if self.case.tech_id == interaction.user.id:
@@ -67,7 +67,7 @@ class TechView(ui.View):
             
     #if the user is the same as the claimer or is a lead, then deletes, else responds with error
     @ui.button(label="Unclaim", style=discord.ButtonStyle.secondary, custom_id='unclaim')
-    async def button_unclaim(self, interaction: discord.Interaction, button):
+    async def button_unclaim(self, interaction: discord.Interaction, button: discord.ui.Button):
         self.case = self.bot.get_case(interaction.message.id)
 
         if self.case.tech_id == interaction.user.id or self.bot.check_if_lead(interaction.user):

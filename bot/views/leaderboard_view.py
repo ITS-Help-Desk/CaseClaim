@@ -23,7 +23,7 @@ class LeaderboardView(ui.View):
 
 	
     @ui.button(label="Refresh", style=discord.ButtonStyle.primary, custom_id="refresh")
-    async def button_refresh(self, interaction: discord.Interaction, button):
+    async def button_refresh(self, interaction: discord.Interaction, button: discord.ui.Button):
         await interaction.response.defer(thinking=False) # Acknowledge button press
         
         new_embed = LeaderboardView.create_embed(interaction.created_at, self.bot.embed_color)
@@ -35,7 +35,7 @@ class LeaderboardView(ui.View):
     
     
     @ui.button(label="My Rank", style=discord.ButtonStyle.secondary, custom_id="myrank")
-    async def button_myrank(self, interaction: discord.Interaction, button):
+    async def button_myrank(self, interaction: discord.Interaction, button: discord.ui.Button):
         await interaction.response.defer(thinking=False) # Acknowledge button press
 
         user_id = interaction.user.id

@@ -42,7 +42,7 @@ class Claim:
 
     @classmethod
     def load_from_json(cls, json_file: dict[str, Any]) -> 'Claim':
-        """Creates a Claim instance from data stores in a JSON file.
+        """Creates a Claim instance from data stored in a JSON file.
 
         Args:
             json_file (dict[str, Any]): The loaded JSON file.
@@ -59,7 +59,26 @@ class Claim:
             severity_level=json_file["severity_level"],
             comments=json_file["comments"]
         )
-        
+
+    @classmethod
+    def load_from_row(cls, row: list[str]) -> 'Claim':
+        """Creates a Claim instance from data stored in a csv file.
+
+        Args:
+            row (dict[str, Any]): The loaded JSON file.
+
+        Returns:
+            Claim: An instance of the Claim class preloaded with this information.
+        """
+        return Claim(
+            case_num=row[2],
+            tech_id=int(row[3]),
+            message_id=int(row[0]),
+            status=row[5],
+            lead_id=int(row[4]),
+            severity_level=row[6],
+            comments=row[7]
+        )
 
     def log(self) -> None:
         """Logs the claim to the logfile."""

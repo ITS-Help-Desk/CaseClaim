@@ -18,6 +18,7 @@ from .cogs.leaderboard_command import LeaderboardCommand
 from .views.lead_view import LeadView
 from .views.tech_view import TechView
 from .views.leaderboard_view import LeaderboardView
+from .views.ping_view import PingView
 
 from bot.claim import Claim
 
@@ -142,7 +143,9 @@ class Bot(commands.Bot):
         """
         self.add_view(TechView(self))
         self.add_view(LeadView(self))
+
         self.add_view(LeaderboardView(self))
+        self.add_view(PingView(self))
         
 
     async def on_ready(self):
