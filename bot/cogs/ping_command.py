@@ -43,11 +43,6 @@ class PingCommand(commands.Cog):
             if len(case_row) == 0:
                 await interaction.response.send_message(content="Error! Case couldn't be found. Please ensure it's already been checked and reported in the log file.", ephemeral=True)
                 return
-            
-            case.message_id = int(case_row[0])
-            case.submitted_time = datetime.datetime.strptime(case_row[1], "%Y-%m-%d %H:%M:%S.%f")
-
-            self.remove_case(user.id, case_num)
 
             fbModal = FeedbackModal(self.bot, case)
             await interaction.response.send_modal(fbModal)

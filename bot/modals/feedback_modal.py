@@ -1,3 +1,4 @@
+import csv
 import discord
 import discord.ui as ui
 from datetime import datetime
@@ -72,6 +73,9 @@ class FeedbackModal(ui.Modal, title='Feedback Form'):
         # Send message
         await interaction.response.send_message(content="Pinged", delete_after=0) # Acknowledge interaction, immediately delete message
 
+        # Remove unpinged case from log
+        self.remove_case(self.case.tech_id, self.case.case_num)
+
         # Update case, re-log it
         old_message_id = self.case.message_id
         self.case.message_id = message.id
@@ -79,7 +83,35 @@ class FeedbackModal(ui.Modal, title='Feedback Form'):
         self.case.severity_level = str(self.severity)
         self.case.comments = str(self.description)
         self.case.lead_id = interaction.user.id
+        self.case.submitted_time = datetime.now()
 
         self.case.log()
 
+        # Remove from active cases
         self.bot.remove_case(old_message_id)
+    
+
+    def remove_case(self, user_id: int, case_num: str) -> None:
+        """Removes the first case in the log file that
+        matches the provided information and hasn't been pinged.
+
+        Args:
+            user_id (int): The user for the case that needs to be pinged.
+            case_num (str): The case number of the case that needs to be pinged.
+        """
+        # Collect rows with this case
+        lines = []
+        found_row = False
+        with open('log.csv', 'r') as f:
+            reader = csv.reader(f)
+            for row in reader:
+                # Exclude row once found
+                if not found_row and row[2] == case_num and row[5] != "Pinged" and int(row[3]) == user_id:
+                    found_row = True
+                    continue
+                
+                lines.append(row)
+                    
+        with open('log.csv', 'w') as f:
+            writer = csv.writer(f)
+            writer.writerows(lines)
