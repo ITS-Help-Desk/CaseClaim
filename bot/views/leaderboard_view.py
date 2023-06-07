@@ -66,8 +66,8 @@ class LeaderboardView(ui.View):
         semester_pings = mp[user_id]
 
         # Get ping rate
-        month_ping_rate = int((month_pings / month_count) * 100)
-        semester_ping_rate = int((semester_pings / semester_count) * 100)
+        month_checked_rate = int(((month_count - month_pings) / month_count) * 100)
+        semester_checked_rate = int(((semester_count - semester_pings) / semester_count) * 100)
 
         # Create embed
         embed = discord.Embed(title=f"{interaction.user.display_name}'s Ranking")
@@ -75,8 +75,8 @@ class LeaderboardView(ui.View):
         embed.set_thumbnail(url=interaction.user.avatar.url)
 
         # Add fields
-        embed.add_field(name="Month Rank", value=f"Rank: **{month_rank}**\nClaims: **{month_count}**\nPing Percent: **{month_ping_rate}%**")
-        embed.add_field(name="Semester Rank", value=f"Rank: **{semester_rank}**\nClaims: **{semester_count}**\nPing Percent: **{semester_ping_rate}%**")
+        embed.add_field(name="Month Rank", value=f"Rank: **{month_rank}**\nClaims: **{month_count}**\nCheck Percent: **{month_checked_rate}%**")
+        embed.add_field(name="Semester Rank", value=f"Rank: **{semester_rank}**\nClaims: **{semester_count}**\nCheck Percent: **{semester_checked_rate}%**")
 
         # Set footer
         embed.set_footer(text="Last Updated")
