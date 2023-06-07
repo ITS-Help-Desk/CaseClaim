@@ -70,7 +70,7 @@ class LeaderboardView(ui.View):
 
         # Get user pings
         month_pings = mp[user_id]
-        semester_pings = mp[user_id]
+        semester_pings = sp[user_id]
 
         # Get ping rate
         month_checked_rate = int(((month_count - month_pings) / month_count) * 100)

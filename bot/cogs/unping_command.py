@@ -89,6 +89,7 @@ class UnpingCommand(commands.Cog):
         if not found_row:
             raise ValueError("Case not found. Case num or user is incorrect, or case itself isn't pinged.")
     
-        with open('log.csv', 'w') as f:
+        with open('log.csv', 'w', newline='', encoding='utf-8') as f:
             writer = csv.writer(f)
-            writer.writerows(lines)
+            for line in lines:
+                writer.writerow(line)

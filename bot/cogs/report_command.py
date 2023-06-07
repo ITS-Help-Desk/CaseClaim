@@ -138,7 +138,7 @@ class ReportCommand(commands.Cog):
         Returns:
             discord.File: The csv file saved on Discord.
         """
-        with open('temp.csv', 'w', newline='') as csvfile:
+        with open('temp.csv', 'w', newline='', encoding='utf-8') as csvfile:
             writer = csv.writer(csvfile)
             for row in rows:
                 writer.writerow(row)

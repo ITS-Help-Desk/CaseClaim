@@ -100,6 +100,6 @@ class PingCommand(commands.Cog):
                 
                 lines.append(row)
                     
-        with open('log.csv', 'w') as f:
+        with open('log.csv', 'w', newline='', encoding='utf-8') as f:
             writer = csv.writer(f)
             writer.writerows(lines)
