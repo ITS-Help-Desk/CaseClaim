@@ -1,7 +1,9 @@
 import json
-from typing import Any, Optional, Union
+from typing import Any, Optional
 from discord.ext import commands
 import discord
+
+from .cogs.unping_command import UnpingCommand
 
 from .cogs.mickie_command import MickieCommand
 from .cogs.help_command import HelpCommand
@@ -159,6 +161,7 @@ class Bot(commands.Bot):
         await self.add_cog(CaseInfoCommand(self))
         await self.add_cog(MyCasesCommand(self))
         await self.add_cog(LeaderboardCommand(self))
+        await self.add_cog(UnpingCommand(self))
         
         synced = await self.tree.sync()
         print("{} commands synced".format(len(synced)))

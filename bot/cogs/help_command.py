@@ -48,5 +48,6 @@ class HelpCommand(commands.Cog):
         
         embed.add_field(name='/report [user] [month]', value=f'Shows a report for an optionally given user and month.')
         embed.add_field(name='/ping', value='Manually pings a case and a user.')
+        embed.add_field(name='/unping', value='Manually unpings a case.')
         embed.add_field(name='/update_percent <percent>', value='Update the percent of cases that\'ll be sent for review.')
         await interaction.response.send_message(embed=embed, ephemeral = True, delete_after=300)
