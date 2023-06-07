@@ -36,6 +36,13 @@ class LeaderboardView(ui.View):
     
     @ui.button(label="My Rank", style=discord.ButtonStyle.secondary, custom_id="myrank")
     async def button_myrank(self, interaction: discord.Interaction, button: discord.ui.Button):
+        """When pressed by a user it shows their personal
+        rank and statistics.
+
+        Args:
+            interaction (discord.Interaction): The interaction this button press originated from.
+            button (discord.ui.Button): Unused argument that's required to be passed in.
+        """
         await interaction.response.defer(thinking=False) # Acknowledge button press
 
         user_id = interaction.user.id

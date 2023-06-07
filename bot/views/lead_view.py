@@ -23,6 +23,12 @@ class LeadView(ui.View):
 	
     @ui.button(label="Check", style=discord.ButtonStyle.success, custom_id="check")
     async def button_check(self, interaction: discord.Interaction, button: discord.ui.Button):
+        """When pressed by a lead, it logs this case as Checked.
+
+        Args:
+            interaction (discord.Interaction): The interaction this button press originated from.
+            button (discord.ui.Button): Unused argument that's required to be passed in.
+        """
         self.case = self.bot.get_case(interaction.message.id)
 
         #Log the case as checked, then delete it
@@ -35,6 +41,13 @@ class LeadView(ui.View):
     
     @ui.button(label="Ping", style=discord.ButtonStyle.danger, custom_id="ping")
     async def button_ping(self, interaction: discord.Interaction, button: discord.ui.Button):
+        """When pressed by a lead, it brings up a feedback modal
+        for a lead to ping a case.
+
+        Args:
+            interaction (discord.Interaction): The interaction this button press originated from.
+            button (discord.ui.Button): Unused argument that's required to be passed in.
+        """
         self.case = self.bot.get_case(interaction.message.id)
 
         #Prompt with Modal, record the response, create a private thread, then delete

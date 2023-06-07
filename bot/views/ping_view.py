@@ -64,6 +64,15 @@ class PingView(ui.View):
     
 
     def find_case(self, message_id: int) -> Optional[Claim]:
+        """Finds the first case in the log file that matches
+        the provided information and hasn't been pinged.
+
+        Args:
+            message_id (int): The ID of the original claim message on log.
+
+        Returns:
+            Optional[Claim]: The claim representation from the log file.
+        """
         case_row = []
         message_id = str(message_id)
         with open('log.csv', 'r') as f:
