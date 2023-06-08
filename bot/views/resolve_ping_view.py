@@ -3,10 +3,9 @@ import discord
 import discord.ui as ui
 
 # Use TYPE_CHECKING to avoid circular import from bot
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING
 
-from bot.claim import Claim
-from bot.cogs.unping_command import UnpingCommand
+from bot.helpers import find_case
 
 if TYPE_CHECKING:
     from ..bot import Bot
@@ -28,7 +27,7 @@ class ResolvePingView(ui.View):
 	
     @ui.button(label="Change Status", style=discord.ButtonStyle.success, custom_id="changestatus")
     async def button_change_status(self, interaction: discord.Interaction, button: discord.ui.Button):
-        case = self.find_case(self.original_message_id)
+        case = find_case(message_id=self.original_message_id, pinged=True)
         if case is None:
             await interaction.response.send_message(content="Error!", ephemeral=True)
             return
@@ -51,7 +50,7 @@ class ResolvePingView(ui.View):
         
         # Change Log file
         try:
-            UnpingCommand.remove_ping(interaction.user.id, case.tech_id, case.case_num)
+            self.remove_ping(interaction.user.id, case.tech_id, case.case_num)
         except Exception as e:
                 await interaction.response.send(content=f"Error: {e}", ephemeral=True)
                 return
@@ -61,7 +60,7 @@ class ResolvePingView(ui.View):
 
     @ui.button(label="Keep as Pinged", style=discord.ButtonStyle.danger, custom_id="keeppinged")
     async def button_keep_pinged(self, interaction: discord.Interaction, button: discord.ui.Button):
-        case = self.find_case(self.original_message_id)
+        case = find_case(message_id=self.original_message_id, pinged=True)
         if case is None:
             await interaction.response.send_message(content="Error!", ephemeral=True)
             return
@@ -86,25 +85,40 @@ class ResolvePingView(ui.View):
         await interaction.response.defer(thinking=False) # Acknowledge button press
         
 
-    def find_case(self, message_id: int) -> Optional[Claim]:
-        """Finds the first case in the log file that matches
-        the provided information and hasn't been pinged.
+    def remove_ping(self, interaction_user: int, user_id: int, case_num: str) -> None:
+        """This function removes a ping from the log.csv file, and replaces the information
+        to show as if the case was never pinged.
 
         Args:
-            message_id (int): The ID of the original claim message on log.
+            interaction_user (int): The user that sent the command.
+            user_id (int): The user for the case that's been pinged.
+            case_num (str): The case number of the case that's been pinged.
 
-        Returns:
-            Optional[Claim]: The claim representation from the log file.
+        Raises:
+            ValueError: If the case provided couldn't be found
         """
-        case_row = []
-        message_id = str(message_id)
+        # Collect rows with this case
+        lines = []
+        found_row = False
         with open('log.csv', 'r') as f:
             reader = csv.reader(f)
             for row in reader:
-                # Save row once found
-                if row[0] == message_id:
-                    case_row = row
-                    break
-        if len(case_row) == 0:
-            return None
-        return Claim.load_from_row(case_row)
+                # Exclude row once found
+                if not found_row and row[2] == case_num and row[5] == "Pinged" and int(row[3]) == user_id:
+                    found_row = True
+                    row[4] = str(interaction_user)
+                    row[5] = "Complete"
+                    row[6] = ""
+                    row[7] = ""
+                
+                lines.append(row)
+                
+                
+        # No case could be found, return False
+        if not found_row:
+            raise ValueError("Case not found. Case num or user is incorrect, or case itself isn't pinged.")
+    
+        with open('log.csv', 'w', newline='', encoding='utf-8') as f:
+            writer = csv.writer(f)
+            for line in lines:
+                writer.writerow(line)

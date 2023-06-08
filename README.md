@@ -35,10 +35,10 @@ This repository contains the code to run the USD ITS Help Desk Case Claim bot. T
     ├── bot.py # Runs main operations for storing cases
     ├── claim.py # OOP representation of a claim
     ├── paginator.py # Creates embed pages that can be traversed
+    ├── helpers.py # Lists some shared functions
     ├── cogs
         ├── claim_command.py # /claim
         ├── ping_command.py # /ping
-        ├── unping_command.py # /unping
         ├── help_command.py # /help
         ├── mycases_command.py # /mycases
         ├── leaderboard_command.py # /leaderboard
@@ -50,9 +50,10 @@ This repository contains the code to run the USD ITS Help Desk Case Claim bot. T
         └── feedback_modal.py # Feedback form for pings
     └── views
         ├── leaderboard_view.py # Refresh and My Rank buttons
-        ├── ping_view.py # Affirm and resolve buttons
-        ├── lead_view.py # Check and ping buttons
-        └── tech_view.py # Complete and unclaim buttons
+        ├── ping_view.py # Affirm and Resolve buttons
+        ├── resolve_ping_view.py # Change Status and Keep Pinged buttons
+        ├── lead_view.py # Check and Ping buttons
+        └── tech_view.py # Complete and Unclaim buttons
 ```
 
 ## Commands
@@ -68,9 +69,6 @@ This repository contains the code to run the USD ITS Help Desk Case Claim bot. T
 - /ping **<case_num>** **\<user>**
     - Allows a lead to manually ping a case and provide feedback to a tech.
     - Leads are able to write a description and severity level, which will be shared with the tech in a private thread.
-- /unping **<case_num>** **\<user>**
-    - Allows a lead to manually remove a ping from a case.
-    - Used for when a lead accidentally pings and case and would like it removed from the log file.
 - /report **\[user]** **\[month]** **\[pinged]**
     - Allows a lead to instantly create a report on filtered cases.
     - Leads can filter depending on a user, month, or whether or not the case was pinged.

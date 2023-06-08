@@ -2,6 +2,7 @@ import csv
 import datetime
 import discord
 import discord.ui as ui
+from bot.helpers import month_number_to_name
 
 # Use TYPE_CHECKING to avoid circular import from bot
 from typing import TYPE_CHECKING
@@ -110,7 +111,7 @@ class LeaderboardView(ui.View):
         embed = discord.Embed(title="ITS Case Claim Leaderboard")
         embed.color = embed_color
 
-        embed.add_field(name=f"{LeaderboardView.month_number_to_name(interaction_date.month)} Ranks", value=month_ranking, inline=True)
+        embed.add_field(name=f"{month_number_to_name(interaction_date.month)} Ranks", value=month_ranking, inline=True)
         embed.add_field(name="Semester Ranks", value=semester_ranking, inline=True)
         embed.set_footer(text="Last Updated")
         embed.timestamp = datetime.datetime.now()
@@ -219,28 +220,3 @@ class LeaderboardView(ui.View):
         month_counts_sorted_keys = sorted(month_counts, key=month_counts.get, reverse=True)
 
         return ((month_counts, month_counts_sorted_keys), (semester_counts, semester_counts_sorted_keys), month_ping_counts, semester_ping_counts)
-    
-
-    @staticmethod
-    def month_number_to_name(month_number: int) -> str:
-        """Converts a month number to the actual name.
-        (e.g. 1 -> January)
-
-        Args:
-            month_number (int): The number of the month (from 1 to 12)
-
-        Raises:
-            ValueError: If the number provided is < 1 or > 12
-
-        Returns:
-            str: The full name of the month (e.g. "February")
-        """
-        month_names = [
-            "January", "February", "March", "April", "May", "June",
-            "July", "August", "September", "October", "November", "December"
-        ]
-
-        if 1 <= month_number <= 12:
-            return month_names[month_number - 1]
-        else:
-            raise ValueError("Invalid month number")

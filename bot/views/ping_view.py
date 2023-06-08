@@ -1,12 +1,11 @@
-import csv
 import discord
 import discord.ui as ui
 
 # Use TYPE_CHECKING to avoid circular import from bot
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING
 
-from bot.claim import Claim
 from bot.views.resolve_ping_view import ResolvePingView
+from bot.helpers import find_case
 
 if TYPE_CHECKING:
     from ..bot import Bot
@@ -26,7 +25,7 @@ class PingView(ui.View):
 	
     @ui.button(label="Affirm", style=discord.ButtonStyle.primary, custom_id="affirm")
     async def button_affirm(self, interaction: discord.Interaction, button: discord.ui.Button):
-        case = self.find_case(interaction.message.id)
+        case = find_case(message_id=interaction.message.id, pinged=True)
         if case is None:
             await interaction.response.send_message(content="Error!", ephemeral=True)
             return
@@ -42,7 +41,7 @@ class PingView(ui.View):
     
     @ui.button(label="Resolve", style=discord.ButtonStyle.secondary, custom_id="resolve")
     async def button_resolve(self, interaction: discord.Interaction, button: discord.ui.Button):
-        case = self.find_case(interaction.message.id)
+        case = find_case(message_id=interaction.message.id, pinged=True)
         if case is None:
             await interaction.response.send_message(content="Error!", ephemeral=True)
             return
@@ -62,27 +61,3 @@ class PingView(ui.View):
         else:
             await interaction.response.send_message(content="You cannot press this button yet.", ephemeral=True)
     
-
-    def find_case(self, message_id: int) -> Optional[Claim]:
-        """Finds the first case in the log file that matches
-        the provided information and hasn't been pinged.
-
-        Args:
-            message_id (int): The ID of the original claim message on log.
-
-        Returns:
-            Optional[Claim]: The claim representation from the log file.
-        """
-        case_row = []
-        message_id = str(message_id)
-        with open('log.csv', 'r') as f:
-            reader = csv.reader(f)
-            for row in reader:
-                # Save row once found
-                if row[0] == message_id:
-                    case_row = row
-                    break
-        
-        if len(case_row) == 0:
-            return None
-        return Claim.load_from_row(case_row)
