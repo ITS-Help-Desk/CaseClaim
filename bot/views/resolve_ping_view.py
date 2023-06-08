@@ -36,17 +36,10 @@ class ResolvePingView(ui.View):
             await interaction.response.send_message(content="You cannot press this button.", ephemeral=True)
             return
         
-        # Confirm that tech has affirmed the case (left the thread)
-        try:
-            user = await interaction.channel.fetch_member(case.tech_id)
-        except:
-            user = None
+        user = await interaction.channel.fetch_member(case.tech_id)
         
-        if user is not None:
-            await interaction.response.send_message(content="You cannot press this button yet.", ephemeral=True)
-            return
-        
-        await interaction.channel.remove_user(interaction.user)
+        await interaction.channel.remove_user(interaction.user) # Remove lead
+        await interaction.channel.remove_user(user) # Remove tech
         
         # Change Log file
         try:
@@ -69,18 +62,6 @@ class ResolvePingView(ui.View):
             await interaction.response.send_message(content="You cannot press this button.", ephemeral=True)
             return
         
-        # Confirm that tech has affirmed the case (left the thread)
-        try:
-            user = await interaction.channel.fetch_member(case.tech_id)
-        except:
-            user = None
-        
-        if user is not None:
-            await interaction.response.send_message(content="You cannot press this button yet.", ephemeral=True)
-            return
-
-        tech = await interaction.guild.fetch_member(case.tech_id)
-        await interaction.channel.add_user(tech)
 
         await interaction.response.defer(thinking=False) # Acknowledge button press
         

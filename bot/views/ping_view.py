@@ -1,11 +1,12 @@
 import discord
 import discord.ui as ui
 
-# Use TYPE_CHECKING to avoid circular import from bot
-from typing import TYPE_CHECKING
-
+from bot.modals.assessment_modal import AssessmentModal
 from bot.views.resolve_ping_view import ResolvePingView
 from bot.helpers import find_case
+
+# Use TYPE_CHECKING to avoid circular import from bot
+from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from ..bot import Bot
@@ -34,12 +35,11 @@ class PingView(ui.View):
             await interaction.response.send_message(content="You cannot press this button.", ephemeral=True)
             return 
 
-        await interaction.channel.send(content=f"<@!{case.lead_id}>, this case has been affirmed by <@!{interaction.user.id}>.")
-        await interaction.channel.remove_user(interaction.user)
+        fbModal = AssessmentModal(self.bot, case)
+        await interaction.response.send_modal(fbModal)
         
-        await interaction.response.defer(thinking=False) # Acknowledge button press
     
-    @ui.button(label="Resolve", style=discord.ButtonStyle.secondary, custom_id="resolve")
+    '''@ui.button(label="Resolve", style=discord.ButtonStyle.secondary, custom_id="resolve")
     async def button_resolve(self, interaction: discord.Interaction, button: discord.ui.Button):
         case = find_case(message_id=interaction.message.id, pinged=True)
         if case is None:
@@ -59,5 +59,5 @@ class PingView(ui.View):
         if user is None:
             await interaction.response.send_message(view=ResolvePingView(self.bot, interaction.message.id), ephemeral=True)
         else:
-            await interaction.response.send_message(content="You cannot press this button yet.", ephemeral=True)
+            await interaction.response.send_message(content="You cannot press this button yet.", ephemeral=True)'''
     
