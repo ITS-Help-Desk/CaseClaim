@@ -37,10 +37,6 @@ class UpdatePercentCommand(commands.Cog):
             await interaction.response.send_message(f"Successfully updated case review rate from {old}% to {percentage}%.", ephemeral=True)
         else:
             # Wrong user tries to use the command
-            bad_user_embed = discord.Embed(
-                description=
-                f"<@{interaction.user.id}>, you do not have permission to use this command!",
-                color=discord.Color.red()
-            )
-            await interaction.response.send_message(embed=bad_user_embed, ephemeral=True)
+            msg = f"<@{interaction.user.id}>, you do not have permission to use this command!"
+            await interaction.response.send_message(content=msg, ephemeral=True)
             

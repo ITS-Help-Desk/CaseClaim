@@ -50,19 +50,12 @@ class ReportCommand(commands.Cog):
                 await interaction.followup.send(embed=report_embed, file=report)
             except Exception as e:
                 print(e)
-                exception_embed = discord.Embed(
-                    description=
-                    f"<@{interaction.user.id}>, an error occurred when trying to pull this report!",
-                    color=discord.Color.red())
-                await interaction.response.send_message(embed=exception_embed, ephemeral=True)
+                msg = f"<@{interaction.user.id}>, an error occurred when trying to pull this report!"
+                await interaction.response.send_message(content=msg, ephemeral=True)
         else:
             # Return error message if user is not Lead
-            bad_user_embed = discord.Embed(
-                description=
-                f"<@{interaction.user.id}>, you do not have permission to pull this report!",
-                color=discord.Color.red()
-            )
-            await interaction.response.send_message(embed=bad_user_embed, ephemeral=True)
+            msg = f"<@{interaction.user.id}>, you do not have permission to pull this report!"
+            await interaction.response.send_message(content=msg, ephemeral=True)
 
 
     async def get_report(self, guild: discord.Guild, user: Optional[discord.Member]=None, month: Optional[str]=None, pinged: bool=False) -> discord.File:

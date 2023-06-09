@@ -47,6 +47,7 @@ This repository contains the code to run the USD ITS Help Desk Case Claim bot. T
         ├── update_percent_command.py # /update_percent
         └── report_command.py # /report
     ├── modals
+        ├── assessment_modal.py # Feedback form for techs affirming pings
         └── feedback_modal.py # Feedback form for pings
     └── views
         ├── leaderboard_view.py # Refresh and My Rank buttons

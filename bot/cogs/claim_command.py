@@ -35,22 +35,22 @@ class ClaimCommand(commands.Cog):
         """
         # Ensure user is claiming case in the correct channel
         if interaction.channel_id != self.bot.cases_channel:
-            claimed = discord.Embed(description=f"Cases cannot be claimed in this channel. Please go to <#{self.bot.cases_channel}>", colour=discord.Color.red())
-            await interaction.response.send_message(embed=claimed, ephemeral=True,  delete_after=300)
+            msg = f"Cases cannot be claimed in this channel. Please go to <#{self.bot.cases_channel}>"
+            await interaction.response.send_message(content=msg, ephemeral=True,  delete_after=300)
             return
 
         # Create a Case object, checks to see if it's valid
         try:
             case = Claim(case_num=case_num, tech_id=interaction.user.id)
         except InvalidClaimError:
-            invalid = discord.Embed(description=f"**{case_num}** is an invalid case number!", colour=discord.Color.red())
-            await interaction.response.send_message(embed=invalid, ephemeral=True, delete_after=300)
+            msg = f"**{case_num}** is an invalid case number!"
+            await interaction.response.send_message(content=msg, ephemeral=True, delete_after=300)
             return
         
         # Check to see if the case claimed has already been claimed and is in progress.
         if self.bot.check_if_claimed(case.case_num):
-            claimed = discord.Embed(description=f"**{case.case_num}** has already been claimed.", colour=discord.Color.red())
-            await interaction.response.send_message(embed=claimed, ephemeral=True,  delete_after=300)
+            msg = f"**{case.case_num}** has already been claimed."
+            await interaction.response.send_message(content=msg, ephemeral=True,  delete_after=300)
             return
         
         # Temporarily add case using the interaction id

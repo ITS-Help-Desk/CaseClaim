@@ -2,7 +2,6 @@ import discord
 import discord.ui as ui
 
 from bot.modals.assessment_modal import AssessmentModal
-from bot.views.resolve_ping_view import ResolvePingView
 from bot.helpers import find_case
 
 # Use TYPE_CHECKING to avoid circular import from bot
