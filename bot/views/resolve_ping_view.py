@@ -88,7 +88,7 @@ class ResolvePingView(ui.View):
                 if not found_row and row[2] == case_num and row[5] == "Pinged" and int(row[3]) == user_id:
                     found_row = True
                     row[4] = str(interaction_user)
-                    row[5] = "Complete"
+                    row[5] = "Checked"
                     row[6] = ""
                     row[7] = ""
                 
