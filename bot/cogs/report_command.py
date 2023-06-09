@@ -95,7 +95,7 @@ class ReportCommand(commands.Cog):
                 
                 # Check if pinged
                 if pinged:
-                    if row[5] != 'Pinged':
+                    if row[5] != 'Pinged' and row[5] != "Resolved":
                         continue
                 
                 for index in [3,4]:
