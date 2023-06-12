@@ -3,6 +3,7 @@ import discord.ui as ui
 
 from bot.status import Status
 from ..modals.feedback_modal import FeedbackModal
+from datetime import datetime
 
 # Use TYPE_CHECKING to avoid circular import from bot
 from typing import TYPE_CHECKING
@@ -36,6 +37,7 @@ class LeadView(ui.View):
         #Log the case as checked, then delete it
         self.case.status = Status.CHECKED
         self.case.lead_id = interaction.user.id
+        self.case.submitted_time = datetime.now()
         self.case.log()
         self.bot.remove_case(self.case.message_id)
         
