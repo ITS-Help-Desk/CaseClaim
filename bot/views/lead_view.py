@@ -1,5 +1,7 @@
 import discord
 import discord.ui as ui
+
+from bot.status import Status
 from ..modals.feedback_modal import FeedbackModal
 
 # Use TYPE_CHECKING to avoid circular import from bot
@@ -32,7 +34,7 @@ class LeadView(ui.View):
         self.case = self.bot.get_case(interaction.message.id)
 
         #Log the case as checked, then delete it
-        self.case.status = "Checked"
+        self.case.status = Status.CHECKED
         self.case.lead_id = interaction.user.id
         self.case.log()
         self.bot.remove_case(self.case.message_id)

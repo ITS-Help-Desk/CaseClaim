@@ -36,6 +36,7 @@ This repository contains the code to run the USD ITS Help Desk Case Claim bot. T
     ├── claim.py # OOP representation of a claim
     ├── paginator.py # Creates embed pages that can be traversed
     ├── helpers.py # Lists some shared functions
+    ├── status.py # Lists case status enum values
     ├── cogs
         ├── claim_command.py # /claim
         ├── ping_command.py # /ping
@@ -87,6 +88,10 @@ This repository contains the code to run the USD ITS Help Desk Case Claim bot. T
 - /leaderboard
     - Allows a user to see a leaderboard of all other users by case claim amount.
     - Shows a paginated view of each user and how many cases they've claimed.
+
+
+## Case Claim Flow Chart
+![Flowchart](flowchart.png)
 
 ## Dependencies
 - discord.py [2.2.2](https://pypi.org/project/discord.py/) 

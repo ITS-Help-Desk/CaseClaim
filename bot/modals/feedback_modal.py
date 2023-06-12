@@ -3,6 +3,7 @@ import discord.ui as ui
 from datetime import datetime
 
 from bot.helpers import remove_case
+from bot.status import Status
 from bot.views.ping_view import PingView
 from ..claim import Claim
 
@@ -79,7 +80,7 @@ class FeedbackModal(ui.Modal, title='Feedback Form'):
         # Update case, re-log it
         old_message_id = self.case.message_id
         self.case.message_id = message.id
-        self.case.status = "Pinged"
+        self.case.status = Status.PINGED
         self.case.severity_level = str(self.severity)
         self.case.comments = str(self.description)
         self.case.lead_id = interaction.user.id

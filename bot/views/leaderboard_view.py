@@ -7,6 +7,8 @@ from bot.helpers import month_number_to_name
 # Use TYPE_CHECKING to avoid circular import from bot
 from typing import TYPE_CHECKING
 
+from bot.status import Status
+
 if TYPE_CHECKING:
     from ..bot import Bot
 
@@ -25,6 +27,12 @@ class LeaderboardView(ui.View):
 	
     @ui.button(label="Refresh", style=discord.ButtonStyle.primary, custom_id="refresh")
     async def button_refresh(self, interaction: discord.Interaction, button: discord.ui.Button):
+        """Refreshes the global ranks of case claims for the whole server.
+
+        Args:
+            interaction (discord.Interaction): The interaction this button press originated from.
+            button (discord.ui.Button): Unused argument that's required to be passed in.
+        """
         await interaction.response.defer(thinking=False) # Acknowledge button press
         
         new_embed = LeaderboardView.create_embed(interaction.created_at, self.bot.embed_color)
@@ -202,7 +210,7 @@ class LeaderboardView(ui.View):
                     month_counts[id] += 1
 
                     # Add pinged
-                    if row[5] == "Pinged":
+                    if row[5] == Status.PINGED or row[5] == Status.RESOLVED:
                         month_ping_counts[id] += 1
 
                 # Organize data for semester
@@ -212,7 +220,7 @@ class LeaderboardView(ui.View):
                     semester_counts[id] += 1
 
                     # Add pinged
-                    if row[5] == "Pinged":
+                    if row[5] == Status.PINGED or row[5] == Status.RESOLVED:
                         semester_ping_counts[id] += 1
 
                 

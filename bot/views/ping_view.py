@@ -25,6 +25,13 @@ class PingView(ui.View):
 	
     @ui.button(label="Affirm", style=discord.ButtonStyle.primary, custom_id="affirm")
     async def button_affirm(self, interaction: discord.Interaction, button: discord.ui.Button):
+        """Allows a tech to affirm a case of theirs that's
+        been pinged.
+
+        Args:
+            interaction (discord.Interaction): The interaction this button press originated from.
+            button (discord.ui.Button): Unused argument that's required to be passed in.
+        """
         case = find_case(message_id=interaction.message.id, pinged=True)
         if case is None:
             await interaction.response.send_message(content="Error!", ephemeral=True)
@@ -37,26 +44,3 @@ class PingView(ui.View):
         fbModal = AssessmentModal(self.bot, case)
         await interaction.response.send_modal(fbModal)
         
-    
-    '''@ui.button(label="Resolve", style=discord.ButtonStyle.secondary, custom_id="resolve")
-    async def button_resolve(self, interaction: discord.Interaction, button: discord.ui.Button):
-        case = find_case(message_id=interaction.message.id, pinged=True)
-        if case is None:
-            await interaction.response.send_message(content="Error!", ephemeral=True)
-            return
-        
-        if case.lead_id != interaction.user.id:
-            await interaction.response.send_message(content="You cannot press this button.", ephemeral=True)
-            return 
-        
-        # Confirm that tech has affirmed the case (left the thread)
-        try:
-            user = await interaction.channel.fetch_member(case.tech_id)
-        except:
-            user = None
-        
-        if user is None:
-            await interaction.response.send_message(view=ResolvePingView(self.bot, interaction.message.id), ephemeral=True)
-        else:
-            await interaction.response.send_message(content="You cannot press this button yet.", ephemeral=True)'''
-    

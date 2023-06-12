@@ -8,6 +8,8 @@ import datetime
 # Use TYPE_CHECKING to avoid circular import from bot
 from typing import TYPE_CHECKING
 
+from bot.status import Status
+
 if TYPE_CHECKING:
     from ..bot import Bot
 
@@ -95,7 +97,7 @@ class CaseInfoCommand(commands.Cog):
             s += f'<t:{t}:f> - {user}'
 
             # Add comments
-            if include_comments and row[5] == "Pinged":
+            if include_comments and (row[5] == Status.PINGED or row[5] == Status.RESOLVED):
                 s += f' [**{row[6]}**: {row[7]}]'
 
             s += '\n'

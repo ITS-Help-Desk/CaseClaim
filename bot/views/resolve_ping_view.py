@@ -6,6 +6,7 @@ import discord.ui as ui
 from typing import TYPE_CHECKING
 
 from bot.helpers import find_case
+from bot.status import Status
 
 if TYPE_CHECKING:
     from ..bot import Bot
@@ -25,8 +26,15 @@ class ResolvePingView(ui.View):
         self.original_message_id = original_message_id
 
 	
-    @ui.button(label="Change Status", style=discord.ButtonStyle.success, custom_id="changestatus")
+    @ui.button(label="Close and Change Status", style=discord.ButtonStyle.success, custom_id="changestatus")
     async def button_change_status(self, interaction: discord.Interaction, button: discord.ui.Button):
+        """Allows a lead to close the thread and change the log
+        status of a case that's been pinged to Resolved.
+
+        Args:
+            interaction (discord.Interaction): The interaction this button press originated from.
+            button (discord.ui.Button): Unused argument that's required to be passed in.
+        """
         case = find_case(message_id=self.original_message_id, pinged=True)
         if case is None:
             await interaction.response.send_message(content="Error!", ephemeral=True)
@@ -45,14 +53,22 @@ class ResolvePingView(ui.View):
         try:
             self.remove_ping(interaction.user.id, case.tech_id, case.case_num)
         except Exception as e:
-                await interaction.response.send(content=f"Error: {e}", ephemeral=True)
-                return
+            print(e)
+            await interaction.response.send_message(content=f"Error: {e}", ephemeral=True)
+            return
             
         await interaction.response.defer(thinking=False) # Acknowledge button press
             
 
-    @ui.button(label="Keep as Pinged", style=discord.ButtonStyle.danger, custom_id="keeppinged")
+    @ui.button(label="Close and Keep Pinged", style=discord.ButtonStyle.danger, custom_id="keeppinged")
     async def button_keep_pinged(self, interaction: discord.Interaction, button: discord.ui.Button):
+        """Allows a lead to close the thread and keep
+        the status of the case as Pinged in the log file.
+
+        Args:
+            interaction (discord.Interaction): The interaction this button press originated from.
+            button (discord.ui.Button): Unused argument that's required to be passed in.
+        """
         case = find_case(message_id=self.original_message_id, pinged=True)
         if case is None:
             await interaction.response.send_message(content="Error!", ephemeral=True)
@@ -62,6 +78,10 @@ class ResolvePingView(ui.View):
             await interaction.response.send_message(content="You cannot press this button.", ephemeral=True)
             return
         
+        user = await interaction.channel.fetch_member(case.tech_id)
+
+        await interaction.channel.remove_user(interaction.user) # Remove lead
+        await interaction.channel.remove_user(user) # Remove tech
 
         await interaction.response.defer(thinking=False) # Acknowledge button press
         
@@ -84,16 +104,13 @@ class ResolvePingView(ui.View):
         with open('log.csv', 'r') as f:
             reader = csv.reader(f)
             for row in reader:
-                # Exclude row once found
-                if not found_row and row[2] == case_num and row[5] == "Pinged" and int(row[3]) == user_id:
+                # Replace row once found
+                if not found_row and row[2] == case_num and row[5] == Status.PINGED and int(row[3]) == user_id:
                     found_row = True
                     row[4] = str(interaction_user)
-                    row[5] = "Resolved"
-                    row[6] = ""
-                    row[7] = ""
+                    row[5] = Status.RESOLVED
                 
                 lines.append(row)
-                
                 
         # No case could be found, return False
         if not found_row:

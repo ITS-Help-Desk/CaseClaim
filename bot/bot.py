@@ -162,6 +162,7 @@ class Bot(commands.Bot):
         await self.add_cog(CaseInfoCommand(self))
         await self.add_cog(MyCasesCommand(self))
         await self.add_cog(LeaderboardCommand(self))
-        
+
+
         synced = await self.tree.sync()
         print("{} commands synced".format(len(synced)))

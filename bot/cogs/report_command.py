@@ -7,6 +7,8 @@ from bot.helpers import month_string_to_number, month_number_to_name
 # Use TYPE_CHECKING to avoid circular import from bot
 from typing import TYPE_CHECKING, Optional, Union
 
+from bot.status import Status
+
 if TYPE_CHECKING:
     from ..bot import Bot
 
@@ -95,7 +97,7 @@ class ReportCommand(commands.Cog):
                 
                 # Check if pinged
                 if pinged:
-                    if row[5] != 'Pinged' and row[5] != "Resolved":
+                    if row[5] != Status.PINGED and row[5] != Status.RESOLVED:
                         continue
                 
                 for index in [3,4]:

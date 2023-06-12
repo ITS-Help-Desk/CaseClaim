@@ -6,6 +6,7 @@ import csv
 from typing import Optional
 
 from bot.claim import Claim
+from bot.status import Status
 
 
 def month_number_to_name(month_number: int) -> str:
@@ -106,7 +107,7 @@ def find_case(case_num='', message_id=-1, user_id=-1, pinged=False) -> Optional[
                 continue
             
             # Test if pinged
-            if (row[5] == "Pinged") != pinged:
+            if (row[5] == Status.PINGED) != pinged:
                 continue
             return Claim.load_from_row(row)
     
@@ -129,7 +130,7 @@ def remove_case(user_id: int, case_num: str) -> None:
         reader = csv.reader(f)
         for row in reader:
             # Exclude row once found
-            if not found_row and row[2] == case_num and row[5] != "Pinged" and int(row[3]) == user_id:
+            if not found_row and row[2] == case_num and row[5] != Status.PINGED and int(row[3]) == user_id:
                 found_row = True
                 continue # Don't add to the lines list
             
