@@ -93,8 +93,11 @@ class CaseInfoCommand(commands.Cog):
                 s += "**[ACTIVE]**"
 
             # Convert timestamp to UNIX
-            t = int(time.mktime(datetime.datetime.strptime(t, "%Y-%m-%d %H:%M:%S.%f").timetuple()))
-            s += f'<t:{t}:f> - {user}'
+            try:
+                t = int(time.mktime(datetime.datetime.strptime(t, "%Y-%m-%d %H:%M:%S.%f").timetuple()))
+                s += f'<t:{t}:f> - {user}'
+            except:
+                s += f'{user}'
 
             # Add comments
             if include_comments and (row[5] == Status.PINGED or row[5] == Status.RESOLVED):
