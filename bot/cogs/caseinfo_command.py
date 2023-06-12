@@ -90,7 +90,7 @@ class CaseInfoCommand(commands.Cog):
             t = row[1]
 
             if row[5] == "":
-                s += "**[ACTIVE]**"
+                s += "**[ACTIVE]** "
 
             # Convert timestamp to UNIX
             try:
