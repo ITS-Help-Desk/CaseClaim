@@ -34,33 +34,36 @@ class ClaimCommand(commands.Cog):
             case_num (str): The case number in Salesforce (e.g. "00960979")
         """
         # Ensure user is claiming case in the correct channel
-        if interaction.channel.id != self.bot.cases_channel:
-            claimed = discord.Embed(description=f"Cases cannot be claimed in this channel. Please go to <#{self.bot.cases_channel}>", colour=discord.Color.red())
-            await interaction.response.send_message(embed=claimed, ephemeral=True,  delete_after=300)
+        if interaction.channel_id != self.bot.cases_channel:
+            msg = f"Cases cannot be claimed in this channel. Please go to <#{self.bot.cases_channel}>"
+            await interaction.response.send_message(content=msg, ephemeral=True,  delete_after=300)
             return
 
         # Create a Case object, checks to see if it's valid
         try:
             case = Claim(case_num=case_num, tech_id=interaction.user.id)
         except InvalidClaimError:
-            invalid = discord.Embed(description=f"**{case_num}** is an invalid case number!", colour=discord.Color.red())
-            await interaction.response.send_message(embed=invalid, ephemeral=True, delete_after=300)
+            msg = f"**{case_num}** is an invalid case number!"
+            await interaction.response.send_message(content=msg, ephemeral=True, delete_after=300)
             return
         
         # Check to see if the case claimed has already been claimed and is in progress.
         if self.bot.check_if_claimed(case.case_num):
-            claimed = discord.Embed(description=f"**{case.case_num}** has already been claimed.", colour=discord.Color.red())
-            await interaction.response.send_message(embed=claimed, ephemeral=True,  delete_after=300)
+            msg = f"**{case.case_num}** has already been claimed."
+            await interaction.response.send_message(content=msg, ephemeral=True,  delete_after=300)
             return
-
-
+        
+        # Temporarily add case using the interaction id
+        # To prevent double claims
+        case.message_id = interaction.id
+        self.bot.add_case(case, store=False)
+        
         # User has claimed the case successfully, create the embed and techview.
         message_embed = discord.Embed(
             description=f"Is being worked on by <@{case.tech_id}>",
             colour=self.bot.embed_color,
             timestamp=datetime.now()
         )
-
         message_embed.set_author(name=f"{case.case_num}", icon_url=f'{interaction.user.display_avatar}')
         message_embed.set_footer(text="Claimed")
 
@@ -69,6 +72,9 @@ class ClaimCommand(commands.Cog):
         # Send message, add case to the list of cases
         await interaction.response.send_message(embed=message_embed, view=message_view)
         response = await interaction.original_response()
-        case.message_id = response.id
 
+        # Now that message has been sent, update the active cases
+        # with the new message id
+        case.message_id = response.id
         self.bot.add_case(case)
+        self.bot.remove_case(interaction.id)

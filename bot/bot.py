@@ -1,20 +1,24 @@
 import json
-from typing import Any, Optional, Union
+from typing import Any, Optional
 from discord.ext import commands
 import discord
+
 from .cogs.mickie_command import MickieCommand
 from .cogs.help_command import HelpCommand
 from .cogs.report_command import ReportCommand
 from .cogs.claim_command import ClaimCommand
 from .cogs.ping_command import PingCommand
 from .cogs.update_percent_command import UpdatePercentCommand
-from .cogs.case_info_command import CaseInfoCommand
+from .cogs.caseinfo_command import CaseInfoCommand
 from .cogs.mycases_command import MyCasesCommand
 from .cogs.leaderboard_command import LeaderboardCommand
-import os
-from bot.claim import Claim
+
 from .views.lead_view import LeadView
 from .views.tech_view import TechView
+from .views.leaderboard_view import LeaderboardView
+from .views.ping_view import PingView
+
+from bot.claim import Claim
 
 
 class Bot(commands.Bot):
@@ -33,23 +37,25 @@ class Bot(commands.Bot):
         self.review_rate = 1.0
         self.embed_color = discord.Color.from_rgb(117, 190, 233)
 
-        # Initialize bot settings#
+        # Initialize bot settings
         intents = discord.Intents.default()
         intents.message_content = True  
         super().__init__(intents=intents, command_prefix='/')
 
 
-    def add_case(self, case: Claim) -> None:
+    def add_case(self, case: Claim, store=True) -> None:
         """Adds a case to the list of actively worked on cases.
 
         Args:
             case (Claim): The case that is being added
+            store (bool): Whether or not to store on file (defaults to True).
         """
         if case.message_id == None:
             raise ValueError("Case message ID not provided!")
         
         self.active_cases[case.message_id] = case
-        self.store_cases()
+        if store:
+            self.store_cases()
     
 
     def get_case(self, message_id: int) -> Optional[Claim]:
@@ -117,7 +123,7 @@ class Bot(commands.Bot):
                 self.active_cases[int(message_id)] = c
     
 
-    def check_if_lead(self, user: Union[discord.Member, discord.User]) -> bool:
+    def check_if_lead(self, user: discord.Member) -> bool:
         """Checks if a given user is a lead or not.
 
         Args:
@@ -135,6 +141,9 @@ class Bot(commands.Bot):
         """
         self.add_view(TechView(self))
         self.add_view(LeadView(self))
+
+        self.add_view(LeaderboardView(self))
+        self.add_view(PingView(self))
         
 
     async def on_ready(self):
@@ -153,6 +162,7 @@ class Bot(commands.Bot):
         await self.add_cog(CaseInfoCommand(self))
         await self.add_cog(MyCasesCommand(self))
         await self.add_cog(LeaderboardCommand(self))
-        
+
+
         synced = await self.tree.sync()
         print("{} commands synced".format(len(synced)))

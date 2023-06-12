@@ -4,7 +4,7 @@ This repository contains the code to run the USD ITS Help Desk Case Claim bot. T
 ## How to Run
 1. Verify Python version
 
-    On Windows: `python -V`
+    On Windows: `python -V` OR `py -V`
     
     On Mac: `python3 -V`
 
@@ -12,7 +12,7 @@ This repository contains the code to run the USD ITS Help Desk Case Claim bot. T
 2. Download dependencies
 
     On Windows:
-    `python -m pip install -r requirements.txt`
+    `python -m pip install -r requirements.txt` OR `py -m pip install -r requirements.txt`
 
     On Mac:
     `python3 -m pip3 install -r requirements.txt`
@@ -35,6 +35,8 @@ This repository contains the code to run the USD ITS Help Desk Case Claim bot. T
     ├── bot.py # Runs main operations for storing cases
     ├── claim.py # OOP representation of a claim
     ├── paginator.py # Creates embed pages that can be traversed
+    ├── helpers.py # Lists some shared functions
+    ├── status.py # Lists case status enum values
     ├── cogs
         ├── claim_command.py # /claim
         ├── ping_command.py # /ping
@@ -42,14 +44,18 @@ This repository contains the code to run the USD ITS Help Desk Case Claim bot. T
         ├── mycases_command.py # /mycases
         ├── leaderboard_command.py # /leaderboard
         ├── mickie_command.py # /mickie
-        ├── case_info_command.py # /caseinfo
+        ├── caseinfo_command.py # /caseinfo
         ├── update_percent_command.py # /update_percent
         └── report_command.py # /report
     ├── modals
+        ├── assessment_modal.py # Feedback form for techs affirming pings
         └── feedback_modal.py # Feedback form for pings
     └── views
-        ├── lead_view.py # Check and ping buttons
-        └── tech_view.py # Complete and unclaim buttons
+        ├── leaderboard_view.py # Refresh and My Rank buttons
+        ├── ping_view.py # Affirm and Resolve buttons
+        ├── resolve_ping_view.py # Change Status and Keep Pinged buttons
+        ├── lead_view.py # Check and Ping buttons
+        └── tech_view.py # Complete and Unclaim buttons
 ```
 
 ## Commands
@@ -83,5 +89,9 @@ This repository contains the code to run the USD ITS Help Desk Case Claim bot. T
     - Allows a user to see a leaderboard of all other users by case claim amount.
     - Shows a paginated view of each user and how many cases they've claimed.
 
-### Dependencies
+
+## Case Claim Flow Chart
+![Flowchart](flowchart.png)
+
+## Dependencies
 - discord.py [2.2.2](https://pypi.org/project/discord.py/) 

@@ -22,9 +22,15 @@ class TechView(ui.View):
         super().__init__(timeout=None)
         self.bot = bot
 
-    #if the user is the same as the claimer, 
+    
     @ui.button(label="Complete", style=discord.ButtonStyle.success, custom_id='complete')
-    async def button_claim(self, interaction: discord.Interaction, button):
+    async def button_claim(self, interaction: discord.Interaction, button: discord.ui.Button):
+        """When pressed by a tech, it marks the case as complete and allows a lead to review it.
+
+        Args:
+            interaction (discord.Interaction): The interaction this button press originated from.
+            button (discord.ui.Button): Unused argument that's required to be passed in.
+        """
         self.case = self.bot.get_case(interaction.message.id)
 
         if self.case.tech_id == interaction.user.id:
@@ -32,6 +38,7 @@ class TechView(ui.View):
             self.case.status = "Complete"
 
             self.bot.remove_case(interaction.message.id)
+            self.case.submitted_time = datetime.now()
             await interaction.message.delete()
 
             completed_embed = discord.Embed(description=f"Has been marked complete by <@{interaction.user.id}>",
@@ -60,19 +67,23 @@ class TechView(ui.View):
                 self.case.log()
         else:
             # Wrong user presses button
-            not_yours = discord.Embed(description=f"{interaction.user}, you didn't claim this case!",
-                colour=discord.Color.red())
-            await interaction.response.send_message(embed=not_yours, ephemeral=True, delete_after=300)
+            msg = f"<@!{interaction.user.id}>, you didn't claim this case!"
+            await interaction.response.send_message(content=msg, ephemeral=True, delete_after=300)
             
-    #if the user is the same as the claimer or is a lead, then deletes, else responds with error
+    
     @ui.button(label="Unclaim", style=discord.ButtonStyle.secondary, custom_id='unclaim')
-    async def button_unclaim(self, interaction: discord.Interaction, button):
+    async def button_unclaim(self, interaction: discord.Interaction, button: discord.ui.Button):
+        """When pressed by a tech, it unclaims the case and allows other techs to claim it.
+
+        Args:
+            interaction (discord.Interaction): The interaction this button press originated from.
+            button (discord.ui.Button): Unused argument that's required to be passed in.
+        """
         self.case = self.bot.get_case(interaction.message.id)
 
         if self.case.tech_id == interaction.user.id or self.bot.check_if_lead(interaction.user):
             self.bot.remove_case(interaction.message.id)
             await interaction.message.delete()
         else:
-            not_yours = discord.Embed(description=f"{interaction.user}, you didn't claim this case!",
-                colour=discord.Color.red())
-            await interaction.response.send_message(embed=not_yours, ephemeral=True, delete_after=300)
+            msg = f"<@!{interaction.user.id}>, you didn't claim this case!"
+            await interaction.response.send_message(content=msg, ephemeral=True, delete_after=300)

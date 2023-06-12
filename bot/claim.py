@@ -1,4 +1,3 @@
-import datetime
 import csv
 from typing import Any
 
@@ -38,10 +37,11 @@ class Claim:
         self.lead_id = lead_id
         self.severity_level = severity_level
         self.comments = comments
+        self.submitted_time = None
 
     @classmethod
     def load_from_json(cls, json_file: dict[str, Any]) -> 'Claim':
-        """Creates a Claim instance from data stores in a JSON file.
+        """Creates a Claim instance from data stored in a JSON file.
 
         Args:
             json_file (dict[str, Any]): The loaded JSON file.
@@ -58,7 +58,26 @@ class Claim:
             severity_level=json_file["severity_level"],
             comments=json_file["comments"]
         )
-        
+
+    @classmethod
+    def load_from_row(cls, row: list[str]) -> 'Claim':
+        """Creates a Claim instance from data stored in a csv file.
+
+        Args:
+            row (dict[str, Any]): The loaded JSON file.
+
+        Returns:
+            Claim: An instance of the Claim class preloaded with this information.
+        """
+        return Claim(
+            case_num=row[2],
+            tech_id=int(row[3]),
+            message_id=int(row[0]),
+            status=row[5],
+            lead_id=int(row[4]),
+            severity_level=row[6],
+            comments=row[7]
+        )
 
     def log(self) -> None:
         """Logs the claim to the logfile."""
@@ -75,7 +94,7 @@ class Claim:
         """
         return [
             str(self.message_id),
-            str(datetime.datetime.now()),
+            str(self.submitted_time),
             self.case_num,
             str(self.tech_id),
             str(self.lead_id),
@@ -92,7 +111,7 @@ class Claim:
         """
         return {
             "message_id": self.message_id,
-            "time": str(datetime.datetime.now()),
+            "time": str(self.submitted_time),
             "case_num": self.case_num,
             "tech_id": self.tech_id,
             "lead_id": self.lead_id,

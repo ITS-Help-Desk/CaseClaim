@@ -8,6 +8,8 @@ import datetime
 # Use TYPE_CHECKING to avoid circular import from bot
 from typing import TYPE_CHECKING
 
+from bot.status import Status
+
 if TYPE_CHECKING:
     from ..bot import Bot
 
@@ -79,6 +81,7 @@ class CaseInfoCommand(commands.Cog):
             # Include just ID in case user cannot be found
             try:
                 user = await self.bot.fetch_user(row[3])
+                user = user.display_name
             except:
                 user = row[3]
             if user is None:
@@ -87,14 +90,17 @@ class CaseInfoCommand(commands.Cog):
             t = row[1]
 
             if row[5] == "":
-                s += "**[ACTIVE]**"
+                s += "**[ACTIVE]** "
 
             # Convert timestamp to UNIX
-            t = int(time.mktime(datetime.datetime.strptime(t, "%Y-%m-%d %H:%M:%S.%f").timetuple()))
-            s += f'<t:{t}:f> - {user}'
+            try:
+                t = int(time.mktime(datetime.datetime.strptime(t, "%Y-%m-%d %H:%M:%S.%f").timetuple()))
+                s += f'<t:{t}:f> - {user}'
+            except:
+                s += f'{user}'
 
             # Add comments
-            if include_comments and row[5] == "Pinged":
+            if include_comments and (row[5] == Status.PINGED or row[5] == Status.RESOLVED):
                 s += f' [**{row[6]}**: {row[7]}]'
 
             s += '\n'

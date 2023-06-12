@@ -2,7 +2,7 @@ from discord import app_commands
 from discord.ext import commands
 import discord
 from ..modals.feedback_modal import FeedbackModal
-from ..claim import Claim
+from bot.helpers import find_case
 
 # Use TYPE_CHECKING to avoid circular import from bot
 from typing import TYPE_CHECKING
@@ -36,14 +36,14 @@ class PingCommand(commands.Cog):
         """
         # Check if user is a lead
         if self.bot.check_if_lead(interaction.user):
-            case = Claim(case_num=case_num, tech_id=user.id)
+            case = find_case(case_num, user_id=user.id, pinged=False)
+            if case is None:
+                await interaction.response.send_message(content="Error! Case couldn't be found. Please ensure it's already been checked and reported in the log file.", ephemeral=True)
+                return
+
             fbModal = FeedbackModal(self.bot, case)
             await interaction.response.send_modal(fbModal)
         else:
             # Return error message if user is not Lead
-            bad_user_embed = discord.Embed(
-                description=
-                f"<@{interaction.user.id}>, you do not have permission to use this command!",
-                color=discord.Color.red()
-            )
-            await interaction.response.send_message(embed=bad_user_embed, ephemeral=True)
+            msg = f"<@{interaction.user.id}>, you do not have permission to use this command!"
+            await interaction.response.send_message(content=msg, ephemeral=True)
