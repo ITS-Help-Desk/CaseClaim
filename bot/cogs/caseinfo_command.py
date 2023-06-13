@@ -80,7 +80,7 @@ class CaseInfoCommand(commands.Cog):
         for row in copy:
             # Include just ID in case user cannot be found
             try:
-                user = await self.bot.fetch_user(row[3])
+                user = await self.bot.fetch_user(int(row[3]))
                 user = user.display_name
             except:
                 user = row[3]
