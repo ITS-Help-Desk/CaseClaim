@@ -1,6 +1,7 @@
 from discord import app_commands
 from discord.ext import commands
 import discord
+import traceback
 
 # Use TYPE_CHECKING to avoid circular import from bot
 from typing import TYPE_CHECKING
@@ -17,7 +18,6 @@ class MickieCommand(commands.Cog):
             bot (Bot): A reference to the original Bot instantiation.
         """
         self.bot = bot
-
     
     @app_commands.command(description="you're so fine")
     async def mickie(self, interaction: discord.Interaction) -> None:
@@ -28,4 +28,10 @@ class MickieCommand(commands.Cog):
             interaction (discord.Interaction): Interaction that the slash command originated from
         """
         await interaction.response.send_message(f"Oh {interaction.user.mention} you're so fine, you blow my mind.")
-        
+
+    @mickie.error
+    async def mickie_error(self, ctx: discord.Interaction, error):
+        full_error = traceback.format_exc()
+
+        ch = await self.bot.fetch_channel(self.bot.error_channel)
+        await ch.send(f"Error with **/mickie** ran by <@!{ctx.user.id}>.\n```{full_error}```")

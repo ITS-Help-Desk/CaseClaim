@@ -50,12 +50,7 @@ class ResolvePingView(ui.View):
         await interaction.channel.remove_user(user) # Remove tech
         
         # Change Log file
-        try:
-            self.remove_ping(interaction.user.id, case.tech_id, case.case_num)
-        except Exception as e:
-            print(e)
-            await interaction.response.send_message(content=f"Error: {e}", ephemeral=True)
-            return
+        self.remove_ping(interaction.user.id, case.tech_id, case.case_num)
             
         await interaction.response.defer(thinking=False) # Acknowledge button press
             

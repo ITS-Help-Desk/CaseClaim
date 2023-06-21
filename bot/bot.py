@@ -12,6 +12,7 @@ from .cogs.update_percent_command import UpdatePercentCommand
 from .cogs.caseinfo_command import CaseInfoCommand
 from .cogs.mycases_command import MyCasesCommand
 from .cogs.leaderboard_command import LeaderboardCommand
+from .cogs.getlog_command import GetLogCommand
 
 from .views.lead_view import LeadView
 from .views.tech_view import TechView
@@ -20,12 +21,11 @@ from .views.ping_view import PingView
 
 from bot.claim import Claim
 
-import traceback
-
 
 class Bot(commands.Bot):
     cases_channel: int
     claims_channel: int
+    error_channel: int
     active_cases: dict[int, Claim]
 
     def __init__(self, **options):
@@ -43,14 +43,6 @@ class Bot(commands.Bot):
         intents = discord.Intents.default()
         intents.message_content = True  
         super().__init__(intents=intents, command_prefix='/')
-        
-        '''@self.event
-        async def on_error(event, *args, **kwargs):
-            message = args[0] # Gets the message object
-            print("test")
-            print(traceback.format_exc())
-
-            await self.send_message(message.channel, "You caused an error!") #send the message to the channel'''
 
 
     def add_case(self, case: Claim, store=True) -> None:
@@ -171,6 +163,7 @@ class Bot(commands.Bot):
         await self.add_cog(UpdatePercentCommand(self))
         await self.add_cog(CaseInfoCommand(self))
         await self.add_cog(MyCasesCommand(self))
+        await self.add_cog(GetLogCommand(self))
         await self.add_cog(LeaderboardCommand(self))
 
 

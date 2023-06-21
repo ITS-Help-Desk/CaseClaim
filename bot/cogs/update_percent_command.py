@@ -1,6 +1,7 @@
 from discord import app_commands
 from discord.ext import commands
 import discord
+import traceback
 
 # Use TYPE_CHECKING to avoid circular import from bot
 from typing import TYPE_CHECKING
@@ -39,4 +40,11 @@ class UpdatePercentCommand(commands.Cog):
             # Wrong user tries to use the command
             msg = f"<@{interaction.user.id}>, you do not have permission to use this command!"
             await interaction.response.send_message(content=msg, ephemeral=True)
-            
+    
+
+    @update_percent.error
+    async def report_error(self, ctx: discord.Interaction, error):
+        full_error = traceback.format_exc()
+
+        ch = await self.bot.fetch_channel(self.bot.error_channel)
+        await ch.send(f"Error with **/update_percent** ran by <@!{ctx.user.id}>.\n```{full_error}```")

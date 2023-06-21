@@ -1,6 +1,7 @@
 from discord import app_commands
 from discord.ext import commands
 import discord
+import traceback
 
 from bot.views.leaderboard_view import LeaderboardView
 
@@ -44,3 +45,11 @@ class LeaderboardCommand(commands.Cog):
                 color=discord.Color.red()
             )
             await interaction.response.send_message(embed=bad_user_embed, ephemeral=True)
+    
+
+    @leaderboard.error
+    async def leaderboard_error(self, ctx: discord.Interaction, error):
+        full_error = traceback.format_exc()
+
+        ch = await self.bot.fetch_channel(self.bot.error_channel)
+        await ch.send(f"Error with **/leaderboard** ran by <@!{ctx.user.id}>.\n```{full_error}```")

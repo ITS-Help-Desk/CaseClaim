@@ -1,6 +1,7 @@
 from discord import app_commands
 from discord.ext import commands
 import discord
+import traceback
 
 # Use TYPE_CHECKING to avoid circular import from bot
 from typing import TYPE_CHECKING
@@ -49,4 +50,13 @@ class HelpCommand(commands.Cog):
         embed.add_field(name='/report [user] [month]', value=f'Shows a report for an optionally given user and month.')
         embed.add_field(name='/ping', value='Manually pings a case and a user.')
         embed.add_field(name='/update_percent <percent>', value='Update the percent of cases that\'ll be sent for review.')
+        embed.add_field(name='/get_log', value='Returns the bot\'s log file.')
         await interaction.response.send_message(embed=embed, ephemeral = True, delete_after=300)
+    
+
+    @help.error
+    async def help_error(self, ctx: discord.Interaction, error):
+        full_error = traceback.format_exc()
+
+        ch = await self.bot.fetch_channel(self.bot.error_channel)
+        await ch.send(f"Error with **/help** ran by <@!{ctx.user.id}>.\n```{full_error}```")

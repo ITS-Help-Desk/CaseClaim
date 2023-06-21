@@ -4,6 +4,7 @@ import discord
 import csv
 import time
 import datetime
+import traceback
 
 # Use TYPE_CHECKING to avoid circular import from bot
 from typing import TYPE_CHECKING
@@ -106,3 +107,11 @@ class CaseInfoCommand(commands.Cog):
             s += '\n'
         
         return s
+
+
+    @caseinfo.error
+    async def report_error(self, ctx: discord.Interaction, error):
+        full_error = traceback.format_exc()
+
+        ch = await self.bot.fetch_channel(self.bot.error_channel)
+        await ch.send(f"Error with **/caseinfo** ran by <@!{ctx.user.id}>.\n```{full_error}```")
