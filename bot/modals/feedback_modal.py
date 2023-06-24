@@ -81,8 +81,8 @@ class FeedbackModal(ui.Modal, title='Feedback Form'):
         old_message_id = self.case.message_id
         self.case.message_id = message.id
         self.case.status = Status.PINGED
-        self.case.severity_level = str(self.severity)
-        self.case.comments = str(self.description)
+        self.case.severity_level = str(self.severity).strip().replace('\n', '')
+        self.case.comments = str(self.description).strip().replace('\n', '')
         self.case.lead_id = interaction.user.id
         self.case.submitted_time = datetime.now()
 

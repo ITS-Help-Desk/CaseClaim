@@ -3,6 +3,7 @@ from discord.ext import commands
 import discord
 from ..modals.feedback_modal import FeedbackModal
 from bot.helpers import find_case
+import traceback
 
 # Use TYPE_CHECKING to avoid circular import from bot
 from typing import TYPE_CHECKING
@@ -47,3 +48,11 @@ class PingCommand(commands.Cog):
             # Return error message if user is not Lead
             msg = f"<@{interaction.user.id}>, you do not have permission to use this command!"
             await interaction.response.send_message(content=msg, ephemeral=True)
+        
+    
+    @ping.error
+    async def ping_error(self, ctx: discord.Interaction, error):
+        full_error = traceback.format_exc()
+
+        ch = await self.bot.fetch_channel(self.bot.error_channel)
+        await ch.send(f"Error with **/ping** ran by <@!{ctx.user.id}>.\n```{full_error}```")

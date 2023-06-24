@@ -88,7 +88,10 @@ class LeaderboardView(ui.View):
         # Create embed
         embed = discord.Embed(title=f"{interaction.user.display_name}'s Ranking")
         embed.color = self.bot.embed_color
-        embed.set_thumbnail(url=interaction.user.avatar.url)
+        try:
+            embed.set_thumbnail(url=interaction.user.avatar.url)
+        except:
+            pass # User doesn't have avatar
 
         # Add fields
         embed.add_field(name="Month Rank", value=f"Rank: **{month_rank}**\nClaims: **{month_count}**\nCheck Percent: **{month_checked_rate}%**")

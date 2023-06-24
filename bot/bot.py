@@ -12,6 +12,7 @@ from .cogs.update_percent_command import UpdatePercentCommand
 from .cogs.caseinfo_command import CaseInfoCommand
 from .cogs.mycases_command import MyCasesCommand
 from .cogs.leaderboard_command import LeaderboardCommand
+from .cogs.getlog_command import GetLogCommand
 
 from .views.lead_view import LeadView
 from .views.tech_view import TechView
@@ -24,6 +25,7 @@ from bot.claim import Claim
 class Bot(commands.Bot):
     cases_channel: int
     claims_channel: int
+    error_channel: int
     active_cases: dict[int, Claim]
 
     def __init__(self, **options):
@@ -161,6 +163,7 @@ class Bot(commands.Bot):
         await self.add_cog(UpdatePercentCommand(self))
         await self.add_cog(CaseInfoCommand(self))
         await self.add_cog(MyCasesCommand(self))
+        await self.add_cog(GetLogCommand(self))
         await self.add_cog(LeaderboardCommand(self))
 
 

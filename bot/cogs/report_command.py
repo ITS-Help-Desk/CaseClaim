@@ -3,6 +3,7 @@ from discord.ext import commands
 import discord
 import csv
 from bot.helpers import month_string_to_number, month_number_to_name
+import traceback
 
 # Use TYPE_CHECKING to avoid circular import from bot
 from typing import TYPE_CHECKING, Optional, Union
@@ -39,21 +40,15 @@ class ReportCommand(commands.Cog):
         # Check if user is a lead
         if self.bot.check_if_lead(interaction.user):
             await interaction.response.defer(ephemeral=True) # Wait in case process takes a long time
+            # Generate report embed
+            report_embed = discord.Embed(
+                description= self.build_description(interaction.user, user, month, pinged),
+                color=self.bot.embed_color
+            )
 
-            try:
-                # Generate report embed
-                report_embed = discord.Embed(
-                    description= self.build_description(interaction.user, user, month, pinged),
-                    color=self.bot.embed_color
-                )
+            report = await self.get_report(interaction.guild, user, month, pinged)
 
-                report = await self.get_report(interaction.guild, user, month, pinged)
-
-                await interaction.followup.send(embed=report_embed, file=report)
-            except Exception as e:
-                print(e)
-                msg = f"<@{interaction.user.id}>, an error occurred when trying to pull this report!"
-                await interaction.response.send_message(content=msg, ephemeral=True)
+            await interaction.followup.send(embed=report_embed, file=report)
         else:
             # Return error message if user is not Lead
             msg = f"<@{interaction.user.id}>, you do not have permission to pull this report!"
@@ -164,8 +159,8 @@ class ReportCommand(commands.Cog):
             if month is not None:
                 month_num = int(month_string_to_number(month.lower()))
                 description += f" for the month of {month_number_to_name(month_num)}"
-        except Exception as e:
-            print(e)
+        except:
+            pass
         
         if pinged is not None:
             if pinged:
@@ -174,4 +169,11 @@ class ReportCommand(commands.Cog):
 
         description += "."
         return description
-        
+    
+
+    @report.error
+    async def report_error(self, ctx: discord.Interaction, error):
+        full_error = traceback.format_exc()
+
+        ch = await self.bot.fetch_channel(self.bot.error_channel)
+        await ch.send(f"Error with **/report** ran by <@!{ctx.user.id}>.\n```{full_error}```")

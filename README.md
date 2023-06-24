@@ -31,30 +31,32 @@ This repository contains the code to run the USD ITS Help Desk Case Claim bot. T
 ├── active_cases.json # All cases being worked on
 ├── log.csv # Information on all cases
 ├── temp.csv # Stores reports
+├── discord.log # Stores all log messages
 └── bot
     ├── bot.py # Runs main operations for storing cases
     ├── claim.py # OOP representation of a claim
-    ├── paginator.py # Creates embed pages that can be traversed
     ├── helpers.py # Lists some shared functions
+    ├── paginator.py # Creates embed pages that can be traversed
     ├── status.py # Lists case status enum values
     ├── cogs
+        ├── caseinfo_command.py # /caseinfo
         ├── claim_command.py # /claim
-        ├── ping_command.py # /ping
+        ├── getlog_command.py # /getlog
         ├── help_command.py # /help
-        ├── mycases_command.py # /mycases
         ├── leaderboard_command.py # /leaderboard
         ├── mickie_command.py # /mickie
-        ├── caseinfo_command.py # /caseinfo
-        ├── update_percent_command.py # /update_percent
-        └── report_command.py # /report
+        ├── mycases_command.py # /mycases
+        ├── ping_command.py # /ping        
+        ├── report_command.py # /report
+        └── update_percent_command.py # /update_percent
     ├── modals
         ├── assessment_modal.py # Feedback form for techs affirming pings
         └── feedback_modal.py # Feedback form for pings
     └── views
+        ├── lead_view.py # Check and Ping buttons
         ├── leaderboard_view.py # Refresh and My Rank buttons
         ├── ping_view.py # Affirm and Resolve buttons
         ├── resolve_ping_view.py # Change Status and Keep Pinged buttons
-        ├── lead_view.py # Check and Ping buttons
         └── tech_view.py # Complete and Unclaim buttons
 ```
 
@@ -88,6 +90,8 @@ This repository contains the code to run the USD ITS Help Desk Case Claim bot. T
 - /leaderboard
     - Allows a user to see a leaderboard of all other users by case claim amount.
     - Shows a paginated view of each user and how many cases they've claimed.
+- /getlog
+    - Allows a lead to get a copy of the log file so that they can view all messages
 
 
 ## Case Claim Flow Chart

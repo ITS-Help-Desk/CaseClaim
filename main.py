@@ -1,5 +1,6 @@
 from bot.bot import Bot
 import json
+import logging
 
 
 def main():
@@ -43,7 +44,7 @@ def main():
         print('Created config.json')
 
         with open("config.json", "w") as f:
-            data = {"cases_channel": 0, "claims_channel": 0}
+            data = {"cases_channel": 0, "claims_channel": 0, "error_channel": 0}
             json.dump(data, f)
             raise ValueError("Please add the required config information into config.csv")
     except FileExistsError:
@@ -67,17 +68,22 @@ def main():
             config_data = json.load(f)
             cases_channel = config_data["cases_channel"]
             claims_channel = config_data["claims_channel"]
+            error_channel = config_data["error_channel"]
             
-            if cases_channel == 0 or claims_channel == 0:
+            if cases_channel == 0 or claims_channel == 0 or error_channel == 0:
                 raise ValueError()
     except:
         raise ValueError("Please add the required config information into config.csv")
 
 
     # Create bot and run
-    bot = Bot()
+    bot = Bot()  
     bot.cases_channel = cases_channel
     bot.claims_channel = claims_channel
+    bot.error_channel = error_channel
+
+    logging.basicConfig(filename='discord.log', filemode='w', level=logging.INFO, format='%(asctime)s:%(levelname)s:%(message)s')
+
     bot.run(token)
 
 

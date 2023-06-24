@@ -4,6 +4,7 @@ import discord
 from datetime import datetime
 from ..views.tech_view import TechView
 from ..claim import Claim, InvalidClaimError
+import traceback
 
 # Use TYPE_CHECKING to avoid circular import from bot
 from typing import TYPE_CHECKING
@@ -78,3 +79,11 @@ class ClaimCommand(commands.Cog):
         case.message_id = response.id
         self.bot.add_case(case)
         self.bot.remove_case(interaction.id)
+    
+
+    @claim.error
+    async def claim_error(self, ctx: discord.Interaction, error):
+        full_error = traceback.format_exc()
+
+        ch = await self.bot.fetch_channel(self.bot.error_channel)
+        await ch.send(f"Error with **/claim** ran by <@!{ctx.user.id}>.\n```{full_error}```")
