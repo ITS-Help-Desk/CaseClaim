@@ -76,14 +76,14 @@ class ReportCommand(commands.Cog):
             reader = csv.reader(csvfile)
             rows = []
             try:
-                month_num = self.month_string_to_number(month.lower())
+                month_num = month_string_to_number(month.lower())
             except:
-                pass
+                month_num = None
+            
             for row in reader:
                 # Check for correct month
-                if month is not None:
-                    if row[1][5:7] != month_num:
-                        continue
+                if month_num is not None and row[1][5:7] != month_num:
+                    continue
                     
                 # Check for correct user
                 if user is not None:

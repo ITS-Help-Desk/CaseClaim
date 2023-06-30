@@ -3,7 +3,8 @@ all throughout this bot.
 """
 
 import csv
-from typing import Optional
+from typing import Optional, Any
+import json
 
 from bot.claim import Claim
 from bot.status import Status
@@ -33,7 +34,7 @@ def month_number_to_name(month_number: int) -> str:
         raise ValueError("Invalid month number")
 
 
-def month_string_to_number(self, month_name: str) -> str:
+def month_string_to_number(month_name: str) -> str:
     """Converts the name of a month to the corresponding number
 
     Args:
@@ -72,7 +73,7 @@ def month_string_to_number(self, month_name: str) -> str:
         'december': '12'
     }
     try:
-        s = month_name.strip()[:3].lower()
+        s = month_name.strip().lower()
         out = m[s]
         return out
     except:
@@ -89,8 +90,6 @@ def find_case(case_num='', message_id=-1, user_id=-1, pinged=False) -> Optional[
     Returns:
         Optional[Claim]: The claim representation from the log file.
     """
-    message_id = str(message_id)
-    user_id = str(user_id)
     with open('log.csv', 'r') as f:
         reader = csv.reader(f)
         for row in reader:
@@ -99,17 +98,36 @@ def find_case(case_num='', message_id=-1, user_id=-1, pinged=False) -> Optional[
                 continue
 
             # Test if message ID matches
-            if message_id != "-1" and row[0] != message_id:
+            if message_id != -1 and row[0] != str(message_id):
                 continue
             
             # Test if user ID matches
-            if user_id != "-1" and row[3] != user_id:
+            if user_id != -1 and row[3] != str(user_id):
                 continue
             
             # Test if pinged
             if (row[5] == Status.PINGED) != pinged:
                 continue
             return Claim.load_from_row(row)
+    
+    with open('active_cases.json', 'r') as f:
+        new_data: dict[str, Any] = json.load(f)
+        for key in new_data.keys():
+            claim_case_num = str(new_data[key]["case_num"])
+            claim_user_id = int(new_data[key]["tech_id"])
+
+            # Test case number
+            if len(case_num) != 0 and case_num != claim_case_num:
+                continue
+
+            # Test if message ID matches
+            if message_id != -1 and int(key) != message_id:
+                continue
+            
+            # Test if user ID matches
+            if user_id != -1 and user_id != claim_user_id:
+                continue
+            return Claim.load_from_json(new_data[key])
     
     # Case couldn't be found, return  None
     return None
