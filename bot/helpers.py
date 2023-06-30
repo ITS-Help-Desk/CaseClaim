@@ -34,7 +34,7 @@ def month_number_to_name(month_number: int) -> str:
         raise ValueError("Invalid month number")
 
 
-def month_string_to_number(self, month_name: str) -> str:
+def month_string_to_number(month_name: str) -> str:
     """Converts the name of a month to the corresponding number
 
     Args:
@@ -73,7 +73,7 @@ def month_string_to_number(self, month_name: str) -> str:
         'december': '12'
     }
     try:
-        s = month_name.strip()[:3].lower()
+        s = month_name.strip().lower()
         out = m[s]
         return out
     except:

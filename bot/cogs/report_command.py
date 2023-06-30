@@ -78,7 +78,8 @@ class ReportCommand(commands.Cog):
             try:
                 month_num = month_string_to_number(month.lower())
             except:
-                pass
+                month_num = None
+            
             for row in reader:
                 # Check for correct month
                 if month_num is not None and row[1][5:7] != month_num:
