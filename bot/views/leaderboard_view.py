@@ -57,34 +57,6 @@ class LeaderboardView(ui.View):
         user_id = interaction.user.id
         data = LeaderboardView.get_data(interaction.created_at)
 
-        # Get general counts
-        mc = data[0][0]
-        sc = data[1][0]
-
-        # Get general ping counts
-        mp = data[2]
-        sp = data[3]
-        
-        # Get sorted counts
-        mc_sorted_keys = data[0][1]
-        sc_sorted_keys = data[1][1]
-
-        # Find ranks
-        month_rank = mc_sorted_keys.index(user_id) + 1
-        semester_rank = sc_sorted_keys.index(user_id) + 1
-
-        # Get user counts
-        month_count = mc[user_id]
-        semester_count = sc[user_id]
-
-        # Get user pings
-        month_pings = mp[user_id]
-        semester_pings = sp[user_id]
-
-        # Get ping rate
-        month_checked_rate = int(((month_count - month_pings) / month_count) * 100)
-        semester_checked_rate = int(((semester_count - semester_pings) / semester_count) * 100)
-
         # Create embed
         embed = discord.Embed(title=f"{interaction.user.display_name}'s Ranking")
         embed.color = self.bot.embed_color
@@ -93,13 +65,42 @@ class LeaderboardView(ui.View):
         except:
             pass # User doesn't have avatar
 
-        # Add fields
-        embed.add_field(name="Month Rank", value=f"Rank: **{month_rank}**\nClaims: **{month_count}**\nCheck Percent: **{month_checked_rate}%**")
-        embed.add_field(name="Semester Rank", value=f"Rank: **{semester_rank}**\nClaims: **{semester_count}**\nCheck Percent: **{semester_checked_rate}%**")
-
         # Set footer
         embed.set_footer(text="Last Updated")
         embed.timestamp = interaction.created_at
+
+        # Get month data
+        try:
+            mc = data[0][0] # Get general count
+            mp = data[2] # Get general ping count
+
+            mc_sorted_keys = data[0][1] # Get sorted count
+            month_rank = mc_sorted_keys.index(user_id) + 1 # Find ranks
+
+            month_count = mc[user_id] # Get user count
+            month_pings = mp[user_id] # Get user ping
+
+            month_checked_rate = int(((month_count - month_pings) / month_count) * 100) # Get ping rate
+            embed.add_field(name="Month Rank", value=f"Rank: **{month_rank}**\nClaims: **{month_count}**\nCheck Percent: **{month_checked_rate}%**")
+        except ValueError:
+            pass
+
+        # Get semester data 
+        try:
+            sc = data[1][0] # Get general counts
+            sp = data[3] # Get general ping count
+
+            sc_sorted_keys = data[1][1] # Get sorted count
+            semester_rank = sc_sorted_keys.index(user_id) + 1 # Find ranks
+
+            semester_count = sc[user_id] # Get user count
+            semester_pings = sp[user_id] # Get user ping
+
+            semester_checked_rate = int(((semester_count - semester_pings) / semester_count) * 100) # Get ping rate
+            embed.add_field(name="Semester Rank", value=f"Rank: **{semester_rank}**\nClaims: **{semester_count}**\nCheck Percent: **{semester_checked_rate}%**")
+        except ValueError:
+            pass
+        
 
         await interaction.followup.send(embed=embed, ephemeral=True)
     
