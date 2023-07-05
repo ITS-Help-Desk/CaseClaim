@@ -24,7 +24,7 @@ class LeadViewRed(ui.View):
         self.bot = bot
 
 	
-    @ui.button(label="Check", style=discord.ButtonStyle.secondary, custom_id="check")
+    @ui.button(label="Check", style=discord.ButtonStyle.secondary, custom_id="checkred")
     async def button_check(self, interaction: discord.Interaction, button: discord.ui.Button):
         """When pressed by a lead, it logs this case as Checked.
 
@@ -43,7 +43,7 @@ class LeadViewRed(ui.View):
         
         await interaction.message.delete()
     
-    @ui.button(label="Ping", style=discord.ButtonStyle.secondary, custom_id="ping")
+    @ui.button(label="Ping", style=discord.ButtonStyle.secondary, custom_id="pingred")
     async def button_ping(self, interaction: discord.Interaction, button: discord.ui.Button):
         """When pressed by a lead, it brings up a feedback modal
         for a lead to ping a case.
