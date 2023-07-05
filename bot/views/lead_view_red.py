@@ -1,6 +1,5 @@
 import discord
 import discord.ui as ui
-from .lead_view_red import LeadViewRed
 
 from bot.status import Status
 from ..modals.feedback_modal import FeedbackModal
@@ -13,7 +12,7 @@ if TYPE_CHECKING:
     from ..bot import Bot
 
 
-class LeadView(ui.View):
+class LeadViewRed(ui.View):
     def __init__(self, bot: "Bot"):
         """Creates a lead view in the lead case claim channel for submitting
         feedback on a completed case submitted by a tech.
@@ -25,7 +24,7 @@ class LeadView(ui.View):
         self.bot = bot
 
 	
-    @ui.button(label="Check", style=discord.ButtonStyle.success, custom_id="check")
+    @ui.button(label="Check", style=discord.ButtonStyle.secondary, custom_id="check")
     async def button_check(self, interaction: discord.Interaction, button: discord.ui.Button):
         """When pressed by a lead, it logs this case as Checked.
 
@@ -44,7 +43,7 @@ class LeadView(ui.View):
         
         await interaction.message.delete()
     
-    @ui.button(label="Ping", style=discord.ButtonStyle.danger, custom_id="ping")
+    @ui.button(label="Ping", style=discord.ButtonStyle.secondary, custom_id="ping")
     async def button_ping(self, interaction: discord.Interaction, button: discord.ui.Button):
         """When pressed by a lead, it brings up a feedback modal
         for a lead to ping a case.
@@ -59,9 +58,3 @@ class LeadView(ui.View):
         self.case.lead_id = interaction.user.id
         fbModal = FeedbackModal(self.bot, self.case)
         await interaction.response.send_modal(fbModal)
-
-        # Update button appearance
-        embed = interaction.message.embeds[0]
-        embed.colour = discord.Colour.red()
-
-        await interaction.message.edit(embed=embed, view=LeadViewRed(self.bot))

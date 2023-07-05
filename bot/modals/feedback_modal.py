@@ -90,3 +90,6 @@ class FeedbackModal(ui.Modal, title='Feedback Form'):
 
         # Remove from active cases
         self.bot.remove_case(old_message_id)
+
+
+        await interaction.message.delete() # Delete checker message

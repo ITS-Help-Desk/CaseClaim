@@ -28,7 +28,7 @@ class GetLogCommand(commands.Cog):
             interaction (discord.Interaction): Interaction that the slash command originated from
         """
         # Check if user is not a lead
-        if not self.bot.check_if_lead(interaction.user):
+        if not self.bot.check_if_dev(interaction.user):
             # Return error message if user is not Lead
             msg = f"<@{interaction.user.id}>, you do not have permission to use this command!"
             await interaction.response.send_message(content=msg, ephemeral=True)
