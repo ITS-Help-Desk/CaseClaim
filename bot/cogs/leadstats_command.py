@@ -3,7 +3,7 @@ from discord.ext import commands
 import discord
 import traceback
 
-from bot.views.check_leaderboard_view import CheckLeaderboardView
+from bot.views.leadstats_view import LeadStatsView
 
 # Use TYPE_CHECKING to avoid circular import from bot
 from typing import TYPE_CHECKING
@@ -12,9 +12,9 @@ if TYPE_CHECKING:
     from ..bot import Bot
 
 
-class CheckLeaderboardCommand(commands.Cog):
+class LeadStatsCommand(commands.Cog):
     def __init__(self, bot: "Bot") -> None:
-        """Creates the /checkleaderboard command using a cog.
+        """Creates the /leadstats command using a cog.
 
         Args:
             bot (Bot): A reference to the original Bot instantiation.
@@ -23,7 +23,7 @@ class CheckLeaderboardCommand(commands.Cog):
 
     
     @app_commands.command(description="Shows a list of all cases a lead has checked")
-    async def check_leaderboard(self, interaction: discord.Interaction) -> None:
+    async def leadstats(self, interaction: discord.Interaction) -> None:
         """Shows a leaderboard of all users by cases checked on the log file.
 
         Args:
@@ -33,10 +33,9 @@ class CheckLeaderboardCommand(commands.Cog):
         if self.bot.check_if_lead(interaction.user):
             await interaction.response.defer() # Wait in case process takes a long time
 
-            embed, file = CheckLeaderboardView.create_embed(interaction.created_at, self.bot.embed_color)
-            embed.set_thumbnail(url=interaction.guild.icon.url)
+            embed, file = await LeadStatsView.create_embed(interaction, self.bot.embed_color)
 
-            await interaction.followup.send(embed=embed, view=CheckLeaderboardView(self.bot), file=file)
+            await interaction.followup.send(embed=embed, view=LeadStatsView(self.bot), file=file)
         else:
             # Return error message if user is not Lead
             bad_user_embed = discord.Embed(
@@ -47,7 +46,7 @@ class CheckLeaderboardCommand(commands.Cog):
             await interaction.response.send_message(embed=bad_user_embed, ephemeral=True)
     
 
-    @check_leaderboard.error
+    @leadstats.error
     async def check_leaderboard_error(self, ctx: discord.Interaction, error):
         full_error = traceback.format_exc()
 
