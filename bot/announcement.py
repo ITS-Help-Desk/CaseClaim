@@ -43,9 +43,14 @@ class Announcement:
                 announcement_embed.add_field(name="ETA to Resolution", value=f"{resolution_time}", inline=False)
             
             return announcement_embed
-        else:
-            pass
-    
+        elif self.announcement_type == "announcement":
+            title = self.info["title"]
+            description = self.info["description"]
+
+            announcement_embed = discord.Embed(title=title, colour=discord.Color.red())
+            announcement_embed.description = description
+
+            return announcement_embed
 
     def to_case_embed(self, announcement_message_jump_url: str) -> discord.Embed:
         if self.announcement_type == "outage":
@@ -60,5 +65,5 @@ class Announcement:
                 case_embed.description += f"\nParent Case: **{parent_case}**"
 
             return case_embed
-        else:
-            pass
+        elif self.announcement_type == "announcement":
+            return self.to_announcement_embed()

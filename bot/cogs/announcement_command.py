@@ -1,6 +1,8 @@
 from discord import app_commands
 from discord.ext import commands
 import discord
+
+from bot.modals.announcement_modal import AnnouncementModal
 from ..modals.outage_modal import OutageModal
 import traceback
 
@@ -40,7 +42,8 @@ class AnnouncementCommand(commands.Cog):
                 outage_modal = OutageModal(self.bot)
                 await interaction.response.send_modal(outage_modal)
             elif str(choices.value) == "announcement":
-                pass
+                announcement_modal = AnnouncementModal(self.bot)
+                await interaction.response.send_modal(announcement_modal)
             elif str(choices.value) == "infoannouncement":
                 pass
             else:

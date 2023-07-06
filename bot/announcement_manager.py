@@ -36,7 +36,7 @@ class AnnouncementManager:
         data = {}
 
         for ann in self.announcements:
-            data[ann.announcement_message_id] = ann.to_dict()
+            data.update(ann.to_dict())
         
         with open("announcements.json", "w") as f:
             json.dump(data, f)
@@ -52,8 +52,11 @@ class AnnouncementManager:
         
                 outage.announcement_message_id = int(key)
                 self.announcements.append(outage)
-            else:
-                pass
+            elif data[key]["type"] == "announcement":
+                announcement = Announcement("announcement", data[key]["info"])
+        
+                announcement.announcement_message_id = int(key)
+                self.announcements.append(announcement)
 
     
     async def resend_announcements(self) -> None:

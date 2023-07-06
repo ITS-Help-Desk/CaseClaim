@@ -24,6 +24,9 @@ from .views.leaderboard_view import LeaderboardView
 from .views.leadstats_view import LeadStatsView
 from .views.ping_view import PingView
 
+from .views.announcement_view import AnnouncementView
+from .views.outage_view import OutageView
+
 
 class Bot(commands.Bot):
     cases_channel: int
@@ -97,6 +100,9 @@ class Bot(commands.Bot):
         self.add_view(LeaderboardView(self))
         self.add_view(LeadStatsView(self))
         self.add_view(PingView(self))
+
+        self.add_view(AnnouncementView(self))
+        self.add_view(OutageView(self))
         
 
     async def on_ready(self):

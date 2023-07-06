@@ -143,7 +143,7 @@ class LeadStatsView(ui.View):
     def convert_to_plot(title, labels, y1, y2):
         # Format labels "andrew (0.33)"
         for i in range(len(labels)):
-            labels[i] = labels[i] + " (" + str(round(y2[i] / (y1[i] + y2[i]), 2)) + ")"
+            labels[i] = labels[i] + " (" + str(round(y2[i] / (y1[i] + y2[i]), 2))*100 + "%)"
 
         data_stream = io.BytesIO()
         fig, ax = plt.subplots()
