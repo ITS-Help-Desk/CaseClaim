@@ -61,18 +61,15 @@ class AnnouncementManager:
     
     async def resend_announcements(self) -> None:
         for ann in self.announcements:
-            if ann.announcement_type == "outage":
-                announcement_channel = await self.bot.fetch_channel(self.bot.announcement_channel)
-                announcement_message = await announcement_channel.fetch_message(ann.announcement_message_id)
+            announcement_channel = await self.bot.fetch_channel(self.bot.announcement_channel)
+            announcement_message = await announcement_channel.fetch_message(ann.announcement_message_id)
 
-                case_channel = await self.bot.fetch_channel(self.bot.cases_channel)
-                case_message = await case_channel.fetch_message(ann.info["case_message_id"])
+            case_channel = await self.bot.fetch_channel(self.bot.cases_channel)
+            case_message = await case_channel.fetch_message(ann.info["case_message_id"])
 
-                new_message = await case_channel.send(embed=ann.to_case_embed(announcement_message.jump_url), silent=True)
-                await case_message.delete()
+            new_message = await case_channel.send(embed=ann.to_case_embed(announcement_message.jump_url), silent=True)
+            await case_message.delete()
 
-                ann.info["case_message_id"] = int(new_message.id)
+            ann.info["case_message_id"] = int(new_message.id)
 
-                self.store_announcements()
-            else:
-                pass
+            self.store_announcements()

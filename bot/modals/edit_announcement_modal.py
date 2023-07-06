@@ -16,14 +16,14 @@ class EditAnnouncementModal(ui.Modal, title='Announcement Update Form'):
         self.bot = bot
         self.announcement = announcement
 
-        self.title = ui.TextInput(label='Title',style=discord.TextStyle.short, default=announcement.info["title"])
-        self.add_item(self.title)
+        self.a_title = ui.TextInput(label='Title',style=discord.TextStyle.short, default=announcement.info["title"])
+        self.add_item(self.a_title)
         self.description = ui.TextInput(label='Description',style=discord.TextStyle.short, required=False, default=announcement.info["description"])
         self.add_item(self.description)
 
 
     async def on_submit(self, interaction: discord.Interaction) -> None:
-        new_title = str(self.title)
+        new_title = str(self.a_title)
         new_description = str(self.description)
 
         self.bot.announcement_manager.remove_announcement(self.announcement)
