@@ -29,35 +29,60 @@ This repository contains the code to run the USD ITS Help Desk Case Claim bot. T
 ├── token.txt # Token for the Discord bot
 ├── config.json # Channel IDs
 ├── active_cases.json # All cases being worked on
+├── announcements.json # All active announcements
 ├── log.csv # Information on all cases
 ├── temp.csv # Stores reports
 ├── discord.log # Stores all log messages
 └── bot
-    ├── bot.py # Runs main operations for storing cases
+    ├── announcement.py # OOP representation of an announcement
+    ├── announcement_manager.py # Runs main operations for storing announcements
+    ├── bot.py # Initializes all commands and views
     ├── claim.py # OOP representation of a claim
+    ├── claim_manager.py # Runs main operations for storing claims
     ├── helpers.py # Lists some shared functions
     ├── paginator.py # Creates embed pages that can be traversed
     ├── status.py # Lists case status enum values
     ├── cogs
+        ├── announcement_command.py # /announcement
         ├── caseinfo_command.py # /caseinfo
         ├── claim_command.py # /claim
         ├── getlog_command.py # /getlog
         ├── help_command.py # /help
         ├── leaderboard_command.py # /leaderboard
+        ├── leaderstats_command.py # /leadstats
         ├── mickie_command.py # /mickie
         ├── mycases_command.py # /mycases
         ├── ping_command.py # /ping        
         ├── report_command.py # /report
         └── update_percent_command.py # /update_percent
     ├── modals
+        ├── announcement_modal.py # Feedback form for announcements
         ├── assessment_modal.py # Feedback form for techs affirming pings
-        └── feedback_modal.py # Feedback form for pings
+        ├── edit_announcement_modal.py # Feedback form for editing announcements
+        ├── edit_outage_modal.py # Feedback form for editing outages
+        ├── feedback_modal.py # Feedback form for pings
+        └── outage_modal.py # Feedback form for outages
     └── views
+        ├── announcement_view.py # Update and Close buttons
         ├── lead_view.py # Check and Ping buttons
+        ├── lead_view_red.py # Check and Ping buttons grayed out
         ├── leaderboard_view.py # Refresh and My Rank buttons
+        ├── leadstats_view.py # Month and Semester buttons
+        ├── outage_view.py # Update and Close buttons
         ├── ping_view.py # Affirm and Resolve buttons
         ├── resolve_ping_view.py # Change Status and Keep Pinged buttons
         └── tech_view.py # Complete and Unclaim buttons
+```
+
+## Config File Structure
+Here's how the `config.json` file should be formatted (replace zeros with ID numbers).
+```json
+{
+  "cases_channel": 0,
+  "claims_channel": 0,
+  "error_channel": 0,
+  "announcement_channel": 0
+}
 ```
 
 ## Commands
@@ -67,9 +92,17 @@ This repository contains the code to run the USD ITS Help Desk Case Claim bot. T
     - When a lead pings a case, they can provide a description and a severity level.
     - This feedback will be shared with the tech in a private thread.
 - /help
-    - Shows all of commands for the bot with descriptions.
+    - Shows all commands for the bot with descriptions.
+- /caseinfo **\<case_num>**
+    - Allows a lead or a tech to see the history of a case and see who's worked on it previously.
+    - Techs can see who's worked on the case and the timestamp.
+    - Leads can see the case comments in addition to who's worked on it and the timestamp.
+- /mycases
+    - Allows a user to see a list of cases they've worked on.
+    - Shows a paginated list containing the time and case numbers.
 - /mickie
     - A fun command that essentially allows users to ping the bot and ensure it's online.
+## Commands (for Leads)
 - /ping **<case_num>** **\<user>**
     - Allows a lead to manually ping a case and provide feedback to a tech.
     - Leads are able to write a description and severity level, which will be shared with the tech in a private thread.
@@ -80,18 +113,19 @@ This repository contains the code to run the USD ITS Help Desk Case Claim bot. T
 - /update_percentage **\<percentage>**
     - Allows a lead to change the percentage of cases that are sent to review.
     - Percentage defaults to 100% every restart.
-- /caseinfo **\<case_num>**
-    - Allows a lead or a tech to see the history of a case and see who's worked on it previously.
-    - Techs can see who's worked on the case and the timestamp.
-    - Leads can see the case comments in addition to who's worked on it and the timestamp.
-- /mycases
-    - Allows a user to see a list of cases they've worked on.
-    - Shows a paginated list containing the time and case numbers.
 - /leaderboard
     - Allows a user to see a leaderboard of all other users by case claim amount.
     - Shows a paginated view of each user and how many cases they've claimed.
+- /leadstats
+    - Allows a user to see a leaderboard of all leads by cases they've checked and how many have been pinged
+    - Uses matplotlib to create a stacked bar chart displaying the information
 - /getlog
     - Allows a lead to get a copy of the log file so that they can view all messages
+## Commands (for PAs)
+- /announcement **<Outage/Announcement/Informational Announcement>**
+  - Allows a PA to make an announcement or an outage.
+  - Prompts the PA with a modal where they can input information
+  - A message will appear in the announcements channel and a sticky message will appear in the cases channel
 
 
 ## Case Claim Flow Chart
