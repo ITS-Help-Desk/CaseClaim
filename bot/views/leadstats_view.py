@@ -4,7 +4,6 @@ import io
 import discord
 import discord.ui as ui
 import matplotlib.pyplot as plt
-from bot.helpers import month_number_to_name
 
 # Use TYPE_CHECKING to avoid circular import from bot
 from typing import TYPE_CHECKING
@@ -148,11 +147,11 @@ class LeadStatsView(ui.View):
 
         # plot bars in stack manner
         plt.xticks(rotation='vertical')
-        plt.bar(labels, y1, color='r', zorder=3)
-        plt.bar(labels, y2, bottom=y1, color='b', zorder=3)
+        plt.bar(labels, y1, color='b', zorder=3)
+        plt.bar(labels, y2, bottom=y1, color='r', zorder=3)
         plt.grid(zorder=0)
 
-        colors = {'Checks':'red', 'Pings':'blue'}
+        colors = {'Pings':'red', 'Checks':'blue'}
         ls = list(colors.keys())
         handles = [plt.Rectangle((0,0),1,1, color=colors[label]) for label in ls]
         plt.legend(handles, ls)
