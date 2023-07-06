@@ -146,7 +146,7 @@ class LeadStatsView(ui.View):
         plt.title(title)
 
         # plot bars in stack manner
-        plt.xticks(rotation='vertical')
+        plt.xticks(rotation=45, ha='right')
         plt.bar(labels, y1, color='b', zorder=3)
         plt.bar(labels, y2, bottom=y1, color='r', zorder=3)
         plt.grid(zorder=0)
