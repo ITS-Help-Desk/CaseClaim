@@ -51,4 +51,4 @@ class LeadStatsCommand(commands.Cog):
         full_error = traceback.format_exc()
 
         ch = await self.bot.fetch_channel(self.bot.error_channel)
-        await ch.send(f"Error with **/checkleaderboard** ran by <@!{ctx.user.id}>.\n```{full_error}```")
+        await ch.send(f"Error with **/leadstats** ran by <@!{ctx.user.id}>.\n```{full_error}```")
