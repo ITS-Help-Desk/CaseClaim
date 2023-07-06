@@ -79,6 +79,8 @@ class ClaimCommand(commands.Cog):
         case.message_id = response.id
         self.bot.claim_manager.add_claim(case)
         self.bot.claim_manager.remove_claim(interaction.id)
+
+        await self.bot.announcement_manager.resend_announcements()
     
 
     @claim.error
