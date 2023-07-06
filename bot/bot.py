@@ -15,6 +15,7 @@ from .cogs.leaderboard_command import LeaderboardCommand
 from .cogs.getlog_command import GetLogCommand
 
 from .views.lead_view import LeadView
+from .views.lead_view_red import LeadViewRed
 from .views.tech_view import TechView
 from .views.leaderboard_view import LeaderboardView
 from .views.ping_view import PingView
@@ -138,11 +139,25 @@ class Bot(commands.Bot):
         return lead_role in user.roles
 
 
+    def check_if_dev(self, user: discord.Member) -> bool:
+        """Checks if a given user is a dev or not.
+
+        Args:
+            user (Union[discord.Member, discord.User]): The Discord user.
+
+        Returns:
+            bool: Whether or not they have the dev role.
+        """
+        dev_role = discord.utils.get(user.guild.roles, name="dev")
+        return dev_role in user.roles
+
+
     async def setup_hook(self):
         """Sets up the views so that they can be persistently loaded
         """
         self.add_view(TechView(self))
         self.add_view(LeadView(self))
+        self.add_view(LeadViewRed(self))
 
         self.add_view(LeaderboardView(self))
         self.add_view(PingView(self))

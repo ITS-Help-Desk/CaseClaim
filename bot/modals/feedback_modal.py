@@ -88,5 +88,11 @@ class FeedbackModal(ui.Modal, title='Feedback Form'):
 
         self.case.log()
 
-        # Remove from active cases
-        self.bot.remove_case(old_message_id)
+        try:
+            # Remove from active cases
+            self.bot.remove_case(old_message_id)
+        except AttributeError:
+            pass # Originated from /ping
+
+
+        await interaction.message.delete() # Delete checker message

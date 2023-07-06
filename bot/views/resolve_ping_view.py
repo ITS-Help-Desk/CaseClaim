@@ -50,7 +50,7 @@ class ResolvePingView(ui.View):
         await interaction.channel.remove_user(user) # Remove tech
         
         # Change Log file
-        self.remove_ping(interaction.user.id, case.tech_id, case.case_num)
+        self.remove_ping(interaction.user.id, case.tech_id, case.case_num, Status.RESOLVED)
             
         await interaction.response.defer(thinking=False) # Acknowledge button press
             
@@ -79,9 +79,39 @@ class ResolvePingView(ui.View):
         await interaction.channel.remove_user(user) # Remove tech
 
         await interaction.response.defer(thinking=False) # Acknowledge button press
+    
+
+    @ui.button(label="Unping", style=discord.ButtonStyle.secondary, custom_id="mistakeping")
+    async def button_mistake_ping(self, interaction: discord.Interaction, button: discord.ui.Button):
+        """Allows a lead to close the thread and change the log
+        status of a case that's been pinged to Checked. This is used if the case is
+        mistakenly pinged.
+
+        Args:
+            interaction (discord.Interaction): The interaction this button press originated from.
+            button (discord.ui.Button): Unused argument that's required to be passed in.
+        """
+        case = find_case(message_id=self.original_message_id, pinged=True)
+        if case is None:
+            await interaction.response.send_message(content="Error!", ephemeral=True)
+            return
+        
+        if case.lead_id != interaction.user.id:
+            await interaction.response.send_message(content="You cannot press this button.", ephemeral=True)
+            return
+        
+        user = await interaction.channel.fetch_member(case.tech_id)
+        
+        await interaction.channel.remove_user(interaction.user) # Remove lead
+        await interaction.channel.remove_user(user) # Remove tech
+        
+        # Change Log file
+        self.remove_ping(interaction.user.id, case.tech_id, case.case_num, Status.CHECKED)
+            
+        await interaction.response.defer(thinking=False) # Acknowledge button press
         
 
-    def remove_ping(self, interaction_user: int, user_id: int, case_num: str) -> None:
+    def remove_ping(self, interaction_user: int, user_id: int, case_num: str, new_status: Status) -> None:
         """This function removes a ping from the log.csv file, and replaces the information
         to show as if the case was never pinged.
 
@@ -105,6 +135,11 @@ class ResolvePingView(ui.View):
                     row[4] = str(interaction_user)
                     row[5] = Status.RESOLVED
                 
+                    # Remove severity and comment
+                    if new_status == Status.CHECKED:
+                        row[5] = Status.CHECKED
+                        row[6] = ''
+                        row[7] = ''
                 lines.append(row)
                 
         # No case could be found, return False
