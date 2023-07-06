@@ -2,7 +2,7 @@ from discord.ext import commands
 import discord
 
 from .claim_manager import ClaimManager
-
+from .announcement_manager import AnnouncementManager
 
 from .cogs.mickie_command import MickieCommand
 from .cogs.help_command import HelpCommand
@@ -15,6 +15,7 @@ from .cogs.mycases_command import MyCasesCommand
 from .cogs.leaderboard_command import LeaderboardCommand
 from .cogs.leadstats_command import LeadStatsCommand
 from .cogs.getlog_command import GetLogCommand
+from .cogs.announcement_command import AnnouncementCommand
 
 from .views.lead_view import LeadView
 from .views.lead_view_red import LeadViewRed
@@ -28,6 +29,7 @@ class Bot(commands.Bot):
     cases_channel: int
     claims_channel: int
     error_channel: int
+    announcement_channel: int
 
     def __init__(self, **options):
         """Initializes the bot (doesn't start it), and initializes some
@@ -35,6 +37,7 @@ class Bot(commands.Bot):
         """
 
         self.claim_manager = ClaimManager(self)
+        self.announcement_manager = AnnouncementManager(self)
 
         self.review_rate = 1.0
         self.embed_color = discord.Color.from_rgb(117, 190, 233)
@@ -71,6 +74,19 @@ class Bot(commands.Bot):
         return dev_role in user.roles
 
 
+    def check_if_pa(self, user: discord.Member) -> bool:
+        """Checks if a given user is a PA or not.
+
+        Args:
+            user (Union[discord.Member, discord.User]): The Discord user.
+
+        Returns:
+            bool: Whether or not they have the dev role.
+        """
+        dev_role = discord.utils.get(user.guild.roles, name="Phone Analyst")
+        return dev_role in user.roles
+
+
     async def setup_hook(self):
         """Sets up the views so that they can be persistently loaded
         """
@@ -101,7 +117,7 @@ class Bot(commands.Bot):
         await self.add_cog(GetLogCommand(self))
         await self.add_cog(LeaderboardCommand(self))
         await self.add_cog(LeadStatsCommand(self))
-
+        await self.add_cog(AnnouncementCommand(self))
 
         synced = await self.tree.sync()
         print("{} commands synced".format(len(synced)))
