@@ -41,8 +41,8 @@ class MyCasesCommand(commands.Cog):
                 if int(row[3]) == interaction.user.id:
                     data.append(row)
         
-        for message_id in self.bot.active_cases.keys():
-            c = self.bot.active_cases[message_id]
+        for message_id in self.bot.claim_manager.active_claims.keys():
+            c = self.bot.claim_manager.active_claims[message_id]
             if c.tech_id == interaction.user.id:
                 data.append(c.log_format())
         

@@ -45,8 +45,8 @@ class CaseInfoCommand(commands.Cog):
                 if row[2] == case_num:
                     data.append(row)
         
-        for message_id in self.bot.active_cases.keys():
-            c = self.bot.active_cases[message_id]
+        for message_id in self.bot.claim_manager.active_claims.keys():
+            c = self.bot.claim_manager.active_claims[message_id]
             if c.case_num == case_num:
                 data.append(c.log_format())
         

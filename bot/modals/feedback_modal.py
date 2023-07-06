@@ -90,7 +90,7 @@ class FeedbackModal(ui.Modal, title='Feedback Form'):
 
         try:
             # Remove from active cases
-            self.bot.remove_case(old_message_id)
+            self.bot.claim_manager.remove_claim(old_message_id)
         except AttributeError:
             pass # Originated from /ping
 

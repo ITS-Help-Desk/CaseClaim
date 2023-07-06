@@ -32,14 +32,14 @@ class LeadViewRed(ui.View):
             interaction (discord.Interaction): The interaction this button press originated from.
             button (discord.ui.Button): Unused argument that's required to be passed in.
         """
-        self.case = self.bot.get_case(interaction.message.id)
+        self.case = self.bot.claim_manager.get_claim(interaction.message.id)
 
         #Log the case as checked, then delete it
         self.case.status = Status.CHECKED
         self.case.lead_id = interaction.user.id
         self.case.submitted_time = datetime.now()
         self.case.log()
-        self.bot.remove_case(self.case.message_id)
+        self.bot.claim_manager.get_claim(self.case.message_id)
         
         await interaction.message.delete()
     
@@ -52,7 +52,7 @@ class LeadViewRed(ui.View):
             interaction (discord.Interaction): The interaction this button press originated from.
             button (discord.ui.Button): Unused argument that's required to be passed in.
         """
-        self.case = self.bot.get_case(interaction.message.id)
+        self.case = self.bot.claim_manager.get_claim(interaction.message.id)
 
         #Prompt with Modal, record the response, create a private thread, then delete
         self.case.lead_id = interaction.user.id
