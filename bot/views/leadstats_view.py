@@ -151,6 +151,12 @@ class LeadStatsView(ui.View):
         plt.bar(labels, y1, color='r', zorder=3)
         plt.bar(labels, y2, bottom=y1, color='b', zorder=3)
         plt.grid(zorder=0)
+
+        colors = {'Checks':'red', 'Pings':'blue'}
+        ls = list(colors.keys())
+        handles = [plt.Rectangle((0,0),1,1, color=colors[label]) for label in ls]
+        plt.legend(handles, ls)
+
         
 
         plt.savefig(data_stream, format='png', bbox_inches="tight", dpi = 80)
