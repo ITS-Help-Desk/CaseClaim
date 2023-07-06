@@ -12,12 +12,14 @@ from .cogs.update_percent_command import UpdatePercentCommand
 from .cogs.caseinfo_command import CaseInfoCommand
 from .cogs.mycases_command import MyCasesCommand
 from .cogs.leaderboard_command import LeaderboardCommand
+from .cogs.leadstats_command import LeadStatsCommand
 from .cogs.getlog_command import GetLogCommand
 
 from .views.lead_view import LeadView
 from .views.lead_view_red import LeadViewRed
 from .views.tech_view import TechView
 from .views.leaderboard_view import LeaderboardView
+from .views.leadstats_view import LeadStatsView
 from .views.ping_view import PingView
 
 from bot.claim import Claim
@@ -160,6 +162,7 @@ class Bot(commands.Bot):
         self.add_view(LeadViewRed(self))
 
         self.add_view(LeaderboardView(self))
+        self.add_view(LeadStatsView(self))
         self.add_view(PingView(self))
         
 
@@ -180,6 +183,7 @@ class Bot(commands.Bot):
         await self.add_cog(MyCasesCommand(self))
         await self.add_cog(GetLogCommand(self))
         await self.add_cog(LeaderboardCommand(self))
+        await self.add_cog(LeadStatsCommand(self))
 
 
         synced = await self.tree.sync()

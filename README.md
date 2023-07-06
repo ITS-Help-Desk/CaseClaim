@@ -98,4 +98,5 @@ This repository contains the code to run the USD ITS Help Desk Case Claim bot. T
 ![Flowchart](flowchart.png)
 
 ## Dependencies
-- discord.py [2.2.2](https://pypi.org/project/discord.py/) 
+- discord.py [2.2.2](https://pypi.org/project/discord.py/)
+- matplotlib [3.7.2](https://pypi.org/project/matplotlib/)
