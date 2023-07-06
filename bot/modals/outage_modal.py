@@ -44,7 +44,7 @@ class OutageModal(ui.Modal, title='Outage Form'):
 
         # Send announcement message
         announcement_channel = await self.bot.fetch_channel(self.bot.announcement_channel)    
-        announcement_message = await announcement_channel.send(embed=announcement_embed, view=OutageView(self.bot))
+        announcement_message = await announcement_channel.send(content="@everyone", embed=announcement_embed, view=OutageView(self.bot))
 
         outage.announcement_message_id = announcement_message.id
 

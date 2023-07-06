@@ -1,8 +1,6 @@
 import discord
 import discord.ui as ui
 
-from bot.modals.edit_announcement_modal import EditAnnouncementModal
-
 # Use TYPE_CHECKING to avoid circular import from bot
 from typing import TYPE_CHECKING
 
@@ -14,15 +12,6 @@ class AnnouncementView(ui.View):
     def __init__(self, bot: "Bot"):
         super().__init__(timeout=None)
         self.bot = bot
-
-	
-    @ui.button(label="Update", style=discord.ButtonStyle.primary, custom_id="update")
-    async def button_update(self, interaction: discord.Interaction, button: discord.ui.Button):
-        if self.bot.check_if_pa(interaction.user):
-            outage = self.bot.announcement_manager.get_announcement(interaction.message.id)
-
-            edit_modal = EditAnnouncementModal(self.bot, outage)
-            await interaction.response.send_modal(edit_modal)
     
 
     @ui.button(label="Close", style=discord.ButtonStyle.secondary, custom_id="close")
@@ -36,7 +25,7 @@ class AnnouncementView(ui.View):
             announcement_embed.colour = self.bot.embed_color
             announcement_embed.add_field(name="Marked as Resolved", value=f"<t:{int(interaction.created_at.timestamp())}:f> by **{interaction.user.display_name}**", inline=True)
 
-            await announcement_message.edit(embed=announcement_embed, view=None)
+            await announcement_message.edit(content="", embed=announcement_embed, view=None)
 
             # Delete case message
             case_channel = await self.bot.fetch_channel(self.bot.cases_channel)

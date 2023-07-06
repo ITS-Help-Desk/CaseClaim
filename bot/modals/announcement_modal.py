@@ -38,7 +38,7 @@ class AnnouncementModal(ui.Modal, title='Announcement Form'):
 
         # Send announcement message
         announcement_channel = await self.bot.fetch_channel(self.bot.announcement_channel)    
-        announcement_message = await announcement_channel.send(embed=announcement_embed, view=AnnouncementView(self.bot))
+        announcement_message = await announcement_channel.send(content="@everyone", embed=announcement_embed, view=AnnouncementView(self.bot))
 
         announcement.announcement_message_id = announcement_message.id
 

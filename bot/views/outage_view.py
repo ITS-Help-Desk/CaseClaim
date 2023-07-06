@@ -37,7 +37,7 @@ class OutageView(ui.View):
             announcement_embed.colour = self.bot.embed_color
             announcement_embed.add_field(name="Marked as Resolved", value=f"<t:{int(interaction.created_at.timestamp())}:f> by **{interaction.user.display_name}**", inline=True)
 
-            await announcement_message.edit(embed=announcement_embed, view=None)
+            await announcement_message.edit(content="", embed=announcement_embed, view=None)
 
             # Delete case message
             case_channel = await self.bot.fetch_channel(self.bot.cases_channel)
