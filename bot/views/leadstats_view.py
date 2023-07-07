@@ -141,25 +141,32 @@ class LeadStatsView(ui.View):
 
     @staticmethod
     def convert_to_plot(title, labels, y1, y2):
-        # Format labels "andrew (0.33)"
-        for i in range(len(labels)):
-            labels[i] = labels[i] + " (" + str(round(y2[i] / (y1[i] + y2[i]), 2))*100 + "%)"
-
         data_stream = io.BytesIO()
         fig, ax = plt.subplots()
 
         # Create plot
         ax.set_title(title)
         plt.xticks(rotation=45, ha="right")
+
         ax.bar(labels, y1, color = "b", zorder=3)
         ax.bar(labels, y2, bottom = y1, color = "r", zorder=3)
-        ax.grid(zorder=0)
+        #ax.grid(zorder=0)
+
+        # Show labels on top of bars
+        for i, (x, y1_val, y2_val) in enumerate(zip(labels, y1, y2)):
+            total = y1_val + y2_val
+            percentage = int(round(y2_val / total, 2) * 100)
+            label = f"{percentage}%"
+            ax.annotate(label, (x, total), ha='center', va='bottom', fontsize=8)
+
 
         # Create legend
         colors = {'Pings':'red', 'Checks':'blue'}
         ls = list(colors.keys())
         handles = [plt.Rectangle((0,0),1,1, color=colors[label]) for label in ls]
         ax.legend(handles, ls)
+
+
         
         # Save and send
         fig.savefig(data_stream, format='png', bbox_inches="tight", dpi = 80)
