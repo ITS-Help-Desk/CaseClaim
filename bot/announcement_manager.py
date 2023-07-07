@@ -1,5 +1,6 @@
 import json
 from bot.announcement import Announcement
+import time
 
 # Use TYPE_CHECKING to avoid circular import from bot
 from typing import TYPE_CHECKING
@@ -74,3 +75,18 @@ class AnnouncementManager:
                 ann.info["case_message_id"] = int(new_message.id)
 
                 self.store_announcements()
+            elif ann.announcement_type == "announcement":
+                current = time.time()
+                if current > ann.info["time"]:
+                    announcement_channel = await self.bot.fetch_channel(self.bot.announcement_channel)
+                    announcement_message = await announcement_channel.fetch_message(ann.announcement_message_id)
+
+                    announcement_embed = announcement_message.embeds[0]
+                    announcement_embed.colour = self.bot.embed_color
+                    await announcement_message.edit(content="", embed=announcement_embed)
+
+                    case_channel = await self.bot.fetch_channel(self.bot.cases_channel)
+                    case_message = await case_channel.fetch_message(ann.info["case_message_id"])
+                    await case_message.delete()
+
+                    self.remove_announcement(ann)

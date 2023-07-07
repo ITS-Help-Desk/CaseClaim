@@ -1,11 +1,10 @@
 import discord
 import discord.ui as ui
+import time
 
 # Use TYPE_CHECKING to avoid circular import from bot
 from typing import TYPE_CHECKING
 from bot.announcement import Announcement
-
-from bot.views.announcement_view import AnnouncementView
 
 if TYPE_CHECKING:
     from bot.bot import Bot
@@ -24,12 +23,14 @@ class AnnouncementModal(ui.Modal, title='Announcement Form'):
         # Create announcement for AnnouncementManager
         a_title = str(self.a_title)
         description = str(self.description)
-        days = 4 if len(str(self.days)) == 0 else int(str(self.days))
+        days = 3 if len(str(self.days)) == 0 else float(str(self.days))
+
+        t = time.time() + (86400 * days)
 
         info = {
             "title": a_title,
             "description": description,
-            "days": days
+            "time": t
         }
 
         announcement = Announcement("announcement", info)
@@ -38,7 +39,7 @@ class AnnouncementModal(ui.Modal, title='Announcement Form'):
 
         # Send announcement message
         announcement_channel = await self.bot.fetch_channel(self.bot.announcement_channel)    
-        announcement_message = await announcement_channel.send(content="@everyone", embed=announcement_embed, view=AnnouncementView(self.bot))
+        announcement_message = await announcement_channel.send(content="@everyone", embed=announcement_embed)
 
         announcement.announcement_message_id = announcement_message.id
 
