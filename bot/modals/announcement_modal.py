@@ -20,6 +20,12 @@ class AnnouncementModal(ui.Modal, title='Announcement Form'):
     days = ui.TextInput(label='Days Shown (1-14) (Optional, Default=4)', style=discord.TextStyle.paragraph, required=False)
     
     async def on_submit(self, interaction: discord.Interaction):
+        """Creates an announcement message which will be sent to the #announcements channel along with
+        a message that will be sent to the cases channel
+
+        Args:
+            interaction (discord.Interaction): The submit modal interaction
+        """
         # Create announcement for AnnouncementManager
         a_title = str(self.a_title)
         description = str(self.description)

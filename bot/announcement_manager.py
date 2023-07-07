@@ -1,6 +1,7 @@
 import json
 from bot.announcement import Announcement
 import time
+from typing import Optional
 
 # Use TYPE_CHECKING to avoid circular import from bot
 from typing import TYPE_CHECKING
@@ -12,28 +13,59 @@ if TYPE_CHECKING:
 class AnnouncementManager:
     announcements: list[Announcement]
     def __init__(self, bot: "Bot"):
+        """Creates the AnnouncementManager by loading
+        all announcements from the announcements.json file
+
+        Args:
+            bot (Bot): A reference to the Bot class
+        """
         self.bot = bot
         self.announcements = []
         self.load_announcements()
     
 
-    def get_announcement(self, announcement_message_id: int):
+    def get_announcement(self, announcement_message_id: int) -> Optional[Announcement]:
+        """Gets an announcement from the self.announcements list by its
+        #announcements channel message ID
+
+
+        Args:
+            announcement_message_id (int): The message ID from the #announcements channel
+
+        Returns:
+            Optional[Announcement]: The announcement (if it can be found)
+        """
         for ann in self.announcements:
             if ann.announcement_message_id == announcement_message_id:
                 return ann
 
 
-    def add_announcement(self, outage: Announcement):
-        self.announcements.append(outage)
+    def add_announcement(self, announcement: Announcement):
+        """Adds an announcement from the self.announcements list and stores it in
+        the announcements.json file
+
+        Args:
+            announcement (Announcement): The announcement object
+        """
+        self.announcements.append(announcement)
         self.store_announcements()
 
     
-    def remove_announcement(self, outage: Announcement):
-        self.announcements.remove(outage)
+    def remove_announcement(self, announcement: Announcement):
+        """Removes an announcement from the self.announcements list and stores it in
+        the announcements.json file
+
+        Args:
+            announcement (Announcement): The announcement object
+        """
+        self.announcements.remove(announcement)
         self.store_announcements()
     
 
     def store_announcements(self) -> None:
+        """Stores the announcements from the self.announcements list to
+        the announcements.json file
+        """
         data = {}
 
         for ann in self.announcements:
@@ -44,6 +76,9 @@ class AnnouncementManager:
 
 
     def load_announcements(self) -> None:
+        """Loads all of the announcements from the announcements.json
+        file and stores them in the self.announcements list
+        """
         with open("announcements.json", "r") as f:
             data = json.load(f)
         
@@ -61,6 +96,9 @@ class AnnouncementManager:
 
     
     async def resend_announcements(self) -> None:
+        """Resends any outages to the cases channel and
+        deletes all old announcements from the cases channel
+        """
         for ann in self.announcements:
             if ann.announcement_type == "outage":
                 announcement_channel = await self.bot.fetch_channel(self.bot.announcement_channel)

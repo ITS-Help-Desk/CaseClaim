@@ -140,7 +140,19 @@ class LeadStatsView(ui.View):
 
 
     @staticmethod
-    def convert_to_plot(title, labels, y1, y2):
+    def convert_to_plot(title: str, labels: list[str], y1: list[int], y2: list[int]) -> io.BytesIO:
+        """Converts data into a plot that can be sent in a Discord message. It uses three
+        parallel lists in order to generate the plot using matplotlib
+
+        Args:
+            title (str): The title of the graph
+            labels (list[str]): The text labels for the bottom X axis of the graph
+            y1 (list[int]): The data points for the checks
+            y2 (list[int]): The data points for the pings
+
+        Returns:
+            io.BytesIO: The bytes that can be used to generate the graph
+        """
         data_stream = io.BytesIO()
         fig, ax = plt.subplots()
 
