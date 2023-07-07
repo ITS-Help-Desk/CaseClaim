@@ -28,7 +28,7 @@ class AnnouncementCommand(commands.Cog):
     @app_commands.choices(choices=[
         app_commands.Choice(name="Outage", value="outage"),
         app_commands.Choice(name="Announcement", value="announcement"),
-        app_commands.Choice(name="Informational Announcement", value="infoannouncement"),
+        #app_commands.Choice(name="Informational Announcement", value="infoannouncement"),
     ])
     async def announcement(self, interaction: discord.Interaction, choices: app_commands.Choice[str]) -> None:
         """This command allows a PA to create an announcement.
