@@ -35,7 +35,7 @@ class AnnouncementCommand(commands.Cog):
 
         Args:
             interaction (discord.Interaction): Interaction that the slash command originated from.
-        """
+        """        
         # Check if user is a PA
         if self.bot.check_if_pa(interaction.user):
             if str(choices.value) == "outage":
@@ -59,4 +59,8 @@ class AnnouncementCommand(commands.Cog):
         full_error = traceback.format_exc()
 
         ch = await self.bot.fetch_channel(self.bot.error_channel)
-        await ch.send(f"Error with **/outage** ran by <@!{ctx.user.id}>.\n```{full_error}```")
+
+        msg = f"Error with **/announcement** ran by <@!{ctx.user.id}>.\n```{full_error}```"
+        if len(msg) > 1993:
+            msg = msg[:1993] + "...```"
+        await ch.send(msg)

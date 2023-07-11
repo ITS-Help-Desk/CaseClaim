@@ -55,4 +55,8 @@ class PingCommand(commands.Cog):
         full_error = traceback.format_exc()
 
         ch = await self.bot.fetch_channel(self.bot.error_channel)
-        await ch.send(f"Error with **/ping** ran by <@!{ctx.user.id}>.\n```{full_error}```")
+        
+        msg = f"Error with **/ping** ran by <@!{ctx.user.id}>.\n```{full_error}```"
+        if len(msg) > 1993:
+            msg = msg[:1993] + "...```"
+        await ch.send(msg)
