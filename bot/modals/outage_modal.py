@@ -61,4 +61,4 @@ class OutageModal(ui.Modal, title='Outage Form'):
 
         
         # Send confirmation message
-        await interaction.response.send_message(content="👍", ephemeral=True)
+        await interaction.response.send_message(content="👍", ephemeral=True, delete_after=0)

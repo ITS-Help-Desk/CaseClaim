@@ -56,4 +56,4 @@ class EditOutageModal(ui.Modal, title='Outage Update Form'):
         await case_message.edit(embed=self.outage.to_case_embed(announcement_message.jump_url))
 
         # Send confirmation message
-        await interaction.response.send_message(content="👍", ephemeral=True)
+        await interaction.response.send_message(content="👍", ephemeral=True, delete_after=0)

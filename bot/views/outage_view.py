@@ -44,4 +44,4 @@ class OutageView(ui.View):
             case_message = await case_channel.fetch_message(outage.info["case_message_id"])
             await case_message.delete()
 
-            await interaction.response.send_message("👍", ephemeral=True)
+            await interaction.response.send_message("👍", ephemeral=True, delete_after=0)
