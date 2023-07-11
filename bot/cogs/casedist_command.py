@@ -31,13 +31,6 @@ class CaseDistCommand(commands.Cog):
         Args:
             interaction (discord.Interaction): Interaction that the slash command originated from
         """
-        #await interaction.response.defer(ephemeral=True) # Wait in case process takes a long time
-
-        # 7-6
-        
-        # 11 hour segments
-        # 22 thirty minute increments
-
         start = datetime.datetime.now() - datetime.timedelta(days = previous_days)
         start = start.replace(hour=7, minute=0, second=0)
 
