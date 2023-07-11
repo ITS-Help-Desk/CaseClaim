@@ -16,6 +16,7 @@ from .cogs.leaderboard_command import LeaderboardCommand
 from .cogs.leadstats_command import LeadStatsCommand
 from .cogs.getlog_command import GetLogCommand
 from .cogs.announcement_command import AnnouncementCommand
+from .cogs.casedist_command import CaseDistCommand
 
 from .views.lead_view import LeadView
 from .views.lead_view_red import LeadViewRed
@@ -122,6 +123,7 @@ class Bot(commands.Bot):
         await self.add_cog(LeaderboardCommand(self))
         await self.add_cog(LeadStatsCommand(self))
         await self.add_cog(AnnouncementCommand(self))
+        await self.add_cog(CaseDistCommand(self))
 
         synced = await self.tree.sync()
         print("{} commands synced".format(len(synced)))
