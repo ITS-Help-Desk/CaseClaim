@@ -76,7 +76,9 @@ class CaseDistCommand(commands.Cog):
             url="attachment://chart.png"
         )
 
-        await interaction.response.send_message(embed=embed, file=chart)
+        embed.colour = self.bot.embed_color
+
+        await interaction.response.send_message(embed=embed, file=chart, ephemeral=True)
         
     def create_labels(self) -> list[str]:
         labels = []
