@@ -27,6 +27,7 @@ class ReportCommand(commands.Cog):
     @app_commands.command(description = "Generate a report of cases logged.")
     @app_commands.describe(user="The user the report will be generated for.")
     @app_commands.describe(month="The month for the report (e.g. \"march\").")
+    @app_commands.default_permissions(mute_members=True)
     async def report(self, interaction: discord.Interaction, user: discord.Member = None, month: str = None, pinged: bool = False):
         """Creates a report of all cases, optionally within a certain month and optionally
         for one specific user.

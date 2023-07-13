@@ -21,8 +21,8 @@ class LeaderboardCommand(commands.Cog):
         """
         self.bot = bot
 
-    
     @app_commands.command(description="Shows a list of all cases a user has worked on")
+    @app_commands.default_permissions(mute_members=True)
     async def leaderboard(self, interaction: discord.Interaction) -> None:
         """Shows a leaderboard of all users by case numbers on the log file.
 

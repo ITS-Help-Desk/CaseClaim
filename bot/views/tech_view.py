@@ -33,6 +33,11 @@ class TechView(ui.View):
         """
         self.case = self.bot.claim_manager.get_claim(interaction.message.id)
 
+        if self.case is None:
+            await interaction.response.send_message("Error, please try again.", ephemeral=True)
+
+            raise AttributeError(f"Case is none (message ID: {interaction.message.id}")
+        
         if self.case.tech_id == interaction.user.id:
             # Update case information
             self.case.status = "Complete"

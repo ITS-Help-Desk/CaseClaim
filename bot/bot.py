@@ -16,6 +16,7 @@ from .cogs.leaderboard_command import LeaderboardCommand
 from .cogs.leadstats_command import LeadStatsCommand
 from .cogs.getlog_command import GetLogCommand
 from .cogs.announcement_command import AnnouncementCommand
+from .cogs.casedist_command import CaseDistCommand
 
 from .views.lead_view import LeadView
 from .views.lead_view_red import LeadViewRed
@@ -112,16 +113,21 @@ class Bot(commands.Bot):
         # Load all commands
         await self.add_cog(MickieCommand(self))
         await self.add_cog(HelpCommand(self))
-        await self.add_cog(ReportCommand(self))
         await self.add_cog(ClaimCommand(self))
-        await self.add_cog(PingCommand(self))
-        await self.add_cog(UpdatePercentCommand(self))
         await self.add_cog(CaseInfoCommand(self))
         await self.add_cog(MyCasesCommand(self))
         await self.add_cog(GetLogCommand(self))
+       
+       
+        await self.add_cog(PingCommand(self))
+        await self.add_cog(ReportCommand(self))
+        await self.add_cog(UpdatePercentCommand(self))
         await self.add_cog(LeaderboardCommand(self))
         await self.add_cog(LeadStatsCommand(self))
-        await self.add_cog(AnnouncementCommand(self))
+        await self.add_cog(CaseDistCommand(self))
 
+
+        await self.add_cog(AnnouncementCommand(self))
+        
         synced = await self.tree.sync()
         print("{} commands synced".format(len(synced)))

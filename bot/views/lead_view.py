@@ -38,7 +38,6 @@ class LeadView(ui.View):
         #Log the case as checked, then delete it
         self.case.status = Status.CHECKED
         self.case.lead_id = interaction.user.id
-        self.case.submitted_time = datetime.now()
         self.case.log()
         self.bot.claim_manager.remove_claim(self.case.message_id)
         

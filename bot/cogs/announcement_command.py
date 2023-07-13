@@ -23,13 +23,12 @@ class AnnouncementCommand(commands.Cog):
 
         
     @app_commands.command(description="Sends an announcement")
-    #@app_commands.autocomplete(choices=rps_autocomplete)
-
     @app_commands.choices(choices=[
         app_commands.Choice(name="Outage", value="outage"),
         app_commands.Choice(name="Announcement", value="announcement"),
         #app_commands.Choice(name="Informational Announcement", value="infoannouncement"),
     ])
+    @app_commands.default_permissions(administrator=True)
     async def announcement(self, interaction: discord.Interaction, choices: app_commands.Choice[str]) -> None:
         """This command allows a PA to create an announcement.
 

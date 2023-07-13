@@ -38,8 +38,6 @@ class HelpCommand(commands.Cog):
         embed.add_field(name='/mickie', value='😉')
         embed.add_field(name='/caseinfo <case_num>', value='See the history of who\'s worked on a case.')
         embed.add_field(name='/mycases', value='Shows all the cases that a user has worked on.')
-        embed.add_field(name='/leaderboard', value='Shows a leaderboard of all users by case claim amount.')
-        
 
         # Check if user is not a lead
         if not self.bot.check_if_lead(interaction.user):
@@ -47,10 +45,23 @@ class HelpCommand(commands.Cog):
             await interaction.response.send_message(embed=embed, ephemeral = True, delete_after=300)
             return
         
-        embed.add_field(name='/report [user] [month]', value=f'Shows a report for an optionally given user and month.')
+        embed.add_field(name='/report [user] [month] [pinged]', value=f'Shows a report for an optionally given user and month, or if it\'s pinged.')
         embed.add_field(name='/ping', value='Manually pings a case and a user.')
         embed.add_field(name='/update_percent <percent>', value='Update the percent of cases that\'ll be sent for review.')
         embed.add_field(name='/get_log', value='Returns the bot\'s log file.')
+        embed.add_field(name='/casedist', value='Returns a graph of the case claim time distribution.')
+        embed.add_field(name='/leaderboard', value='Shows a leaderboard of all users by case claim amount.')
+        embed.add_field(name='/leadstats', value='Shows a leaderboard of all leads by case check amount.')
+
+
+        # Check if user is not a lead
+        if not self.bot.check_if_pa(interaction.user):
+            # Send standard help message
+            await interaction.response.send_message(embed=embed, ephemeral = True, delete_after=300)
+            return
+
+        embed.add_field(name='/announcement <type>', value='Sends an announcement/outage to the announcements channel.')
+
         await interaction.response.send_message(embed=embed, ephemeral = True, delete_after=300)
     
 

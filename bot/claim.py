@@ -49,7 +49,7 @@ class Claim:
         Returns:
             Claim: An instance of the Claim class preloaded with this information.
         """
-        return Claim(
+        c = Claim(
             case_num=json_file["case_num"],
             tech_id=int(json_file["tech_id"]),
             message_id=int(json_file["message_id"]),
@@ -58,6 +58,11 @@ class Claim:
             severity_level=json_file["severity_level"],
             comments=json_file["comments"]
         )
+
+        if "time" in json_file.keys():
+            cls.submitted_time = json_file["time"]
+        
+        return c
 
     @classmethod
     def load_from_row(cls, row: list[str]) -> 'Claim':
@@ -69,7 +74,7 @@ class Claim:
         Returns:
             Claim: An instance of the Claim class preloaded with this information.
         """
-        return Claim(
+        c = Claim(
             case_num=row[2],
             tech_id=int(row[3]),
             message_id=int(row[0]),
@@ -78,6 +83,9 @@ class Claim:
             severity_level=row[6],
             comments=row[7]
         )
+        c.submitted_time = row[1]
+
+        return c
 
     def log(self) -> None:
         """Logs the claim to the logfile."""
@@ -109,13 +117,19 @@ class Claim:
         Returns:
             dict[str, Any]: The dictionary that can immediately be stored in a JSON file.
         """
-        return {
-            "message_id": self.message_id,
-            "time": str(self.submitted_time),
-            "case_num": self.case_num,
-            "tech_id": self.tech_id,
-            "lead_id": self.lead_id,
-            "status": self.status,
-            "severity_level": self.severity_level,
-            "comments": self.comments
-        }
+        
+        data = {
+                "message_id": self.message_id,
+                "case_num": self.case_num,
+                "tech_id": self.tech_id,
+                "lead_id": self.lead_id,
+                "status": self.status,
+                "severity_level": self.severity_level,
+                "comments": self.comments
+            }
+        
+
+        if self.submitted_time is not None:
+            data["time"] = str(self.submitted_time)
+        
+        return data

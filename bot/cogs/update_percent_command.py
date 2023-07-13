@@ -22,6 +22,7 @@ class UpdatePercentCommand(commands.Cog):
     
     @app_commands.command(description="Changes the percent of cases that will be sent to the review channel")
     @app_commands.describe(percentage="The new percent of cases (e.g. 100 or 50)")
+    @app_commands.default_permissions(mute_members=True)
     async def update_percent(self, interaction: discord.Interaction, percentage: int) -> None:
         """Changes the percent of cases that will be sent to the review channel. If a case isn't sent
         for review, it will automatically be logged.
