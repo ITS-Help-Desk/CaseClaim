@@ -85,6 +85,11 @@ Here's how the `config.json` file should be formatted (replace zeros with ID num
 }
 ```
 
+## Role Permissions
+- Tech: `N/A`
+- Lead: `Mute Members`
+- Phone Analyst: `Administrator`
+
 ## Commands
 - /claim **<case_num>**
     - Allows a tech to claim a case and ensure that no other techs will work on that case.

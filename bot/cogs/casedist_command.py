@@ -6,6 +6,7 @@ import csv
 import datetime
 import io
 import matplotlib.pyplot as plt
+from matplotlib import ticker
 
 # Use TYPE_CHECKING to avoid circular import from bot
 from typing import TYPE_CHECKING
@@ -23,10 +24,10 @@ class CaseDistCommand(commands.Cog):
         """
         self.bot = bot
 
-    @app_commands.command(description="Shows a list of all the previous techs who've worked on a case")
+    @app_commands.command(description="Shows a graph of the timing of case claims")
+    @app_commands.default_permissions(mute_members=True)
     async def casedist(self, interaction: discord.Interaction, previous_days: int) -> None:
-        """Shows a list of all techs who've previously worked on a case, and shows the
-        ping comments if the command sender is a lead.
+        """Sends a matplotlib graph of the average case claim time.
 
         Args:
             interaction (discord.Interaction): Interaction that the slash command originated from
@@ -34,10 +35,11 @@ class CaseDistCommand(commands.Cog):
         start = datetime.datetime.now() - datetime.timedelta(days = previous_days)
         start = start.replace(hour=7, minute=0, second=0)
 
-        days = [] # 22 segments
-        for i in range(22):
+        days = [] # 44 segments
+        for i in range(44):
             days.append(0)
 
+        # Collect data
         with open('log.csv', 'r') as f:
             reader = csv.reader(f)
             for row in reader:
@@ -48,7 +50,7 @@ class CaseDistCommand(commands.Cog):
                     start_time = date_time.replace(hour=7, minute=0, second=0)
                     fixed_date = int(time.mktime(date_time.timetuple())) - int(time.mktime(start_time.timetuple()))
 
-                    index = (fixed_date // 60) // 30
+                    index = (fixed_date // 60) // 15
 
                     days[min(index, len(days) - 1)] += 1
         
@@ -62,6 +64,9 @@ class CaseDistCommand(commands.Cog):
         plt.xticks(rotation=90, ha="right")
 
         ax.bar(labels, days, color = "b", zorder=3)
+
+        plt.gca().xaxis.set_major_locator(ticker.MaxNLocator(nbins=13))
+
 
         # Save and send
         fig.savefig(data_stream, format='png', bbox_inches="tight", dpi = 80)
@@ -81,12 +86,18 @@ class CaseDistCommand(commands.Cog):
         await interaction.response.send_message(embed=embed, file=chart, ephemeral=True)
         
     def create_labels(self) -> list[str]:
+        """Creates a list of labels for the graph broken up by 15 minute increments
+        7:00, 7:15, 7:30, 7:45, 8:00...
+
+        Returns:
+            list[str]: A list with all labels
+        """
         labels = []
 
         hour = 7
         minute = 0
-        for i in range(22):
-            next_minute = minute + 30
+        for i in range(44):
+            next_minute = minute + 15
             next_hour = hour
             if next_minute >= 60:
                 next_minute = 0

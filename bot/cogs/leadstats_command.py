@@ -23,6 +23,7 @@ class LeadStatsCommand(commands.Cog):
 
     
     @app_commands.command(description="Shows a list of all cases a lead has checked")
+    @app_commands.default_permissions(mute_members=True)
     async def leadstats(self, interaction: discord.Interaction) -> None:
         """Shows a leaderboard of all users by cases checked on the log file.
 
