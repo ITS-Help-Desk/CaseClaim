@@ -49,7 +49,7 @@ class ClaimCommand(commands.Cog):
             return
         
         # Check to see if the case claimed has already been claimed and is in progress.
-        if self.bot.check_if_claimed(case.case_num):
+        if self.bot.claim_manager.check_if_claimed(case.case_num):
             msg = f"**{case.case_num}** has already been claimed."
             await interaction.response.send_message(content=msg, ephemeral=True,  delete_after=300)
             return
@@ -57,7 +57,7 @@ class ClaimCommand(commands.Cog):
         # Temporarily add case using the interaction id
         # To prevent double claims
         case.message_id = interaction.id
-        self.bot.add_case(case, store=False)
+        self.bot.claim_manager.add_claim(case, store=False)
         
         # User has claimed the case successfully, create the embed and techview.
         message_embed = discord.Embed(
@@ -77,8 +77,10 @@ class ClaimCommand(commands.Cog):
         # Now that message has been sent, update the active cases
         # with the new message id
         case.message_id = response.id
-        self.bot.add_case(case)
-        self.bot.remove_case(interaction.id)
+        self.bot.claim_manager.add_claim(case)
+        self.bot.claim_manager.remove_claim(interaction.id)
+
+        await self.bot.announcement_manager.resend_announcements()
     
 
     @claim.error
@@ -86,4 +88,8 @@ class ClaimCommand(commands.Cog):
         full_error = traceback.format_exc()
 
         ch = await self.bot.fetch_channel(self.bot.error_channel)
-        await ch.send(f"Error with **/claim** ran by <@!{ctx.user.id}>.\n```{full_error}```")
+
+        msg = f"Error with **/claim** ran by <@!{ctx.user.id}>.\n```{full_error}```"
+        if len(msg) > 1993:
+            msg = msg[:1993] + "...```"
+        await ch.send()

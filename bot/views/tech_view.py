@@ -31,13 +31,13 @@ class TechView(ui.View):
             interaction (discord.Interaction): The interaction this button press originated from.
             button (discord.ui.Button): Unused argument that's required to be passed in.
         """
-        self.case = self.bot.get_case(interaction.message.id)
+        self.case = self.bot.claim_manager.get_claim(interaction.message.id)
 
         if self.case.tech_id == interaction.user.id:
             # Update case information
             self.case.status = "Complete"
 
-            self.bot.remove_case(interaction.message.id)
+            self.bot.claim_manager.remove_claim(interaction.message.id)
             self.case.submitted_time = datetime.now()
             await interaction.message.delete()
 
@@ -61,7 +61,7 @@ class TechView(ui.View):
                 # Add the case back into active_cases with a different key
                 # This allows the leadview to be persistent
                 self.case.message_id = msg.id
-                self.bot.add_case(self.case)
+                self.bot.claim_manager.add_claim(self.case)
             else:
                 # If case isn't sent for review, log it
                 self.case.log()
@@ -79,10 +79,10 @@ class TechView(ui.View):
             interaction (discord.Interaction): The interaction this button press originated from.
             button (discord.ui.Button): Unused argument that's required to be passed in.
         """
-        self.case = self.bot.get_case(interaction.message.id)
+        self.case = self.bot.claim_manager.get_claim(interaction.message.id)
 
         if self.case.tech_id == interaction.user.id or self.bot.check_if_lead(interaction.user):
-            self.bot.remove_case(interaction.message.id)
+            self.bot.claim_manager.remove_claim(interaction.message.id)
             await interaction.message.delete()
         else:
             msg = f"<@!{interaction.user.id}>, you didn't claim this case!"

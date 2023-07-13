@@ -41,10 +41,13 @@ class MyCasesCommand(commands.Cog):
                 if int(row[3]) == interaction.user.id:
                     data.append(row)
         
-        for message_id in self.bot.active_cases.keys():
-            c = self.bot.active_cases[message_id]
+        for message_id in self.bot.claim_manager.active_claims.keys():
+            c = self.bot.claim_manager.active_claims[message_id]
             if c.tech_id == interaction.user.id:
-                data.append(c.log_format())
+                try:
+                    data.append(c.log_format())
+                except:
+                    pass # Case can't be shown
         
         # Send data
         new_data = self.data_to_rowstr(data)
@@ -84,8 +87,11 @@ class MyCasesCommand(commands.Cog):
                 s += "**[ACTIVE]**"
 
             # Convert timestamp to UNIX
-            t = int(time.mktime(datetime.datetime.strptime(t, "%Y-%m-%d %H:%M:%S.%f").timetuple()))
-            s += f'<t:{t}:f> - {row[2]}'
+            try:
+                t = int(time.mktime(datetime.datetime.strptime(t, "%Y-%m-%d %H:%M:%S.%f").timetuple()))
+                s += f'<t:{t}:f> - {row[2]}'
+            except:
+                pass # Time in the log is invalid
 
             new_data.append(s)
         
@@ -131,4 +137,8 @@ class MyCasesCommand(commands.Cog):
         full_error = traceback.format_exc()
 
         ch = await self.bot.fetch_channel(self.bot.error_channel)
-        await ch.send(f"Error with **/mycases** ran by <@!{ctx.user.id}>.\n```{full_error}```")
+
+        msg = f"Error with **/mycases** ran by <@!{ctx.user.id}>.\n```{full_error}```"
+        if len(msg) > 1993:
+            msg = msg[:1993] + "...```"
+        await ch.send(msg)

@@ -44,7 +44,7 @@ def main():
         print('Created config.json')
 
         with open("config.json", "w") as f:
-            data = {"cases_channel": 0, "claims_channel": 0, "error_channel": 0}
+            data = {"cases_channel": 0, "claims_channel": 0, "error_channel": 0, "announcement_channel": 0}
             json.dump(data, f)
             raise ValueError("Please add the required config information into config.csv")
     except FileExistsError:
@@ -61,6 +61,19 @@ def main():
             json.dump(data, f)
     except FileExistsError:
         pass
+    
+
+    # Create announcements.json if it doesn't already exist
+    try:
+        f = open("announcements.json", "x")
+        f.close()
+        print('Created announcements.json')
+
+        with open("announcements.json", "w") as f:
+            data = {}
+            json.dump(data, f)
+    except FileExistsError:
+        pass
 
     # Read the values from config.json
     try:
@@ -69,8 +82,9 @@ def main():
             cases_channel = config_data["cases_channel"]
             claims_channel = config_data["claims_channel"]
             error_channel = config_data["error_channel"]
+            announcement_channel = config_data["announcement_channel"]
             
-            if cases_channel == 0 or claims_channel == 0 or error_channel == 0:
+            if cases_channel == 0 or claims_channel == 0 or error_channel == 0 or announcement_channel == 0:
                 raise ValueError()
     except:
         raise ValueError("Please add the required config information into config.csv")
@@ -81,6 +95,7 @@ def main():
     bot.cases_channel = cases_channel
     bot.claims_channel = claims_channel
     bot.error_channel = error_channel
+    bot.announcement_channel = announcement_channel
 
     logging.basicConfig(filename='discord.log', filemode='w', level=logging.INFO, format='%(asctime)s:%(levelname)s:%(message)s')
 

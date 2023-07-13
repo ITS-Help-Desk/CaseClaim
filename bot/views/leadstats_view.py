@@ -140,25 +140,48 @@ class LeadStatsView(ui.View):
 
 
     @staticmethod
-    def convert_to_plot(title, labels, y1, y2):
+    def convert_to_plot(title: str, labels: list[str], y1: list[int], y2: list[int]) -> io.BytesIO:
+        """Converts data into a plot that can be sent in a Discord message. It uses three
+        parallel lists in order to generate the plot using matplotlib
+
+        Args:
+            title (str): The title of the graph
+            labels (list[str]): The text labels for the bottom X axis of the graph
+            y1 (list[int]): The data points for the checks
+            y2 (list[int]): The data points for the pings
+
+        Returns:
+            io.BytesIO: The bytes that can be used to generate the graph
+        """
         data_stream = io.BytesIO()
+        fig, ax = plt.subplots()
 
-        plt.title(title)
+        # Create plot
+        ax.set_title(title)
+        plt.xticks(rotation=45, ha="right")
 
-        # plot bars in stack manner
-        plt.xticks(rotation=45, ha='right')
-        plt.bar(labels, y1, color='b', zorder=3)
-        plt.bar(labels, y2, bottom=y1, color='r', zorder=3)
-        plt.grid(zorder=0)
+        ax.bar(labels, y1, color = "b", zorder=3)
+        ax.bar(labels, y2, bottom = y1, color = "r", zorder=3)
+        #ax.grid(zorder=0)
 
+        # Show labels on top of bars
+        for i, (x, y1_val, y2_val) in enumerate(zip(labels, y1, y2)):
+            total = y1_val + y2_val
+            percentage = int(round(y2_val / total, 2) * 100)
+            label = f"{percentage}%"
+            ax.annotate(label, (x, total), ha='center', va='bottom', fontsize=8)
+
+
+        # Create legend
         colors = {'Pings':'red', 'Checks':'blue'}
         ls = list(colors.keys())
         handles = [plt.Rectangle((0,0),1,1, color=colors[label]) for label in ls]
-        plt.legend(handles, ls)
+        ax.legend(handles, ls)
+
 
         
-
-        plt.savefig(data_stream, format='png', bbox_inches="tight", dpi = 80)
+        # Save and send
+        fig.savefig(data_stream, format='png', bbox_inches="tight", dpi = 80)
         plt.close()
 
         data_stream.seek(0)

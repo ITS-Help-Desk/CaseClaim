@@ -1,7 +1,8 @@
-import json
-from typing import Any, Optional
 from discord.ext import commands
 import discord
+
+from .claim_manager import ClaimManager
+from .announcement_manager import AnnouncementManager
 
 from .cogs.mickie_command import MickieCommand
 from .cogs.help_command import HelpCommand
@@ -14,6 +15,7 @@ from .cogs.mycases_command import MyCasesCommand
 from .cogs.leaderboard_command import LeaderboardCommand
 from .cogs.leadstats_command import LeadStatsCommand
 from .cogs.getlog_command import GetLogCommand
+from .cogs.announcement_command import AnnouncementCommand
 
 from .views.lead_view import LeadView
 from .views.lead_view_red import LeadViewRed
@@ -22,22 +24,22 @@ from .views.leaderboard_view import LeaderboardView
 from .views.leadstats_view import LeadStatsView
 from .views.ping_view import PingView
 
-from bot.claim import Claim
+from .views.outage_view import OutageView
 
 
 class Bot(commands.Bot):
     cases_channel: int
     claims_channel: int
     error_channel: int
-    active_cases: dict[int, Claim]
+    announcement_channel: int
 
     def __init__(self, **options):
         """Initializes the bot (doesn't start it), and initializes some
         instance variables relating to file locations.
         """
 
-        # Load cases from active_cases file
-        self.load_cases()
+        self.claim_manager = ClaimManager(self)
+        self.announcement_manager = AnnouncementManager(self)
 
         self.review_rate = 1.0
         self.embed_color = discord.Color.from_rgb(117, 190, 233)
@@ -46,86 +48,6 @@ class Bot(commands.Bot):
         intents = discord.Intents.default()
         intents.message_content = True  
         super().__init__(intents=intents, command_prefix='/')
-
-
-    def add_case(self, case: Claim, store=True) -> None:
-        """Adds a case to the list of actively worked on cases.
-
-        Args:
-            case (Claim): The case that is being added
-            store (bool): Whether or not to store on file (defaults to True).
-        """
-        if case.message_id == None:
-            raise ValueError("Case message ID not provided!")
-        
-        self.active_cases[case.message_id] = case
-        if store:
-            self.store_cases()
-    
-
-    def get_case(self, message_id: int) -> Optional[Claim]:
-        """Gets a case from the list of actively worked-on cases.
-
-        Args:
-            message_id (int): The id of the original message the bot responded with.
-
-        Returns:
-            Optional[Claim]: The claim (if it exists).
-        """
-        return self.active_cases.get(message_id, None)
-    
-
-    def check_if_claimed(self, case_num: str) -> bool:
-        """Checks if a case has already been claimed or not by
-        looking it up in the active_cases dict.
-
-        Args:
-            case_num (str): The number of the case trying to be claimed
-
-        Returns:
-            bool: True or False if the case has been claimed or not
-        """
-        for message_id in list(self.active_cases.keys()):
-            case = self.active_cases[message_id]
-            if case.case_num == case_num and case.status != "Complete":
-                return True
-        return False
-
-
-    def remove_case(self, message_id: int) -> None:
-        """Removes a case from the list of actively worked on cases.
-
-        Args:
-            message_id (int): The message id of the case that is being removed.
-        """
-        try:
-            del self.active_cases[message_id]
-        except KeyError:
-            pass
-        self.store_cases()
-    
-
-    def store_cases(self) -> None:
-        """Stores the actively worked on cases into the file actives_cases.json
-        """
-        new_data = {}
-        for message_id in self.active_cases.keys():
-            c = self.get_case(message_id)
-            if c is not None:
-                new_data[str(message_id)] = c.json_format()
-        with open('active_cases.json', 'w') as f:
-            json.dump(new_data, f)
-    
-
-    def load_cases(self) -> None:
-        """Loads the actively worked on cases from the file active_cases.json
-        """
-        self.active_cases = {}
-        with open('active_cases.json', 'r') as f:
-            new_data: dict[str, Any] = json.load(f)
-            for message_id in new_data.keys():
-                c = Claim.load_from_json(new_data[message_id])
-                self.active_cases[int(message_id)] = c
     
 
     def check_if_lead(self, user: discord.Member) -> bool:
@@ -154,6 +76,19 @@ class Bot(commands.Bot):
         return dev_role in user.roles
 
 
+    def check_if_pa(self, user: discord.Member) -> bool:
+        """Checks if a given user is a PA or not.
+
+        Args:
+            user (Union[discord.Member, discord.User]): The Discord user.
+
+        Returns:
+            bool: Whether or not they have the dev role.
+        """
+        dev_role = discord.utils.get(user.guild.roles, name="Phone Analyst")
+        return dev_role in user.roles
+
+
     async def setup_hook(self):
         """Sets up the views so that they can be persistently loaded
         """
@@ -164,6 +99,8 @@ class Bot(commands.Bot):
         self.add_view(LeaderboardView(self))
         self.add_view(LeadStatsView(self))
         self.add_view(PingView(self))
+
+        self.add_view(OutageView(self))
         
 
     async def on_ready(self):
@@ -184,7 +121,7 @@ class Bot(commands.Bot):
         await self.add_cog(GetLogCommand(self))
         await self.add_cog(LeaderboardCommand(self))
         await self.add_cog(LeadStatsCommand(self))
-
+        await self.add_cog(AnnouncementCommand(self))
 
         synced = await self.tree.sync()
         print("{} commands synced".format(len(synced)))
