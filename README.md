@@ -126,8 +126,11 @@ Here's how the `config.json` file should be formatted (replace zeros with ID num
     - Uses matplotlib to create a stacked bar chart displaying the information
 - /getlog
     - Allows a lead to get a copy of the log file so that they can view all messages
+- /casedist **\<days>**
+    - Allows a lead to see the distribution of case claim time throughout the day.
+    - Uses matplotlib to create a histogram displaying the information.
 ## Commands (for PAs)
-- /announcement **<Outage/Announcement/Informational Announcement>**
+- /announcement **<Outage/Announcement>**
   - Allows a PA to make an announcement or an outage.
   - Prompts the PA with a modal where they can input information
   - A message will appear in the announcements channel and a sticky message will appear in the cases channel
