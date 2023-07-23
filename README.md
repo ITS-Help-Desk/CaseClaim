@@ -55,7 +55,7 @@ This repository contains the code to run the USD ITS Help Desk Case Claim bot. T
         ├── ping_command.py # /ping        
         ├── report_command.py # /report
         └── update_percent_command.py # /update_percent
-    ├── modals
+    ├── forms
         ├── announcement_modal.py # Feedback form for announcements
         ├── assessment_modal.py # Feedback form for techs affirming pings
         ├── edit_announcement_modal.py # Feedback form for editing announcements
@@ -81,7 +81,12 @@ Here's how the `config.json` file should be formatted (replace zeros with ID num
   "cases_channel": 0,
   "claims_channel": 0,
   "error_channel": 0,
-  "announcement_channel": 0
+  "announcement_channel": 0,
+  
+  "db_user": "",
+  "db_password": "",
+  "db_host": "",
+  "db_name": ""
 }
 ```
 
