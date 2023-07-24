@@ -37,6 +37,19 @@ class CompletedClaim(DatabaseItem):
 
             return data
 
+    @staticmethod
+    def get_all_with_case_num(connection: MySQLConnection, case_num: str) -> list['CompletedClaim']:
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT * FROM CompletedClaims WHERE case_num = %s", (case_num,))
+            results = cursor.fetchall()
+
+            data = []
+            for result in results:
+                data.append(
+                    CompletedClaim(result[0], result[1], User.from_id(connection, result[2]), result[3], result[4]))
+
+            return data
+
     def add_to_database(self, connection: MySQLConnection) -> None:
         with connection.cursor() as cursor:
             sql = "INSERT INTO CompletedClaims (checker_message_id, case_num, tech_id, claim_time, complete_time) VALUES (%s, %s, %s, %s, %s)"

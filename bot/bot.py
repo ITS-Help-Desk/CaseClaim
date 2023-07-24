@@ -8,6 +8,7 @@ from bot.cogs.claim_command import ClaimCommand
 from bot.cogs.mickie_command import MickieCommand
 from bot.cogs.getlog_command import GetLogCommand
 from bot.cogs.mycases_command import MyCasesCommand
+from bot.cogs.caseinfo_command import CaseInfoCommand
 
 from bot.views.claim_view import ClaimView
 from bot.views.affirm_view import AffirmView
@@ -117,6 +118,7 @@ class Bot(commands.Bot):
         await self.add_cog(MickieCommand(self))
         await self.add_cog(GetLogCommand(self))
         await self.add_cog(MyCasesCommand(self))
+        await self.add_cog(CaseInfoCommand(self))
         '''await self.add_cog(MickieCommand(self))
         await self.add_cog(HelpCommand(self))
         await self.add_cog(ClaimCommand(self))

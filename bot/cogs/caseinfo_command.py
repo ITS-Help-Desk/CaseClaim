@@ -16,40 +16,41 @@ if TYPE_CHECKING:
     from ..bot import Bot
 
 
-class MyCasesCommand(commands.Cog):
+class CaseInfoCommand(commands.Cog):
     def __init__(self, bot: "Bot") -> None:
-        """Creates the /mycases command using a cog.
+        """Creates the /caseinfo command using a cog.
 
         Args:
             bot (Bot): A reference to the original Bot instantiation.
         """
         self.bot = bot
 
-    @app_commands.command(description="Shows a list of all cases a user has worked on")
-    async def mycases(self, interaction: discord.Interaction) -> None:
-        """Shows a list of all cases a user has worked on.
+    @app_commands.command(description="Shows a list of all users a case has been worked on by")
+    @app_commands.describe(case_num="Case #")
+    async def caseinfo(self, interaction: discord.Interaction, case_num: str) -> None:
+        """Shows a list of all users a case has worked on by.
 
         Args:
             interaction (discord.Interaction): Interaction that the slash command originated from
+            case_num (str): The case number in Salesforce (e.g. "00960979")
         """
         await interaction.response.defer(ephemeral=True)  # Wait in case process takes a long time
 
         # Collect rows with this case
         rows: list[ActiveClaim | CompletedClaim | CheckedClaim] = []
-        for result in ActiveClaim.get_all_with_tech_id(self.bot.connection, interaction.user.id):
+        for result in ActiveClaim.get_all_with_case_num(self.bot.connection, case_num):
             rows.append(result)
 
-        for result in CompletedClaim.get_all_with_tech_id(self.bot.connection, interaction.user.id):
+        for result in CompletedClaim.get_all_with_case_num(self.bot.connection, case_num):
             rows.append(result)
 
-        for result in CheckedClaim.get_all_with_tech_id(self.bot.connection, interaction.user.id):
+        for result in CheckedClaim.get_all_with_case_num(self.bot.connection, case_num):
             rows.append(result)
 
         rows.sort(key=lambda x: x.claim_time, reverse=True)
         row_str = self.data_to_rowstr(rows)
 
-        name = await interaction.guild.fetch_member(interaction.user.id)
-        title = f'Cases Worked on by {name.display_name} ({len(rows)})'
+        title = f'Cases History of {case_num} ({len(rows)})'
         if len(row_str) <= 10:
             embed = discord.Embed(title=title)
             embed.colour = self.bot.embed_color
@@ -78,7 +79,7 @@ class MyCasesCommand(commands.Cog):
 
             # Convert timestamp to UNIX
             t = int(time.mktime(row.claim_time.timetuple()))
-            s += f'<t:{t}:f> - {row.case_num}'
+            s += f'<t:{t}:f> - <@!{row.tech.discord_id}>'
 
             row_str.append(s)
 
@@ -117,13 +118,13 @@ class MyCasesCommand(commands.Cog):
 
         return embeds
 
-    @mycases.error
-    async def mycases_error(self, ctx: discord.Interaction, error):
+    @caseinfo.error
+    async def caseinfo_error(self, ctx: discord.Interaction, error):
         full_error = traceback.format_exc()
 
         ch = await self.bot.fetch_channel(self.bot.error_channel)
 
-        msg = f"Error with **/mycases** ran by <@!{ctx.user.id}>.\n```{full_error}```"
+        msg = f"Error with **/caseinfo** ran by <@!{ctx.user.id}>.\n```{full_error}```"
         if len(msg) > 1993:
             msg = msg[:1993] + "...```"
         await ch.send(msg)

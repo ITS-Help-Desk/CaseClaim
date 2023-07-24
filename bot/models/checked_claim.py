@@ -49,6 +49,20 @@ class CheckedClaim(DatabaseItem):
 
             return data
 
+    @staticmethod
+    def get_all_with_case_num(connection: MySQLConnection, case_num: str) -> list['CheckedClaim']:
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT * FROM CheckedClaims WHERE case_num = %s", (case_num,))
+            results = cursor.fetchall()
+
+            data = []
+            for result in results:
+                data.append(CheckedClaim(result[0], result[1], User.from_id(connection, result[2]),
+                                         User.from_id(connection, result[3]),
+                                         result[4], result[5], result[6], Status.from_str(result[7]), result[8]))
+
+            return data
+
     def change_status(self, connection: MySQLConnection, new_status: Status):
         with connection.cursor() as cursor:
             if new_status == Status.CHECKED:
