@@ -35,7 +35,6 @@ class ResolvePingView(ui.View):
             button (discord.ui.Button): Unused argument that's required to be passed in.
         """
         case = CheckedClaim.from_ping_thread_id(self.bot.connection, interaction.channel_id)
-        ping = Ping.from_thread_id(self.bot.connection, interaction.channel_id)
 
         if case.lead.discord_id != interaction.user.id:
             await interaction.response.send_message(content="You cannot press this button.", ephemeral=True)

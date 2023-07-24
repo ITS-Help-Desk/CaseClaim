@@ -5,8 +5,15 @@ from mysql.connector import MySQLConnection
 from bot.announcement_manager import AnnouncementManager
 
 from bot.cogs.claim_command import ClaimCommand
+from bot.cogs.mickie_command import MickieCommand
+from bot.cogs.getlog_command import GetLogCommand
+from bot.cogs.mycases_command import MyCasesCommand
 
 from bot.views.claim_view import ClaimView
+from bot.views.affirm_view import AffirmView
+from bot.views.check_view import CheckView
+from bot.views.check_view_red import CheckViewRed
+from bot.views.resolve_ping_view import ResolvePingView
 
 '''from cogs.mickie_command import MickieCommand
 from cogs.help_command import HelpCommand
@@ -44,8 +51,6 @@ class Bot(commands.Bot):
         instance variables relating to file locations.
         """
         self.announcement_manager = AnnouncementManager(self)
-
-        self.review_rate = 1.0
         self.embed_color = discord.Color.from_rgb(117, 190, 233)
 
         # Initialize bot settings
@@ -53,7 +58,8 @@ class Bot(commands.Bot):
         intents.message_content = True  
         super().__init__(intents=intents, command_prefix='/')
 
-    def check_if_lead(self, user: discord.Member) -> bool:
+    @staticmethod
+    def check_if_lead(user: discord.Member) -> bool:
         """Checks if a given user is a lead or not.
 
         Args:
@@ -65,7 +71,8 @@ class Bot(commands.Bot):
         lead_role = discord.utils.get(user.guild.roles, name="Lead")
         return lead_role in user.roles
 
-    def check_if_dev(self, user: discord.Member) -> bool:
+    @staticmethod
+    def check_if_dev(user: discord.Member) -> bool:
         """Checks if a given user is a dev or not.
 
         Args:
@@ -77,7 +84,8 @@ class Bot(commands.Bot):
         dev_role = discord.utils.get(user.guild.roles, name="dev")
         return dev_role in user.roles
 
-    def check_if_pa(self, user: discord.Member) -> bool:
+    @staticmethod
+    def check_if_pa(user: discord.Member) -> bool:
         """Checks if a given user is a PA or not.
 
         Args:
@@ -93,16 +101,10 @@ class Bot(commands.Bot):
         """Sets up the views so that they can be persistently loaded
         """
         self.add_view(ClaimView(self))
-        '''self.add_view(TechView(self))
-        self.add_view(LeadView(self))
-        self.add_view(LeadViewRed(self))
-
-        self.add_view(LeaderboardView(self))
-        self.add_view(LeadStatsView(self))
-        self.add_view(PingView(self))
-
-        self.add_view(OutageView(self))'''
-        
+        self.add_view(AffirmView(self))
+        self.add_view(CheckView(self))
+        self.add_view(CheckViewRed(self))
+        self.add_view(ResolvePingView(self))
 
     async def on_ready(self):
         """Loads all commands stored in the cogs folder and starts the bot.
@@ -112,6 +114,9 @@ class Bot(commands.Bot):
 
         # Load all commands
         await self.add_cog(ClaimCommand(self))
+        await self.add_cog(MickieCommand(self))
+        await self.add_cog(GetLogCommand(self))
+        await self.add_cog(MyCasesCommand(self))
         '''await self.add_cog(MickieCommand(self))
         await self.add_cog(HelpCommand(self))
         await self.add_cog(ClaimCommand(self))
@@ -132,5 +137,3 @@ class Bot(commands.Bot):
 
         synced = await self.tree.sync()
         print("{} commands synced".format(len(synced)))
-
-

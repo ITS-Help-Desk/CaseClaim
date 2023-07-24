@@ -36,6 +36,19 @@ class CheckedClaim(DatabaseItem):
             return CheckedClaim(result[0], result[1], User.from_id(connection, result[2]), User.from_id(connection, result[3]),
                                 result[4], result[5], result[6], Status.from_str(result[7]), result[8])
 
+    @staticmethod
+    def get_all_with_tech_id(connection: MySQLConnection, tech_id: int) -> list['CheckedClaim']:
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT * FROM CheckedClaims WHERE tech_id = %s", (tech_id,))
+            results = cursor.fetchall()
+
+            data = []
+            for result in results:
+                data.append(CheckedClaim(result[0], result[1], User.from_id(connection, result[2]), User.from_id(connection, result[3]),
+                            result[4], result[5], result[6], Status.from_str(result[7]), result[8]))
+
+            return data
+
     def change_status(self, connection: MySQLConnection, new_status: Status):
         with connection.cursor() as cursor:
             if new_status == Status.CHECKED:
@@ -45,7 +58,6 @@ class CheckedClaim(DatabaseItem):
             sql = "UPDATE CheckedClaims SET status = %s WHERE checker_message_id=%s"
             cursor.execute(sql, (new_status, self.checker_message_id,))
             connection.commit()
-
 
     def add_to_database(self, connection: MySQLConnection) -> None:
         with connection.cursor() as cursor:

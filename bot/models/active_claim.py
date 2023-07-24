@@ -35,6 +35,18 @@ class ActiveClaim(DatabaseItem):
 
             return ActiveClaim(result[0], result[1], User.from_id(connection, result[2]), result[3])
 
+    @staticmethod
+    def get_all_with_tech_id(connection: MySQLConnection, tech_id: int) -> list['ActiveClaim']:
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT * FROM ActiveClaims WHERE tech_id = %s", (tech_id,))
+            results = cursor.fetchall()
+
+            data = []
+            for result in results:
+                data.append(ActiveClaim(result[0], result[1], User.from_id(connection, result[2]), result[3]))
+
+            return data
+
     def add_to_database(self, connection: MySQLConnection) -> None:
         with connection.cursor() as cursor:
             sql = "INSERT INTO ActiveClaims (claim_message_id, case_num, tech_id, claim_time) VALUES (%s, %s, %s, %s)"

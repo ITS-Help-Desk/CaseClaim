@@ -40,5 +40,5 @@ class AffirmView(ui.View):
             await interaction.response.send_message(content="You cannot press this button.", ephemeral=True)
             return
 
-        fbModal = AffirmForm(self.bot, case)
-        await interaction.response.send_modal(fbModal)
+        form = AffirmForm(self.bot, case)
+        await interaction.response.send_modal(form)

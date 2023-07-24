@@ -2,6 +2,7 @@
 all throughout this bot.
 """
 
+
 def month_number_to_name(month_number: int) -> str:
     """Converts a month number to the actual name.
     (e.g. 1 -> January)
@@ -55,7 +56,6 @@ def month_string_to_number(month_name: str) -> str:
         'february': '02',
         'march': '03',
         'april': '04',
-        'may': '05',
         'june': '06',
         'july': '07',
         'august': '08',
@@ -68,5 +68,5 @@ def month_string_to_number(month_name: str) -> str:
         s = month_name.strip().lower()
         out = m[s]
         return out
-    except:
+    except Exception:
         raise ValueError('Not a month')

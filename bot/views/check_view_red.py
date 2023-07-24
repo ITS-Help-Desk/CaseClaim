@@ -58,5 +58,5 @@ class CheckViewRed(ui.View):
         case = CompletedClaim.from_id(self.bot.connection, interaction.message.id)
 
         # Prompt with Modal, record the response, create a private thread, then delete
-        fbModal = PingForm(self.bot, case)
-        await interaction.response.send_modal(fbModal)
+        form = PingForm(self.bot, case)
+        await interaction.response.send_modal(form)

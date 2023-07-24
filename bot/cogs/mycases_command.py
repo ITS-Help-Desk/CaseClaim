@@ -1,0 +1,130 @@
+from discord import app_commands
+from discord.ext import commands
+import discord
+import time
+import datetime
+from .. import paginator
+import traceback
+
+from bot.models.active_claim import ActiveClaim
+from bot.models.completed_claim import CompletedClaim
+from bot.models.checked_claim import CheckedClaim
+
+# Use TYPE_CHECKING to avoid circular import from bot
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from ..bot import Bot
+
+
+class MyCasesCommand(commands.Cog):
+    def __init__(self, bot: "Bot") -> None:
+        """Creates the /mycases command using a cog.
+
+        Args:
+            bot (Bot): A reference to the original Bot instantiation.
+        """
+        self.bot = bot
+
+    @app_commands.command(description="Shows a list of all cases a user has worked on")
+    async def mycases(self, interaction: discord.Interaction) -> None:
+        """Shows a list of all cases a user has worked on.
+
+        Args:
+            interaction (discord.Interaction): Interaction that the slash command originated from
+        """
+        await interaction.response.defer(ephemeral=True)  # Wait in case process takes a long time
+
+        # Collect rows with this case
+        rows: list[ActiveClaim | CompletedClaim | CheckedClaim] = []
+        for result in ActiveClaim.get_all_with_tech_id(self.bot.connection, interaction.user.id):
+            rows.append(result)
+
+        for result in CompletedClaim.get_all_with_tech_id(self.bot.connection, interaction.user.id):
+            rows.append(result)
+
+        for result in CheckedClaim.get_all_with_tech_id(self.bot.connection, interaction.user.id):
+            rows.append(result)
+
+        rows.sort(key=lambda x: x.claim_time, reverse=True)
+        row_str = self.data_to_rowstr(rows)
+
+        name = await interaction.guild.fetch_member(interaction.user.id)
+        title = f'Cases Worked on by {name.display_name} ({len(rows)})'
+        if len(row_str) <= 10:
+            embed = discord.Embed(title=title)
+            embed.colour = self.bot.embed_color
+            embed.description = '\n'.join(row for row in row_str)
+
+            await interaction.followup.send(embed=embed, ephemeral=True)
+        else:
+            embeds = self.create_paginator_embeds(row_str, title)
+            await paginator.Simple(ephemeral=True).start(interaction, embeds)
+
+    def data_to_rowstr(self, rows: list[ActiveClaim | CompletedClaim | CheckedClaim]) -> list[str]:
+        """Converts the raw data into a list of strings
+        that can be used in the embed description.
+
+        Args:
+            rows (list[str]): The list of raw strings from the csv.
+
+        Returns:
+            list[str]: The list of descriptions that can be directly used in an embed.
+        """
+        row_str = []
+        for row in rows:
+            s = ''
+            if type(row) == ActiveClaim:
+                s += "**[ACTIVE]**"
+
+            # Convert timestamp to UNIX
+            t = int(time.mktime(row.claim_time.timetuple()))
+            s += f'<t:{t}:f> - {row.case_num}'
+
+            row_str.append(s)
+
+        return row_str
+
+    def create_paginator_embeds(self, data: list[str], title: str) -> list[discord.Embed]:
+        """Creates a list of embeds that can be used with a paginator.
+
+        Args:
+            data (list[str]): The list of case descriptions.
+            title (str): The title for each of the embeds
+
+        Returns:
+            list[discord.Embed]: A list of embeds for the paginator.
+        """
+        # Create a list of embeds to paginate
+        embeds = []
+        i = 0
+        data_len = len(data)
+
+        # Go through all cases
+        while i < data_len:
+            # Create an embed for every 10 cases
+            new_embed = discord.Embed(title=title)
+            new_embed.colour = self.bot.embed_color
+            description = ''
+
+            # Add ten (or fewer) cases
+            for j in range(min(10, len(data))):
+                row = data.pop(0)
+                description += row + '\n'
+
+            new_embed.description = description
+            embeds.append(new_embed)
+            i += 10
+
+        return embeds
+
+    @mycases.error
+    async def mycases_error(self, ctx: discord.Interaction, error):
+        full_error = traceback.format_exc()
+
+        ch = await self.bot.fetch_channel(self.bot.error_channel)
+
+        msg = f"Error with **/mycases** ran by <@!{ctx.user.id}>.\n```{full_error}```"
+        if len(msg) > 1993:
+            msg = msg[:1993] + "...```"
+        await ch.send(msg)
