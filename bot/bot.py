@@ -1,7 +1,12 @@
 from discord.ext import commands
 import discord
+from mysql.connector import MySQLConnection
 
-from announcement_manager import AnnouncementManager
+from bot.announcement_manager import AnnouncementManager
+
+from bot.cogs.claim_command import ClaimCommand
+
+from bot.views.claim_view import ClaimView
 
 '''from cogs.mickie_command import MickieCommand
 from cogs.help_command import HelpCommand
@@ -32,6 +37,7 @@ class Bot(commands.Bot):
     claims_channel: int
     error_channel: int
     announcement_channel: int
+    connection: MySQLConnection
 
     def __init__(self, **options):
         """Initializes the bot (doesn't start it), and initializes some
@@ -86,7 +92,7 @@ class Bot(commands.Bot):
     async def setup_hook(self):
         """Sets up the views so that they can be persistently loaded
         """
-        pass
+        self.add_view(ClaimView(self))
         '''self.add_view(TechView(self))
         self.add_view(LeadView(self))
         self.add_view(LeadViewRed(self))
@@ -105,6 +111,7 @@ class Bot(commands.Bot):
         print(f'Logged in as {self.user}!')
 
         # Load all commands
+        await self.add_cog(ClaimCommand(self))
         '''await self.add_cog(MickieCommand(self))
         await self.add_cog(HelpCommand(self))
         await self.add_cog(ClaimCommand(self))
@@ -122,6 +129,8 @@ class Bot(commands.Bot):
 
 
         await self.add_cog(AnnouncementCommand(self))'''
-        
+
         synced = await self.tree.sync()
         print("{} commands synced".format(len(synced)))
+
+

@@ -89,7 +89,6 @@ def main():
     if connection is None:
         pass
 
-
     # Create bot and run
     bot = Bot()  
     bot.cases_channel = cases_channel

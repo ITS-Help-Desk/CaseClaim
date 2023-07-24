@@ -2,8 +2,8 @@ from datetime import datetime
 from mysql.connector import MySQLConnection
 from typing import Optional
 
-from database_item import DatabaseItem
-from user import User
+from bot.models.database_item import DatabaseItem
+from bot.models.user import User
 
 
 class ActiveClaim(DatabaseItem):
@@ -19,6 +19,9 @@ class ActiveClaim(DatabaseItem):
             cursor.execute("SELECT * FROM ActiveClaims WHERE claim_message_id = %s", (claim_message_id,))
             result = cursor.fetchone()
 
+            if result is None:
+                return None
+
             return ActiveClaim(result[0], result[1], User.from_id(connection, result[2]), result[3])
 
     @staticmethod
@@ -27,10 +30,20 @@ class ActiveClaim(DatabaseItem):
             cursor.execute("SELECT * FROM ActiveClaims WHERE case_num = %s", (case_num,))
             result = cursor.fetchone()
 
+            if result is None:
+                return None
+
             return ActiveClaim(result[0], result[1], User.from_id(connection, result[2]), result[3])
 
-    def add_to_database(self) -> None:
-        pass
+    def add_to_database(self, connection: MySQLConnection) -> None:
+        with connection.cursor() as cursor:
+            sql = "INSERT INTO ActiveClaims (claim_message_id, case_num, tech_id, claim_time) VALUES (%s, %s, %s, %s)"
+            formatted_date = self.claim_time.strftime('%Y-%m-%d %H:%M:%S')
+            cursor.execute(sql, (self.claim_message_id, self.case_num, self.tech.discord_id, formatted_date,))
+            connection.commit()
 
-    def remove_from_database(self) -> None:
-        pass
+    def remove_from_database(self, connection: MySQLConnection) -> None:
+        with connection.cursor() as cursor:
+            sql = "DELETE FROM ActiveClaims WHERE claim_message_id = %s"
+            cursor.execute(sql, (self.claim_message_id,))
+            connection.commit()

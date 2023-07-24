@@ -1,7 +1,7 @@
 from typing import Optional
 from mysql.connector import MySQLConnection
 
-from database_item import DatabaseItem
+from bot.models.database_item import DatabaseItem
 
 
 class User(DatabaseItem):
@@ -15,6 +15,9 @@ class User(DatabaseItem):
         with connection.cursor() as cursor:
             cursor.execute("SELECT * FROM Users WHERE discord_id = %s", (discord_id, ))
             result = cursor.fetchone()
+
+            if result is None:
+                return None
 
             return User(result[0], result[1], result[2])
 
