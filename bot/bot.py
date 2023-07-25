@@ -1,6 +1,7 @@
 from discord.ext import commands
 import discord
 from mysql.connector import MySQLConnection
+from typing import Union
 
 from bot.announcement_manager import AnnouncementManager
 
@@ -47,10 +48,17 @@ class Bot(commands.Bot):
     announcement_channel: int
     connection: MySQLConnection
 
-    def __init__(self, **options):
+    def __init__(self, config: dict[str, Union[int, str]], connection: MySQLConnection):
         """Initializes the bot (doesn't start it), and initializes some
         instance variables relating to file locations.
         """
+        self.cases_channel = int(config["cases_channel"])
+        self.claims_channel = int(config["claims_channel"])
+        self.error_channel = int(config["error_channel"])
+        self.announcement_channel = int(config["announcement_channel"])
+
+        self.connection = connection
+
         self.announcement_manager = AnnouncementManager(self)
         self.embed_color = discord.Color.from_rgb(117, 190, 233)
 

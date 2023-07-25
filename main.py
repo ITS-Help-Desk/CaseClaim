@@ -68,7 +68,7 @@ def main():
             
             if cases_channel == 0 or claims_channel == 0 or error_channel == 0 or announcement_channel == 0:
                 raise ValueError()
-    except:
+    except Exception:
         raise ValueError("Please add the required config information into config.csv")
 
     db_config = {
@@ -86,18 +86,8 @@ def main():
     except Error as err:
         print(f"Error: '{err}'")
 
-    if connection is None:
-        pass
-
     # Create bot and run
-    bot = Bot()  
-    bot.cases_channel = cases_channel
-    bot.claims_channel = claims_channel
-    bot.error_channel = error_channel
-    bot.announcement_channel = announcement_channel
-
-    bot.connection = connection
-
+    bot = Bot(config_data, connection)
 
     logging.basicConfig(filename='discord.log', filemode='w', level=logging.INFO, format='%(asctime)s:%(levelname)s:%(message)s')
 
