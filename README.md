@@ -144,6 +144,13 @@ Here's how the `config.json` file should be formatted (replace zeros with ID num
 ## Case Claim Flow Chart
 ![Flowchart](flowchart.png)
 
+## Database
+The database managing all the claims, users, and announcements/outages is run with
+[MySQL](https://www.mysql.com/) and the relating files can be found in the `sql` folder.
+
+A diagram of the table layout of the database can be found
+[here](https://drawsql.app/teams/andrews-team-22/diagrams/itstest/embed).
+
 ## Dependencies
 - discord.py [2.2.2](https://pypi.org/project/discord.py/)
 - matplotlib [3.7.2](https://pypi.org/project/matplotlib/)
