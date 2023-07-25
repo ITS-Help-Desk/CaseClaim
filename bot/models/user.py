@@ -8,11 +8,16 @@ class User(DatabaseItem):
     def __init__(self, discord_id: int, first_name: str, last_name: str):
         self.discord_id = discord_id
 
-        if first_name.lower() != first_name:
+        if first_name[0].isupper():
             self.first_name = first_name
         else:
-            self.first_name = first_name
-        self.last_name = last_name
+            self.first_name = first_name.capitalize()
+
+        if last_name[0].isupper():
+            self.last_name = last_name
+        else:
+            self.last_name = last_name.capitalize()
+
         self.full_name = first_name + " " + last_name
 
     @staticmethod
