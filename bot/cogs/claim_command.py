@@ -55,6 +55,13 @@ class ClaimCommand(commands.Cog):
             await interaction.response.send_message(content=msg, ephemeral=True, delete_after=300)
             return
 
+        # Check to see if user is in the list
+        u = User.from_id(self.bot.connection, interaction.user.id)
+        if u is None:
+            msg = f"Please use the **/join** command before claiming cases."
+            await interaction.response.send_message(content=msg, ephemeral=True, delete_after=300)
+            return
+
         # User has claimed the case successfully, create the embed and techview.
         message_embed = discord.Embed(
             description=f"Is being worked on by <@{interaction.user.id}>",

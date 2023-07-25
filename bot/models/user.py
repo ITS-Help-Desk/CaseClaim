@@ -28,8 +28,15 @@ class User(DatabaseItem):
     def deactivate(self) -> None:
         pass
 
-    def add_to_database(self) -> None:
-        pass
+    def add_to_database(self, connection: MySQLConnection) -> None:
+        with connection.cursor() as cursor:
+            sql = "INSERT INTO Users (discord_id, first_name, last_name, active) VALUES (%s, %s, %s, %s)"
 
-    def remove_from_database(self) -> None:
-        pass
+            cursor.execute(sql, (self.discord_id, self.first_name, self.last_name, True))
+            connection.commit()
+
+    def remove_from_database(self, connection: MySQLConnection) -> None:
+        with connection.cursor() as cursor:
+            sql = "DELETE FROM Users WHERE discord_id = %s"
+            cursor.execute(sql, (self.discord_id,))
+            connection.commit()
