@@ -6,6 +6,8 @@ class Status(StrEnum):
     CHECKED = "Checked",
     PINGED = "Pinged",
     RESOLVED = "Resolved"
+    KUDOS = "Kudos"
+    DONE = "Done"
 
     @staticmethod
     def from_str(s: str) -> 'Status':
@@ -18,3 +20,7 @@ class Status(StrEnum):
                 return Status.PINGED
             case "resolved":
                 return Status.RESOLVED
+            case "kudos":
+                return Status.KUDOS
+            case "done":
+                return Status.DONE
