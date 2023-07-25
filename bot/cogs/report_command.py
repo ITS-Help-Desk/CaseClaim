@@ -1,0 +1,90 @@
+from discord import app_commands
+from discord.ext import commands
+import discord
+import csv
+from bot.helpers import month_string_to_number
+import traceback
+
+from bot.models.checked_claim import CheckedClaim
+from bot.models.ping import Ping
+
+# Use TYPE_CHECKING to avoid circular import from bot
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from ..bot import Bot
+
+
+class ReportCommand(commands.Cog):
+    def __init__(self, bot: "Bot") -> None:
+        """Creates the /report command using a cog.
+
+        Args:
+            bot (Bot): A reference to the original Bot instantiation.
+        """
+        self.bot = bot
+
+    @app_commands.command(description="Generate a report of cases logged.")
+    @app_commands.describe(user="The user the report will be generated for.")
+    @app_commands.describe(month="The month for the report (e.g. \"march\").")
+    @app_commands.describe(pinged="Whether or not the case has been pinged.")
+    @app_commands.default_permissions(mute_members=True)
+    async def report(self, interaction: discord.Interaction, user: discord.Member = None, month: str = None,
+                     pinged: bool = False):
+        """Creates a report of all cases, optionally within a certain month and optionally
+        for one specific user.
+
+        Args:
+            interaction (discord.Interaction): Interaction that the slash command originated from.
+            user (discord.Member, optional): The user that the report will correspond to. Defaults to None.
+            month (str, optional): The month that all of the cases comes from. Defaults to None.
+            pinged (bool, optional): Whether or not the case has been pinged. Defaults to False.
+        """
+        # Check if user is a lead
+        if self.bot.check_if_lead(interaction.user):
+            await interaction.response.defer(ephemeral=True)  # Wait in case process takes a long time
+
+            if month is not None:
+                month = int(month_string_to_number(month))
+            results = CheckedClaim.search(self.bot.connection, user, month, pinged)
+            row_str = self.data_to_rowstr(results)
+
+            with open('temp.csv', 'w', newline='', encoding='utf-8') as csvfile:
+                writer = csv.writer(csvfile)
+                for row in row_str:
+                    writer.writerow(row)
+
+            report = discord.File('temp.csv')
+
+            await interaction.followup.send(content="Here's your report", file=report)
+        else:
+            # Return error message if user is not Lead
+            msg = f"<@{interaction.user.id}>, you do not have permission to pull this report!"
+            await interaction.response.send_message(content=msg, ephemeral=True)
+
+    def data_to_rowstr(self, data: list[CheckedClaim]) -> list[list[str]]:
+        new_list = []
+        for claim in data:
+            t = claim.claim_time.strftime("%b %d %Y %-I:%M %p")  # Format time
+            row = [str(t), str(claim.case_num), str(claim.tech.full_name), str(claim.lead.full_name), str(claim.status)]
+
+            # Add ping data
+            if claim.ping_thread_id is not None:
+                p = Ping.from_thread_id(self.bot.connection, claim.ping_thread_id)
+                row.append(p.severity)
+                row.append(p.description)
+
+            new_list.append(row)
+
+        return new_list
+
+    @report.error
+    async def report_error(self, ctx: discord.Interaction, error):
+        full_error = traceback.format_exc()
+
+        ch = await self.bot.fetch_channel(self.bot.error_channel)
+
+        msg = f"Error with **/report** ran by <@!{ctx.user.id}>.\n```{full_error}```"
+        if len(msg) > 1993:
+            msg = msg[:1993] + "...```"
+        await ch.send(msg)

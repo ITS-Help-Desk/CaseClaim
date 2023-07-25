@@ -9,6 +9,7 @@ class User(DatabaseItem):
         self.discord_id = discord_id
         self.first_name = first_name
         self.last_name = last_name
+        self.full_name = first_name + " " + last_name
 
     @staticmethod
     def from_id(connection: MySQLConnection, discord_id: int) -> Optional['User']:
