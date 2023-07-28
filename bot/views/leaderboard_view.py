@@ -1,4 +1,3 @@
-import csv
 import datetime
 import discord
 import discord.ui as ui
@@ -37,7 +36,7 @@ class LeaderboardView(ui.View):
         """
         await interaction.response.defer(thinking=False)  # Acknowledge button press
 
-        new_embed = LeaderboardView.create_embed(interaction.created_at, self.bot.embed_color)
+        new_embed = LeaderboardView.create_embed(self.bot, interaction.created_at)
         new_embed.set_thumbnail(url=interaction.guild.icon.url)
 
         message = interaction.message
@@ -107,22 +106,22 @@ class LeaderboardView(ui.View):
         await interaction.followup.send(embed=embed, ephemeral=True)
 
     @staticmethod
-    def create_embed(interaction_date: datetime.datetime, embed_color: discord.Color) -> discord.Embed:
+    def create_embed(bot: 'Bot', interaction_date: datetime.datetime) -> discord.Embed:
         """Creates the leaderboard embed for the /leaderboard command and for the
         Refresh button.
 
         Args:
+            bot (Bot): A reference to the bot class
             interaction_date (datetime.datetime): The time at which this request is made.
-            embed_color (discord.Color): The color of the embed.
 
         Returns:
             discord.Embed: The embed object with everything already completed for month and semester rankings.
         """
-        month_ranking, semester_ranking = LeaderboardView.create_rankings(interaction_date)
+        month_ranking, semester_ranking = LeaderboardView.create_rankings(bot.connection, interaction_date)
 
         # Create embed
         embed = discord.Embed(title="ITS Case Claim Leaderboard")
-        embed.colour = embed_color
+        embed.colour = bot.embed_color
 
         embed.add_field(name=f"{month_number_to_name(interaction_date.month)} Ranks", value=month_ranking, inline=True)
         embed.add_field(name="Semester Ranks", value=semester_ranking, inline=True)
@@ -198,9 +197,11 @@ class LeaderboardView(ui.View):
 
         claims = CheckedClaim.search(connection)
         for claim in claims:
+            # Skip cases that are "done"
             if claim.status == Status.DONE:
                 continue
 
+            # Initialize month/semester ping count dicts
             if claim.tech.discord_id not in month_ping_counts.keys():
                 month_ping_counts[claim.tech.discord_id] = 0
             if claim.tech.discord_id not in semester_ping_counts.keys():
@@ -215,6 +216,32 @@ class LeaderboardView(ui.View):
                 # Add pinged
                 if claim.status == Status.PINGED or claim.status == Status.RESOLVED:
                     month_ping_counts[claim.tech.discord_id] += 1
+
+            # Check for semester
+            if claim.claim_time.year != interaction_date.year:
+                continue
+
+            if 1 <= claim.claim_time.month <= 6:
+                sem1 = "Spring"
+            else:
+                sem1 = "Fall"
+
+            if 1 <= interaction_date.month <= 6:
+                sem2 = "Spring"
+            else:
+                sem2 = "Fall"
+
+            if sem1 != sem2:
+                continue
+
+            # Organize data for semester
+            if claim.tech.discord_id not in semester_counts.keys():
+                semester_counts[claim.tech.discord_id] = 0
+            semester_counts[claim.tech.discord_id] += 1
+
+            # Add pinged
+            if claim.status == Status.PINGED or claim.status == Status.RESOLVED:
+                semester_ping_counts[claim.tech.discord_id] += 1
 
         semester_counts_sorted_keys = sorted(semester_counts, key=semester_counts.get, reverse=True)
         month_counts_sorted_keys = sorted(month_counts, key=month_counts.get, reverse=True)

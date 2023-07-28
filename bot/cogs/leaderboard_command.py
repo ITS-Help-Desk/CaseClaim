@@ -3,7 +3,7 @@ from discord.ext import commands
 import discord
 import traceback
 
-#from bot.views.leaderboard_view import LeaderboardView
+from bot.views.leaderboard_view import LeaderboardView
 
 # Use TYPE_CHECKING to avoid circular import from bot
 from typing import TYPE_CHECKING
@@ -33,7 +33,7 @@ class LeaderboardCommand(commands.Cog):
         if self.bot.check_if_lead(interaction.user):
             await interaction.response.defer()  # Wait in case process takes a long time
 
-            embed = LeaderboardView.create_embed(interaction.created_at, self.bot.embed_color)
+            embed = LeaderboardView.create_embed(self.bot, interaction.created_at)
             embed.set_thumbnail(url=interaction.guild.icon.url)
 
             await interaction.followup.send(embed=embed, view=LeaderboardView(self.bot))
