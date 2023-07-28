@@ -6,6 +6,7 @@ from bot.models.completed_claim import CompletedClaim
 from bot.models.checked_claim import CheckedClaim
 from bot.models.user import User
 from bot.status import Status
+from bot.views.kudos_view import KudosView
 
 # Use TYPE_CHECKING to avoid circular import from bot
 from typing import TYPE_CHECKING
@@ -54,7 +55,7 @@ class KudosForm(ui.Modal, title='Kudos Form'):
         # Add users to thread and send message
         await thread.add_user(interaction.user)
         await thread.add_user(original_user)
-        message = await thread.send(embed=fb_embed)
+        message = await thread.send(embed=fb_embed, view=KudosView(self))
 
         # Send message
         await interaction.response.send_message(content="Complemented!",

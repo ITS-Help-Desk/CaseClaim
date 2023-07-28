@@ -13,12 +13,14 @@ from bot.cogs.join_command import JoinCommand
 from bot.cogs.announcement_command import AnnouncementCommand
 from bot.cogs.help_command import HelpCommand
 from bot.cogs.leaderboard_command import LeaderboardCommand
+from bot.cogs.case_dist import CaseDistCommand
 
 from bot.views.claim_view import ClaimView
 from bot.views.affirm_view import AffirmView
 from bot.views.check_view import CheckView
 from bot.views.check_view_red import CheckViewRed
 from bot.views.resolve_ping_view import ResolvePingView
+from bot.views.outage_view import OutageView
 
 from bot.models.outage import Outage
 
@@ -126,6 +128,8 @@ class Bot(commands.Bot):
         self.add_view(CheckView(self))
         self.add_view(CheckViewRed(self))
         self.add_view(ResolvePingView(self))
+        self.add_view(OutageView(self))
+        self.add_view(ResolvePingView(self))
 
     async def on_ready(self):
         """Loads all commands stored in the cogs folder and starts the bot.
@@ -144,6 +148,7 @@ class Bot(commands.Bot):
         await self.add_cog(GetLogCommand(self))
         await self.add_cog(ReportCommand(self))
         await self.add_cog(LeaderboardCommand(self))
+        await self.add_cog(CaseDistCommand(self))
 
         await self.add_cog(AnnouncementCommand(self))
 
