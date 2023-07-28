@@ -1,4 +1,4 @@
-from discord.ext import commands
+from discord.ext import commands, tasks
 import discord
 from mysql.connector import MySQLConnection
 from typing import Union
@@ -12,12 +12,15 @@ from bot.cogs.report_command import ReportCommand
 from bot.cogs.join_command import JoinCommand
 from bot.cogs.announcement_command import AnnouncementCommand
 from bot.cogs.help_command import HelpCommand
+from bot.cogs.leaderboard_command import LeaderboardCommand
 
 from bot.views.claim_view import ClaimView
 from bot.views.affirm_view import AffirmView
 from bot.views.check_view import CheckView
 from bot.views.check_view_red import CheckViewRed
 from bot.views.resolve_ping_view import ResolvePingView
+
+from bot.models.outage import Outage
 
 '''from cogs.mickie_command import MickieCommand
 from cogs.help_command import HelpCommand
@@ -63,6 +66,8 @@ class Bot(commands.Bot):
 
         self.embed_color = discord.Color.from_rgb(117, 190, 233)
 
+        self.resend_outages = False
+
         # Initialize bot settings
         intents = discord.Intents.default()
         intents.message_content = True  
@@ -107,6 +112,12 @@ class Bot(commands.Bot):
         dev_role = discord.utils.get(user.guild.roles, name="Phone Analyst")
         return dev_role in user.roles
 
+    @tasks.loop(seconds=5)  # repeat after every 5 seconds
+    async def resend_outages_loop(self):
+        if self.resend_outages:
+            await Outage.resend(self)
+            self.resend_outages = False
+
     async def setup_hook(self):
         """Sets up the views so that they can be persistently loaded
         """
@@ -130,10 +141,9 @@ class Bot(commands.Bot):
         await self.add_cog(CaseInfoCommand(self))
         await self.add_cog(JoinCommand(self))
 
-
         await self.add_cog(GetLogCommand(self))
-
         await self.add_cog(ReportCommand(self))
+        await self.add_cog(LeaderboardCommand(self))
 
         await self.add_cog(AnnouncementCommand(self))
 
@@ -154,6 +164,8 @@ class Bot(commands.Bot):
 
 
         await self.add_cog(AnnouncementCommand(self))'''
+
+        self.resend_outages_loop.start()
 
         synced = await self.tree.sync()
         print("{} commands synced".format(len(synced)))

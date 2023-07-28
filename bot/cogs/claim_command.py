@@ -6,7 +6,6 @@ import traceback
 
 from bot.models.user import User
 from bot.models.active_claim import ActiveClaim
-from bot.models.outage import Outage
 from bot.models.announcement import Announcement
 
 from bot.views.claim_view import ClaimView
@@ -86,7 +85,7 @@ class ClaimCommand(commands.Cog):
         case = ActiveClaim(response.id, case_num, tech, datetime.now())
         case.add_to_database(self.bot.connection)
 
-        await Outage.resend(self.bot)
+        self.bot.resend_outages = True
         await Announcement.resend(self.bot)
 
     @claim.error

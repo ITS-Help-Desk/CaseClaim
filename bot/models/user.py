@@ -31,6 +31,18 @@ class User(DatabaseItem):
 
             return User(result[0], result[1], result[2])
 
+    @staticmethod
+    def get_all(connection: MySQLConnection) -> list['User']:
+        with connection.cursor() as cursor:
+            users = []
+            cursor.execute("SELECT * FROM Users")
+            results = cursor.fetchall()
+
+            for result in results:
+                users.append(User(result[0], result[1], result[2]))
+
+            return users
+
     def activate(self) -> None:
         pass
 

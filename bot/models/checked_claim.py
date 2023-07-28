@@ -78,11 +78,11 @@ class CheckedClaim(DatabaseItem):
             connection.commit()
 
     @staticmethod
-    def search(connection: MySQLConnection, user: Optional[discord.User] = None, month: Optional[int] = None, pinged=False) -> list['CheckedClaim']:
+    def search(connection: MySQLConnection, user: Optional[User] = None, month: Optional[int] = None, pinged=False) -> list['CheckedClaim']:
         sql = "SELECT * FROM CheckedClaims WHERE 1=1"
 
         if user is not None:
-            sql += f" AND tech_id = {user.id}"
+            sql += f" AND tech_id = {user.discord_id}"
 
         if month is not None:
             now = datetime.now()
@@ -111,8 +111,6 @@ class CheckedClaim(DatabaseItem):
                                          User.from_id(connection, result[3]),
                                          result[4], result[5], result[6], Status.from_str(result[7]), result[8]))
             return data
-
-
 
     def add_to_database(self, connection: MySQLConnection) -> None:
         with connection.cursor() as cursor:

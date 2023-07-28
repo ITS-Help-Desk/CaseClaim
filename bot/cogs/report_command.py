@@ -7,6 +7,7 @@ import traceback
 
 from bot.models.checked_claim import CheckedClaim
 from bot.models.ping import Ping
+from bot.models.user import User
 
 # Use TYPE_CHECKING to avoid circular import from bot
 from typing import TYPE_CHECKING
@@ -46,6 +47,10 @@ class ReportCommand(commands.Cog):
 
             if month is not None:
                 month = int(month_string_to_number(month))
+
+            if user is not None:
+                user = User.from_id(self.bot.connection, user.id)
+
             results = CheckedClaim.search(self.bot.connection, user, month, pinged)
             row_str = self.data_to_rowstr(results)
 

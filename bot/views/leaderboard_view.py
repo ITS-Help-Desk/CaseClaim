@@ -2,7 +2,10 @@ import csv
 import datetime
 import discord
 import discord.ui as ui
+from mysql.connector import MySQLConnection
 from bot.helpers import month_number_to_name
+
+from bot.models.checked_claim import CheckedClaim
 
 # Use TYPE_CHECKING to avoid circular import from bot
 from typing import TYPE_CHECKING
@@ -53,7 +56,7 @@ class LeaderboardView(ui.View):
         await interaction.response.defer(thinking=False)  # Acknowledge button press
 
         user_id = interaction.user.id
-        data = LeaderboardView.get_data(interaction.created_at)
+        data = LeaderboardView.get_data(self.bot.connection, interaction.created_at)
 
         # Create embed
         embed = discord.Embed(title=f"{interaction.user.display_name}'s Ranking")
@@ -129,17 +132,18 @@ class LeaderboardView(ui.View):
         return embed
 
     @staticmethod
-    def create_rankings(interaction_date: datetime.datetime) -> tuple[str, str]:
+    def create_rankings(connection: MySQLConnection, interaction_date: datetime.datetime) -> tuple[str, str]:
         """Creates the ranking strings for monthly and semester ranks.
 
         Args:
+            connection (MySQLConnection): The connection to the database
             interaction_date (datetime.datetime): The time at which this request is made.
 
         Returns:
             tuple[str, str]: Returns a tuple containing ("1. Andrew\n2. James", "1. James\n2. Andrew") where
             the first element is for monthly and second element is for semester.
         """
-        data = LeaderboardView.get_data(interaction_date)
+        data = LeaderboardView.get_data(connection, interaction_date)
 
         mc = data[0][0]
         sc = data[1][0]
@@ -167,7 +171,7 @@ class LeaderboardView(ui.View):
         return month_ranking, semester_ranking
 
     @staticmethod
-    def get_data(interaction_date: datetime.datetime) -> tuple[
+    def get_data(connection: MySQLConnection, interaction_date: datetime.datetime) -> tuple[
         tuple[dict[int, int], list[int]], tuple[dict[int, int], list[int]], dict[int, int], dict[int, int]]:
         """Collects a large amount of data to be used by various commands and events within this bot.
         This function collects:
@@ -178,6 +182,7 @@ class LeaderboardView(ui.View):
             - Total amount of pinged cases by each user by month
             - Total amount of pinged cases by each user by semester
         Args:
+            connection (MySQLConnection): The connection to the database
             interaction_date (datetime.datetime): The time that this data was requested at.
 
         Returns:
@@ -191,38 +196,25 @@ class LeaderboardView(ui.View):
         month_ping_counts = {}
         semester_ping_counts = {}
 
-        with open('log.csv', 'r') as f:
-            reader = csv.reader(f)
-            for row in reader:
-                date = datetime.datetime.strptime(row[1], "%Y-%m-%d %H:%M:%S.%f")
+        claims = CheckedClaim.search(connection)
+        for claim in claims:
+            if claim.status == Status.DONE:
+                continue
 
-                id = int(row[3])
+            if claim.tech.discord_id not in month_ping_counts.keys():
+                month_ping_counts[claim.tech.discord_id] = 0
+            if claim.tech.discord_id not in semester_ping_counts.keys():
+                semester_ping_counts[claim.tech.discord_id] = 0
 
-                # Initialize information as zero
-                if not id in month_ping_counts.keys():
-                    month_ping_counts[id] = 0
-                if not id in semester_ping_counts.keys():
-                    semester_ping_counts[id] = 0
+            # Organize data for month
+            if claim.claim_time.month == interaction_date.month and claim.claim_time.year == interaction_date.year:
+                if claim.tech.discord_id not in month_counts.keys():
+                    month_counts[claim.tech.discord_id] = 0
+                month_counts[claim.tech.discord_id] += 1
 
-                # Organize data for month
-                if date.month == interaction_date.month:
-                    if not id in month_counts.keys():
-                        month_counts[id] = 0
-                    month_counts[id] += 1
-
-                    # Add pinged
-                    if row[5] == Status.PINGED or row[5] == Status.RESOLVED:
-                        month_ping_counts[id] += 1
-
-                # Organize data for semester
-                if date.year == interaction_date.year:
-                    if not id in semester_counts.keys():
-                        semester_counts[id] = 0
-                    semester_counts[id] += 1
-
-                    # Add pinged
-                    if row[5] == Status.PINGED or row[5] == Status.RESOLVED:
-                        semester_ping_counts[id] += 1
+                # Add pinged
+                if claim.status == Status.PINGED or claim.status == Status.RESOLVED:
+                    month_ping_counts[claim.tech.discord_id] += 1
 
         semester_counts_sorted_keys = sorted(semester_counts, key=semester_counts.get, reverse=True)
         month_counts_sorted_keys = sorted(month_counts, key=month_counts.get, reverse=True)
