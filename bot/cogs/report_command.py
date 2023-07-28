@@ -70,7 +70,7 @@ class ReportCommand(commands.Cog):
     def data_to_rowstr(self, data: list[CheckedClaim]) -> list[list[str]]:
         new_list = []
         for claim in data:
-            t = claim.claim_time.strftime("%b %d %Y %-I:%M %p")  # Format time
+            t = claim.claim_time.strftime("%b %d %Y %#I:%M %p")  # Format time
             row = [str(t), str(claim.case_num), str(claim.tech.full_name), str(claim.lead.full_name), str(claim.status)]
 
             # Add ping data
