@@ -11,6 +11,7 @@ from bot.cogs.caseinfo_command import CaseInfoCommand
 from bot.cogs.report_command import ReportCommand
 from bot.cogs.join_command import JoinCommand
 from bot.cogs.announcement_command import AnnouncementCommand
+from bot.cogs.help_command import HelpCommand
 
 from bot.views.claim_view import ClaimView
 from bot.views.affirm_view import AffirmView
@@ -122,14 +123,20 @@ class Bot(commands.Bot):
         print(f'Logged in as {self.user}!')
 
         # Load all commands
+        await self.add_cog(HelpCommand(self))
         await self.add_cog(ClaimCommand(self))
         await self.add_cog(MickieCommand(self))
-        await self.add_cog(GetLogCommand(self))
         await self.add_cog(MyCasesCommand(self))
         await self.add_cog(CaseInfoCommand(self))
-        await self.add_cog(ReportCommand(self))
         await self.add_cog(JoinCommand(self))
+
+
+        await self.add_cog(GetLogCommand(self))
+
+        await self.add_cog(ReportCommand(self))
+
         await self.add_cog(AnnouncementCommand(self))
+
         '''await self.add_cog(MickieCommand(self))
         await self.add_cog(HelpCommand(self))
         await self.add_cog(ClaimCommand(self))

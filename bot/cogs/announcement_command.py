@@ -4,6 +4,7 @@ import discord
 import traceback
 
 from bot.forms.outage_form import OutageForm
+from bot.forms.announcement_form import AnnouncementForm
 
 # Use TYPE_CHECKING to avoid circular import from bot
 from typing import TYPE_CHECKING
@@ -41,8 +42,8 @@ class AnnouncementCommand(commands.Cog):
                 await interaction.response.send_modal(outage_modal)
             elif str(choices.value) == "announcement":
                 pass
-                #announcement_modal = AnnouncementModal(self.bot)
-                #await interaction.response.send_modal(announcement_modal)
+                announcement_modal = AnnouncementForm(self.bot)
+                await interaction.response.send_modal(announcement_modal)
             else:
                 await interaction.response.send_message(content="Error! Invalid choice selected", ephemeral=True)
         else:

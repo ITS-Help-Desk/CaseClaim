@@ -7,6 +7,7 @@ import traceback
 from bot.models.user import User
 from bot.models.active_claim import ActiveClaim
 from bot.models.outage import Outage
+from bot.models.announcement import Announcement
 
 from bot.views.claim_view import ClaimView
 
@@ -86,7 +87,7 @@ class ClaimCommand(commands.Cog):
         case.add_to_database(self.bot.connection)
 
         await Outage.resend(self.bot)
-        #await self.bot.announcement_manager.resend_announcements()
+        await Announcement.resend(self.bot)
 
     @claim.error
     async def claim_error(self, ctx: discord.Interaction, error):

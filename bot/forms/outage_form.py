@@ -49,7 +49,7 @@ class OutageForm(ui.Modal, title='Outage Form'):
 
         # Send announcement message
         announcement_channel = await self.bot.fetch_channel(self.bot.announcement_channel)
-        announcement_message = await announcement_channel.send(content="@everyone", embed=announcement_embed, view=OutageView(self.bot))
+        announcement_message = await announcement_channel.send(content="@here", embed=announcement_embed, view=OutageView(self.bot))
 
         # Create case embed
         case_embed = discord.Embed(title=f"{service} Outage", colour=discord.Color.red())
@@ -66,3 +66,5 @@ class OutageForm(ui.Modal, title='Outage Form'):
         out.add_to_database(self.bot.connection)
         # Send confirmation message
         await interaction.response.send_message(content="👍", ephemeral=True, delete_after=0)
+
+        await announcement_message.edit(content="")

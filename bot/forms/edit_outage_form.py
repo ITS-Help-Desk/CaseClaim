@@ -2,6 +2,7 @@ import discord
 import discord.ui as ui
 
 from bot.models.outage import Outage
+
 # Use TYPE_CHECKING to avoid circular import from bot
 from typing import TYPE_CHECKING
 
