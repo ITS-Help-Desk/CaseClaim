@@ -41,7 +41,6 @@ class AnnouncementCommand(commands.Cog):
                 outage_modal = OutageForm(self.bot)
                 await interaction.response.send_modal(outage_modal)
             elif str(choices.value) == "announcement":
-                pass
                 announcement_modal = AnnouncementForm(self.bot)
                 await interaction.response.send_modal(announcement_modal)
             else:

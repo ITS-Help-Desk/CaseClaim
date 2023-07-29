@@ -41,19 +41,7 @@ def main():
         with open("config.json", "w") as f:
             data = {"cases_channel": 0, "claims_channel": 0, "error_channel": 0, "announcement_channel": 0}
             json.dump(data, f)
-            raise ValueError("Please add the required config information into config.csv")
-    except FileExistsError:
-        pass
-
-    # Create announcements.json if it doesn't already exist
-    try:
-        f = open("announcements.json", "x")
-        f.close()
-        print('Created announcements.json')
-
-        with open("announcements.json", "w") as f:
-            data = {}
-            json.dump(data, f)
+            raise ValueError("Please add the required config information into config.json")
     except FileExistsError:
         pass
 
@@ -69,7 +57,7 @@ def main():
             if cases_channel == 0 or claims_channel == 0 or error_channel == 0 or announcement_channel == 0:
                 raise ValueError()
     except Exception:
-        raise ValueError("Please add the required config information into config.csv")
+        raise ValueError("Please add the required config information into config.json")
 
     db_config = {
         'user': config_data["db_user"],

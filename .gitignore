@@ -1,9 +1,6 @@
 token.txt
 temp.csv
-log.csv
 config.json
-active_cases.json
-announcements.json
 .vscode
 .DS_Store
 .idea

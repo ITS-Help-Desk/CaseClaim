@@ -14,6 +14,7 @@ from bot.cogs.announcement_command import AnnouncementCommand
 from bot.cogs.help_command import HelpCommand
 from bot.cogs.leaderboard_command import LeaderboardCommand
 from bot.cogs.case_dist import CaseDistCommand
+from bot.cogs.leadstats_command import LeadStatsCommand
 
 from bot.views.claim_view import ClaimView
 from bot.views.affirm_view import AffirmView
@@ -21,31 +22,9 @@ from bot.views.check_view import CheckView
 from bot.views.check_view_red import CheckViewRed
 from bot.views.resolve_ping_view import ResolvePingView
 from bot.views.outage_view import OutageView
+from bot.views.leadstats_view import LeadStatsView
 
 from bot.models.outage import Outage
-
-'''from cogs.mickie_command import MickieCommand
-from cogs.help_command import HelpCommand
-from cogs.report_command import ReportCommand
-from cogs.claim_command import ClaimCommand
-from cogs.ping_command import PingCommand
-from cogs.update_percent_command import UpdatePercentCommand
-from cogs.caseinfo_command import CaseInfoCommand
-from cogs.mycases_command import MyCasesCommand
-from cogs.leaderboard_command import LeaderboardCommand
-from cogs.leadstats_command import LeadStatsCommand
-from cogs.getlog_command import GetLogCommand
-from cogs.announcement_command import AnnouncementCommand
-from cogs.casedist_command import CaseDistCommand
-
-from views.lead_view import LeadView
-from views.lead_view_red import LeadViewRed
-from views.tech_view import TechView
-from views.leaderboard_view import LeaderboardView
-from views.leadstats_view import LeadStatsView
-from views.ping_view import PingView
-
-from views.outage_view import OutageView'''
 
 
 class Bot(commands.Bot):
@@ -129,7 +108,7 @@ class Bot(commands.Bot):
         self.add_view(CheckViewRed(self))
         self.add_view(ResolvePingView(self))
         self.add_view(OutageView(self))
-        self.add_view(ResolvePingView(self))
+        self.add_view(LeadStatsView(self))
 
     async def on_ready(self):
         """Loads all commands stored in the cogs folder and starts the bot.
@@ -149,26 +128,9 @@ class Bot(commands.Bot):
         await self.add_cog(ReportCommand(self))
         await self.add_cog(LeaderboardCommand(self))
         await self.add_cog(CaseDistCommand(self))
+        await self.add_cog(LeadStatsCommand(self))
 
         await self.add_cog(AnnouncementCommand(self))
-
-        '''await self.add_cog(MickieCommand(self))
-        await self.add_cog(HelpCommand(self))
-        await self.add_cog(ClaimCommand(self))
-        await self.add_cog(CaseInfoCommand(self))
-        await self.add_cog(MyCasesCommand(self))
-        await self.add_cog(GetLogCommand(self))
-       
-       
-        await self.add_cog(PingCommand(self))
-        await self.add_cog(ReportCommand(self))
-        await self.add_cog(UpdatePercentCommand(self))
-        await self.add_cog(LeaderboardCommand(self))
-        await self.add_cog(LeadStatsCommand(self))
-        await self.add_cog(CaseDistCommand(self))
-
-
-        await self.add_cog(AnnouncementCommand(self))'''
 
         self.resend_outages_loop.start()
 
