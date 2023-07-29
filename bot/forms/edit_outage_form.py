@@ -12,6 +12,12 @@ if TYPE_CHECKING:
 
 class EditOutageForm(ui.Modal, title='Outage Update Form'):
     def __init__(self, bot: "Bot", outage: Outage):
+        """Creates a form for editing the fields of an outage.
+
+        Args:
+            bot (Bot): A reference to the original Bot instantiation.
+            outage (Outage): The outage that is being edited
+        """
         super().__init__()
         self.bot = bot
         self.outage = outage
@@ -33,6 +39,11 @@ class EditOutageForm(ui.Modal, title='Outage Update Form'):
         self.add_item(self.resolution_time)
 
     async def on_submit(self, interaction: discord.Interaction) -> None:
+        """Once submitted, this edits the outage in the database and edits the case and announcement messages
+
+        Args:
+            interaction (discord.Interaction): The submit modal interaction
+        """
         new_service = str(self.service)
         new_parent_case = str(self.parent_case)
         new_description = str(self.description)
@@ -54,9 +65,11 @@ class EditOutageForm(ui.Modal, title='Outage Update Form'):
 
         announcement_embed.add_field(name="Description", value=f"{new_description}", inline=False)
 
+        # Add troubleshooting steps
         if new_troubleshoot_steps is not None and len(str(new_troubleshoot_steps)) != 0:
             announcement_embed.add_field(name="How to Troubleshoot", value=f"{new_troubleshoot_steps}", inline=False)
 
+        # Add resolution time
         if new_resolution_time is not None and len(str(new_resolution_time)) != 0:
             announcement_embed.add_field(name="ETA to Resolution", value=f"{new_resolution_time}", inline=False)
 

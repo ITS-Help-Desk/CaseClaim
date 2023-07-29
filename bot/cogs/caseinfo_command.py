@@ -5,6 +5,8 @@ import time
 from bot import paginator
 import traceback
 
+from bot.helpers import create_paginator_embeds
+
 from bot.models.active_claim import ActiveClaim
 from bot.models.completed_claim import CompletedClaim
 from bot.models.checked_claim import CheckedClaim
@@ -47,9 +49,11 @@ class CaseInfoCommand(commands.Cog):
         for result in CheckedClaim.get_all_with_case_num(self.bot.connection, case_num):
             rows.append(result)
 
+        # Sort data, create written descriptions
         rows.sort(key=lambda x: x.claim_time, reverse=True)
         row_str = self.data_to_rowstr(rows)
 
+        # Create paginator embed
         title = f'Cases History of {case_num} ({len(rows)})'
         if len(row_str) <= 10:
             embed = discord.Embed(title=title)
@@ -58,7 +62,7 @@ class CaseInfoCommand(commands.Cog):
 
             await interaction.followup.send(embed=embed, ephemeral=True)
         else:
-            embeds = self.create_paginator_embeds(row_str, title)
+            embeds = create_paginator_embeds(row_str, title, self.bot.embed_color)
             await paginator.Simple(ephemeral=True).start(interaction, embeds)
 
     def data_to_rowstr(self, rows: list[ActiveClaim | CompletedClaim | CheckedClaim]) -> list[str]:
@@ -66,7 +70,7 @@ class CaseInfoCommand(commands.Cog):
         that can be used in the embed description.
 
         Args:
-            rows (list[str]): The list of raw strings from the csv.
+            rows (list[ActiveClaim | CompletedClaim | CheckedClaim]): The list of raw strings from the database.
 
         Returns:
             list[str]: The list of descriptions that can be directly used in an embed.
@@ -84,39 +88,6 @@ class CaseInfoCommand(commands.Cog):
             row_str.append(s)
 
         return row_str
-
-    def create_paginator_embeds(self, data: list[str], title: str) -> list[discord.Embed]:
-        """Creates a list of embeds that can be used with a paginator.
-
-        Args:
-            data (list[str]): The list of case descriptions.
-            title (str): The title for each of the embeds
-
-        Returns:
-            list[discord.Embed]: A list of embeds for the paginator.
-        """
-        # Create a list of embeds to paginate
-        embeds = []
-        i = 0
-        data_len = len(data)
-
-        # Go through all cases
-        while i < data_len:
-            # Create an embed for every 10 cases
-            new_embed = discord.Embed(title=title)
-            new_embed.colour = self.bot.embed_color
-            description = ''
-
-            # Add ten (or fewer) cases
-            for j in range(min(10, len(data))):
-                row = data.pop(0)
-                description += row + '\n'
-
-            new_embed.description = description
-            embeds.append(new_embed)
-            i += 10
-
-        return embeds
 
     @caseinfo.error
     async def caseinfo_error(self, ctx: discord.Interaction, error):

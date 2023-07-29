@@ -6,6 +6,13 @@ from bot.models.database_item import DatabaseItem
 
 class User(DatabaseItem):
     def __init__(self, discord_id: int, first_name: str, last_name: str):
+        """Creates a representation of a user
+
+        Args:
+            discord_id (int): The discord ID of a user
+            first_name (str): The first name of a user
+            last_name (str): The last name of a user
+        """
         self.discord_id = discord_id
 
         if first_name[0].isupper():
@@ -22,6 +29,15 @@ class User(DatabaseItem):
 
     @staticmethod
     def from_id(connection: MySQLConnection, discord_id: int) -> Optional['User']:
+        """Returns a User (if found) based on a provided discord ID
+
+        Args:
+            connection (MySQLConnection): The connection to the MySQL database
+            discord_id (int): The discord ID of a user
+
+        Returns:
+            Optional[User] - A representation of a user
+        """
         with connection.cursor() as cursor:
             cursor.execute("SELECT * FROM Users WHERE discord_id = %s", (discord_id, ))
             result = cursor.fetchone()
@@ -33,6 +49,14 @@ class User(DatabaseItem):
 
     @staticmethod
     def get_all(connection: MySQLConnection) -> list['User']:
+        """Gets all the users in the database
+
+        Args:
+            connection (MySQLConnection): The connection to the MySQL database
+
+        Returns:
+            list[User] - A list of users
+        """
         with connection.cursor() as cursor:
             users = []
             cursor.execute("SELECT * FROM Users")

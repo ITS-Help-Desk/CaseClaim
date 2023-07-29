@@ -24,6 +24,11 @@ class JoinForm(ui.Modal, title='Join Form'):
     last_name = ui.TextInput(label='Last Name', style=discord.TextStyle.short)
 
     async def on_submit(self, interaction: discord.Interaction):
+        """Records the user's first and last name and saves it to the database.
+
+        Args:
+            interaction (discord.Interaction): The submit modal interaction
+        """
         user = User(interaction.user.id, str(self.first_name), str(self.last_name))
         user.add_to_database(self.bot.connection)
 

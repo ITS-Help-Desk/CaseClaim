@@ -17,6 +17,12 @@ if TYPE_CHECKING:
 
 class KudosForm(ui.Modal, title='Kudos Form'):
     def __init__(self, bot: "Bot", case: CompletedClaim):
+        """Creates a feedback form for complementing a tech's handling of a case.
+
+        Args:
+            bot (Bot): A reference to the original Bot instantiation.
+            case (CompletedClaim): The claim that is being complemented
+        """
         super().__init__()
         self.bot = bot
         self.case = case

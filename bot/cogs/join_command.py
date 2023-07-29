@@ -23,6 +23,12 @@ class JoinCommand(commands.Cog):
 
     @app_commands.command(description="Allows a user to be added to our list")
     async def join(self, interaction: discord.Interaction) -> None:
+        """Allows a user to join the server by logging their first and last name
+        for data analytic purposes.
+
+        Args:
+            interaction (discord.Interaction): Interaction that the slash command originated from
+        """
         await interaction.response.send_modal(JoinForm(self.bot))
 
     @join.error

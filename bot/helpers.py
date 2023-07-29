@@ -2,6 +2,8 @@
 all throughout this bot.
 """
 
+import discord
+
 
 def month_number_to_name(month_number: int) -> str:
     """Converts a month number to the actual name.
@@ -70,3 +72,37 @@ def month_string_to_number(month_name: str) -> str:
         return out
     except Exception:
         raise ValueError('Not a month')
+
+
+def create_paginator_embeds(data: list[str], title: str, embed_color: discord.Color) -> list[discord.Embed]:
+    """Creates a list of embeds that can be used with a paginator.
+
+    Args:
+        data (list[str]): The list of case descriptions.
+        title (str): The title for each of the embeds
+
+    Returns:
+        list[discord.Embed]: A list of embeds for the paginator.
+    """
+    # Create a list of embeds to paginate
+    embeds = []
+    i = 0
+    data_len = len(data)
+
+    # Go through all cases
+    while i < data_len:
+        # Create an embed for every 10 cases
+        new_embed = discord.Embed(title=title)
+        new_embed.colour = embed_color
+        description = ''
+
+        # Add ten (or fewer) cases
+        for j in range(min(10, len(data))):
+            row = data.pop(0)
+            description += row + '\n'
+
+        new_embed.description = description
+        embeds.append(new_embed)
+        i += 10
+
+    return embeds

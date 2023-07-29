@@ -28,10 +28,11 @@ class CaseDistCommand(commands.Cog):
     @app_commands.command(description="Shows a graph of the timing of case claims")
     @app_commands.default_permissions(mute_members=True)
     async def casedist(self, interaction: discord.Interaction, previous_days: int) -> None:
-        """Sends a matplotlib graph of the average case claim time.
+        """Sends a graph of the case claim time distribution
 
         Args:
-            interaction (discord.Interaction): Interaction that the slash command originated from
+            interaction (discord.Interaction): Interaction that the slash command originated from.
+            previous_days (int): The amount of days worth of data that will be used.
         """
         start = datetime.datetime.now() - datetime.timedelta(days=previous_days)
         start = start.replace(hour=7, minute=0, second=0)
@@ -40,6 +41,7 @@ class CaseDistCommand(commands.Cog):
         for i in range(44):
             days.append(0)
 
+        # Generate data
         claims = CheckedClaim.search(self.bot.connection)
         for claim in claims:
             if claim.claim_time > start:
@@ -50,6 +52,7 @@ class CaseDistCommand(commands.Cog):
 
                 days[min(index, len(days) - 1)] += 1
 
+        # Create graph
         data_stream = io.BytesIO()
         fig, ax = plt.subplots()
 

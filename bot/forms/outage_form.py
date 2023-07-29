@@ -15,6 +15,13 @@ if TYPE_CHECKING:
 
 class OutageForm(ui.Modal, title='Outage Form'):
     def __init__(self, bot: "Bot"):
+        """Creates a form for creating an outage.
+        Records the service name, parent case, description,
+        troubleshooting steps, and resolution time.
+
+        Args:
+            bot (Bot): A reference to the original Bot instantiation.
+        """
         super().__init__()
         self.bot = bot
 
@@ -27,6 +34,12 @@ class OutageForm(ui.Modal, title='Outage Form'):
                                    required=False)
 
     async def on_submit(self, interaction: discord.Interaction):
+        """Creates an outage object and saves it to the database. Also sends a message
+        to the announcement and cases channels.
+
+        Args:
+            interaction (discord.Interaction): Interaction that the slash command originated from.
+        """
         service = str(self.service)
         parent_case = str(self.parent_case) if len(str(self.parent_case)) != 0 else None
         description = str(self.description)
@@ -41,9 +54,11 @@ class OutageForm(ui.Modal, title='Outage Form'):
 
         announcement_embed.add_field(name="Description", value=f"{description}", inline=False)
 
+        # Add troubleshooting steps
         if troubleshooting_steps is not None and len(str(troubleshooting_steps)) != 0:
             announcement_embed.add_field(name="How to Troubleshoot", value=f"{troubleshooting_steps}", inline=False)
 
+        # Add resolution time
         if troubleshooting_steps is not None and len(str(resolution_time)) != 0:
             announcement_embed.add_field(name="ETA to Resolution", value=f"{resolution_time}", inline=False)
 

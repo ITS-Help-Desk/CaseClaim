@@ -45,5 +45,4 @@ class AffirmForm(ui.Modal, title='Tech Assessment'):
         if len(str(self.assessment)) != 0:
             embed.add_field(name="Assessment", value=self.assessment)
 
-        await interaction.channel.send(content=f"<@!{self.case.lead.discord_id}>", embed=embed,
-                                       view=ResolvePingView(self.bot))
+        await interaction.channel.send(content=f"<@!{self.case.lead.discord_id}>", embed=embed, view=ResolvePingView(self.bot))

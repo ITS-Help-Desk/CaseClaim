@@ -38,7 +38,7 @@ class ReportCommand(commands.Cog):
         Args:
             interaction (discord.Interaction): Interaction that the slash command originated from.
             user (discord.Member, optional): The user that the report will correspond to. Defaults to None.
-            month (str, optional): The month that all of the cases comes from. Defaults to None.
+            month (str, optional): The month that all the cases comes from. Defaults to None.
             pinged (bool, optional): Whether or not the case has been pinged. Defaults to False.
         """
         # Check if user is a lead
@@ -68,6 +68,15 @@ class ReportCommand(commands.Cog):
             await interaction.response.send_message(content=msg, ephemeral=True)
 
     def data_to_rowstr(self, data: list[CheckedClaim]) -> list[list[str]]:
+        """Converts the raw data into a list of strings
+        that can be used in the embed description.
+
+        Args:
+            data (list[CheckedClaim]): The list of raw strings from the database.
+
+        Returns:
+            list[list[str]]: The list of descriptions that can be directly used to be put in the temp.csv file.
+        """
         new_list = []
         for claim in data:
             t = claim.claim_time.strftime("%b %d %Y %#I:%M %p")  # Format time
