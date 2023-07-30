@@ -12,7 +12,7 @@ class Simple(discord.ui.View):
     Parameters:
     ----------
     timeout: int
-        How long the Paginator should timeout in, after the last interaction. (In seconds) (Overrides default of 60)
+        How long the Paginator should time out in, after the last interaction. (In seconds) (Overrides default of 60)
     PreviousButton: discord.ui.Button
         Overrides default previous button.
     NextButton: discord.ui.Button
@@ -48,7 +48,7 @@ class Simple(discord.ui.View):
 
         super().__init__(timeout=timeout)
 
-    async def start(self, ctx: discord.Interaction|commands.Context, pages: list[discord.Embed]):
+    async def start(self, ctx: discord.Interaction | commands.Context, pages: list[discord.Embed]):
         
         if isinstance(ctx, discord.Interaction):
             ctx = await commands.Context.from_interaction(ctx)
@@ -104,7 +104,6 @@ class Simple(discord.ui.View):
             return await interaction.response.send_message(embed=embed, ephemeral=True)
         await self.previous()
         await interaction.response.defer()
-
 
 
 class SimplePaginatorPageCounter(discord.ui.Button):

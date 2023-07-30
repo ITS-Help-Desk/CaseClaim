@@ -1,11 +1,16 @@
 from discord import app_commands
 from discord.ext import commands
 import discord
-import csv
 import time
-import datetime
-from .. import paginator
+from bot import paginator
 import traceback
+
+from bot.helpers import create_paginator_embeds
+
+from bot.models.active_claim import ActiveClaim
+from bot.models.completed_claim import CompletedClaim
+from bot.models.checked_claim import CheckedClaim
+from bot.models.user import User
 
 # Use TYPE_CHECKING to avoid circular import from bot
 from typing import TYPE_CHECKING
@@ -23,7 +28,6 @@ class MyCasesCommand(commands.Cog):
         """
         self.bot = bot
 
-    
     @app_commands.command(description="Shows a list of all cases a user has worked on")
     async def mycases(self, interaction: discord.Interaction) -> None:
         """Shows a list of all cases a user has worked on.
@@ -31,106 +35,65 @@ class MyCasesCommand(commands.Cog):
         Args:
             interaction (discord.Interaction): Interaction that the slash command originated from
         """
-        await interaction.response.defer(ephemeral=True) # Wait in case process takes a long time
+        # Check to see if user is in the list
+        u = User.from_id(self.bot.connection, interaction.user.id)
+        if u is None:
+            msg = f"Please use the **/join** command using this command."
+            await interaction.response.send_message(content=msg, ephemeral=True, delete_after=300)
+            return
+
+        await interaction.response.defer(ephemeral=True)  # Wait in case process takes a long time
 
         # Collect rows with this case
-        data = []
-        with open('log.csv', 'r') as f:
-            reader = csv.reader(f)
-            for row in reader:
-                if int(row[3]) == interaction.user.id:
-                    data.append(row)
-        
-        for message_id in self.bot.claim_manager.active_claims.keys():
-            c = self.bot.claim_manager.active_claims[message_id]
-            if c.tech_id == interaction.user.id:
-                try:
-                    data.append(c.log_format())
-                except:
-                    pass # Case can't be shown
-        
-        # Send data
-        new_data = self.data_to_rowstr(data)
+        rows: list[ActiveClaim | CompletedClaim | CheckedClaim] = []
+        for result in ActiveClaim.get_all_with_tech_id(self.bot.connection, interaction.user.id):
+            rows.append(result)
+
+        for result in CompletedClaim.get_all_with_tech_id(self.bot.connection, interaction.user.id):
+            rows.append(result)
+
+        for result in CheckedClaim.get_all_with_tech_id(self.bot.connection, interaction.user.id):
+            rows.append(result)
+
+        # Sort data
+        rows.sort(key=lambda x: x.claim_time, reverse=True)
+        row_str = self.data_to_rowstr(rows)
+
         name = await interaction.guild.fetch_member(interaction.user.id)
-        name = name.display_name
-        title = f'Cases Worked on by {name} ({len(new_data)})'
-        if len(new_data) <= 10:
+        title = f'Cases Worked on by {name.display_name} ({len(rows)})'
+        if len(row_str) <= 10:
             embed = discord.Embed(title=title)
             embed.colour = self.bot.embed_color
-            embed.description = '\n'.join(row for row in new_data)
+            embed.description = '\n'.join(row for row in row_str)
 
             await interaction.followup.send(embed=embed, ephemeral=True)
         else:
-            embeds = self.create_paginator_embeds(new_data, title)
+            embeds = create_paginator_embeds(row_str, title, self.bot.embed_color)
             await paginator.Simple(ephemeral=True).start(interaction, embeds)
-        
-        
-    def data_to_rowstr(self, rows: list[str]) -> list[str]:
+
+    def data_to_rowstr(self, rows: list[ActiveClaim | CompletedClaim | CheckedClaim]) -> list[str]:
         """Converts the raw data into a list of strings
         that can be used in the embed description.
 
         Args:
-            rows (list[str]): The list of raw strings from the csv.
+            rows (list[str]): The list of raw strings from the database.
 
         Returns:
             list[str]: The list of descriptions that can be directly used in an embed.
         """
-        copy = rows[:]
-        copy.reverse()
-        new_data = []
-        for row in copy:
+        row_str = []
+        for row in rows:
             s = ''
-            # Include just ID in case user cannot be found    
-            t = row[1]
-
-            if row[5] == "":
+            if type(row) == ActiveClaim:
                 s += "**[ACTIVE]**"
 
             # Convert timestamp to UNIX
-            try:
-                t = int(time.mktime(datetime.datetime.strptime(t, "%Y-%m-%d %H:%M:%S.%f").timetuple()))
-                s += f'<t:{t}:f> - {row[2]}'
-            except:
-                pass # Time in the log is invalid
+            t = int(time.mktime(row.claim_time.timetuple()))
+            s += f'<t:{t}:f> - {row.case_num}'
 
-            new_data.append(s)
-        
-        return new_data
+            row_str.append(s)
 
- 
-    def create_paginator_embeds(self, data: list[str], title: str) -> list[discord.Embed]:
-        """Creates a list of embeds that can be used with a paginator.
-
-        Args:
-            data (list[str]): The list of case descriptions.
-            title (str): The title for each of the embeds
-
-        Returns:
-            list[discord.Embed]: A list of embeds for the paginator.
-        """
-        # Create a list of embeds to paginate
-        embeds = []
-        i = 0
-        data_len = len(data)
-
-        # Go through all cases
-        while i < data_len:
-            # Create an embed for every 10 cases
-            new_embed = discord.Embed(title=title)
-            new_embed.colour = self.bot.embed_color
-            description = ''
-            
-            # Add ten (or fewer) cases
-            for j in range(min(10, len(data))):
-                row = data.pop(0)
-                description += row + '\n'
-            
-            new_embed.description = description
-            embeds.append(new_embed)
-            i += 10
-            
-        return embeds
-        
+        return row_str
 
     @mycases.error
     async def mycases_error(self, ctx: discord.Interaction, error):

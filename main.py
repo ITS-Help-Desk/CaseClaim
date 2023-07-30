@@ -1,6 +1,9 @@
-from bot.bot import Bot
 import json
 import logging
+import mysql.connector
+from mysql.connector import Error
+
+from bot.bot import Bot
 
 
 def main():
@@ -28,14 +31,6 @@ def main():
         with open('token.txt', 'w') as f:
             f.write(token.strip())
             f.close()
-    
-    # Create log.csv if it doesn't already exist
-    try:
-        f = open("log.csv", "x")
-        f.close()
-        print('Created log.csv')
-    except FileExistsError:
-        pass
 
     # Create config.json if it doesn't already exist
     try:
@@ -46,32 +41,7 @@ def main():
         with open("config.json", "w") as f:
             data = {"cases_channel": 0, "claims_channel": 0, "error_channel": 0, "announcement_channel": 0}
             json.dump(data, f)
-            raise ValueError("Please add the required config information into config.csv")
-    except FileExistsError:
-        pass
-
-    # Create active_cases.json if it doesn't already exist
-    try:
-        f = open("active_cases.json", "x")
-        f.close()
-        print('Created active_cases.json')
-
-        with open("active_cases.json", "w") as f:
-            data = {}
-            json.dump(data, f)
-    except FileExistsError:
-        pass
-    
-
-    # Create announcements.json if it doesn't already exist
-    try:
-        f = open("announcements.json", "x")
-        f.close()
-        print('Created announcements.json')
-
-        with open("announcements.json", "w") as f:
-            data = {}
-            json.dump(data, f)
+            raise ValueError("Please add the required config information into config.json")
     except FileExistsError:
         pass
 
@@ -86,16 +56,26 @@ def main():
             
             if cases_channel == 0 or claims_channel == 0 or error_channel == 0 or announcement_channel == 0:
                 raise ValueError()
-    except:
-        raise ValueError("Please add the required config information into config.csv")
+    except Exception:
+        raise ValueError("Please add the required config information into config.json")
 
+    db_config = {
+        'user': config_data["db_user"],
+        'password': config_data["db_password"],
+        'host': config_data["db_host"],
+        'database': config_data["db_name"],
+        'raise_on_warnings': True
+    }
+
+    connection = None
+    try:
+        connection = mysql.connector.connect(**db_config)
+        print("MySQL Database connection successful")
+    except Error as err:
+        print(f"Error: '{err}'")
 
     # Create bot and run
-    bot = Bot()  
-    bot.cases_channel = cases_channel
-    bot.claims_channel = claims_channel
-    bot.error_channel = error_channel
-    bot.announcement_channel = announcement_channel
+    bot = Bot(config_data, connection)
 
     logging.basicConfig(filename='discord.log', filemode='w', level=logging.INFO, format='%(asctime)s:%(levelname)s:%(message)s')
 

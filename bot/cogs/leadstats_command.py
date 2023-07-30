@@ -21,7 +21,6 @@ class LeadStatsCommand(commands.Cog):
         """
         self.bot = bot
 
-    
     @app_commands.command(description="Shows a list of all cases a lead has checked")
     @app_commands.default_permissions(mute_members=True)
     async def leadstats(self, interaction: discord.Interaction) -> None:
@@ -32,9 +31,9 @@ class LeadStatsCommand(commands.Cog):
         """
         # Check if user is a lead
         if self.bot.check_if_lead(interaction.user):
-            await interaction.response.defer() # Wait in case process takes a long time
+            await interaction.response.defer()  # Wait in case process takes a long time
 
-            embed, file = await LeadStatsView.create_embed(interaction, self.bot.embed_color)
+            embed, file = await LeadStatsView.create_embed(self.bot, interaction)
 
             await interaction.followup.send(embed=embed, view=LeadStatsView(self.bot), file=file)
         else:
@@ -45,7 +44,6 @@ class LeadStatsCommand(commands.Cog):
                 color=discord.Color.red()
             )
             await interaction.response.send_message(embed=bad_user_embed, ephemeral=True)
-    
 
     @leadstats.error
     async def check_leaderboard_error(self, ctx: discord.Interaction, error):

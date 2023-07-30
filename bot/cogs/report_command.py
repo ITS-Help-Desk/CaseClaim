@@ -2,13 +2,15 @@ from discord import app_commands
 from discord.ext import commands
 import discord
 import csv
-from bot.helpers import month_string_to_number, month_number_to_name
+from bot.helpers import month_string_to_number
 import traceback
 
-# Use TYPE_CHECKING to avoid circular import from bot
-from typing import TYPE_CHECKING, Optional, Union
+from bot.models.checked_claim import CheckedClaim
+from bot.models.ping import Ping
+from bot.models.user import User
 
-from bot.status import Status
+# Use TYPE_CHECKING to avoid circular import from bot
+from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from ..bot import Bot
@@ -23,154 +25,72 @@ class ReportCommand(commands.Cog):
         """
         self.bot = bot
 
-
-    @app_commands.command(description = "Generate a report of cases logged.")
+    @app_commands.command(description="Generate a report of cases logged.")
     @app_commands.describe(user="The user the report will be generated for.")
     @app_commands.describe(month="The month for the report (e.g. \"march\").")
+    @app_commands.describe(pinged="Whether or not the case has been pinged.")
     @app_commands.default_permissions(mute_members=True)
-    async def report(self, interaction: discord.Interaction, user: discord.Member = None, month: str = None, pinged: bool = False):
+    async def report(self, interaction: discord.Interaction, user: discord.Member = None, month: str = None,
+                     pinged: bool = False):
         """Creates a report of all cases, optionally within a certain month and optionally
         for one specific user.
 
         Args:
             interaction (discord.Interaction): Interaction that the slash command originated from.
             user (discord.Member, optional): The user that the report will correspond to. Defaults to None.
-            month (str, optional): The month that all of the cases comes from. Defaults to None.
+            month (str, optional): The month that all the cases comes from. Defaults to None.
             pinged (bool, optional): Whether or not the case has been pinged. Defaults to False.
         """
         # Check if user is a lead
         if self.bot.check_if_lead(interaction.user):
-            await interaction.response.defer(ephemeral=True) # Wait in case process takes a long time
-            # Generate report embed
-            report_embed = discord.Embed(
-                description= self.build_description(interaction.user, user, month, pinged),
-                color=self.bot.embed_color
-            )
+            await interaction.response.defer(ephemeral=True)  # Wait in case process takes a long time
 
-            report = await self.get_report(interaction.guild, user, month, pinged)
+            if month is not None:
+                month = int(month_string_to_number(month))
 
-            await interaction.followup.send(embed=report_embed, file=report)
+            if user is not None:
+                user = User.from_id(self.bot.connection, user.id)
+
+            results = CheckedClaim.search(self.bot.connection, user, month, pinged)
+            row_str = self.data_to_rowstr(results)
+
+            with open('temp.csv', 'w', newline='', encoding='utf-8') as csvfile:
+                writer = csv.writer(csvfile)
+                for row in row_str:
+                    writer.writerow(row)
+
+            report = discord.File('temp.csv')
+
+            await interaction.followup.send(content="Here's your report", file=report)
         else:
             # Return error message if user is not Lead
             msg = f"<@{interaction.user.id}>, you do not have permission to pull this report!"
             await interaction.response.send_message(content=msg, ephemeral=True)
 
-
-    async def get_report(self, guild: discord.Guild, user: Optional[discord.Member]=None, month: Optional[str]=None, pinged: bool=False) -> discord.File:
-        """Generated a report for a given user and month. If neither if these values are provided, this
-        function will return a general report for a month, or a general report for a user.
-
-        The log information is saved to a temporary csv and is uploaded to Discord.
+    def data_to_rowstr(self, data: list[CheckedClaim]) -> list[list[str]]:
+        """Converts the raw data into a list of strings
+        that can be used in the embed description.
 
         Args:
-            user (Optional[discord.Member], optional): The user the report will be generated for. Defaults to None.
-            month (Optional[str], optional): The month the report will be generated for (e.g. "march"). Defaults to None.
-            pinged (bool, optional): Whether or not the cae has been pinged. Defaults to None.
+            data (list[CheckedClaim]): The list of raw strings from the database.
 
         Returns:
-            discord.File: The csv file saved on Discord.
+            list[list[str]]: The list of descriptions that can be directly used to be put in the temp.csv file.
         """
-        user_map: dict[int, Union[discord.Member, int]] = {}
-        
-        # Open file and record all data requested
-        with open('log.csv', 'r') as csvfile:
-            reader = csv.reader(csvfile)
-            rows = []
-            try:
-                month_num = month_string_to_number(month.lower())
-            except:
-                month_num = None
-            
-            for row in reader:
-                # Check for correct month
-                if month_num is not None and row[1][5:7] != month_num:
-                    continue
-                    
-                # Check for correct user
-                if user is not None:
-                    if row[3] != str(user.id):
-                        continue
-                
-                # Check if pinged
-                if pinged:
-                    if row[5] != Status.PINGED and row[5] != Status.RESOLVED:
-                        continue
-                
-                for index in [3,4]:
-                    if not int(row[index]) in user_map.keys():
-                        # Add user to local map
-                        try:
-                            user_map[int(row[index])] = await guild.fetch_member(int(row[index]))
-                        except:
-                            user_map[int(row[index])] = int(row[index])
-                        
-                        if user_map.get(int(row[index]), None) == None:
-                            user_map[int(row[index])] = int(row[index])
-                        
-                    if type(user_map[int(row[index])]) != int:
-                        row[index] = user_map[int(row[index])].display_name
-                
-                row[1] = row[1][0:16] # Fix time
-                
-                # If all tests pass, add row
-                row.pop(0) # Remove message_id
-                rows.append(row)
+        new_list = []
+        for claim in data:
+            t = claim.claim_time.strftime("%b %d %Y %#I:%M %p")  # Format time
+            row = [str(t), str(claim.case_num), str(claim.tech.full_name), str(claim.lead.full_name), str(claim.status)]
 
-        
-        # Save to a temp file, then upload to Discord.
-        return self.save_to_tempfile(rows)
-        
-    
-    def save_to_tempfile(self, rows: list[list[str]]) -> discord.File:
-        """Saves a given nested list to a temporary csv file.
+            # Add ping data
+            if claim.ping_thread_id is not None:
+                p = Ping.from_thread_id(self.bot.connection, claim.ping_thread_id)
+                row.append(p.severity)
+                row.append(p.description)
 
-        Args:
-            rows (list[str]): The nested list containing the log information about the user's cases.
+            new_list.append(row)
 
-        Returns:
-            discord.File: The csv file saved on Discord.
-        """
-        with open('temp.csv', 'w', newline='', encoding='utf-8') as csvfile:
-            writer = csv.writer(csvfile)
-            for row in rows:
-                writer.writerow(row)
-
-        return discord.File('temp.csv')
-
-
-    def build_description(self, requester: discord.User, user: Optional[discord.User], month: Optional[str], pinged: Optional[bool]) -> str:
-        """Builds a description for the /report command depending on the parameters
-        given by the user.
-
-        Args:
-            requester (discord.User): The user requesting the report.
-            user (Optional[discord.User]): The user the report is for.
-            month (Optional[str]): The month the report is for.
-            pinged (Optional[bool]): Whether or not to show only pinged cases.
-
-        Returns:
-            str: The description for the /report command embed.
-        """
-        description = f"<@!{requester.id}>, here is your report for cases"
-
-        if user is not None:
-            description += f" by <@!{user.id}>"
-        
-        try:
-            if month is not None:
-                month_num = int(month_string_to_number(month.lower()))
-                description += f" for the month of {month_number_to_name(month_num)}"
-        except:
-            pass
-        
-        if pinged is not None:
-            if pinged:
-                description += " that've been pinged"
-        
-
-        description += "."
-        return description
-    
+        return new_list
 
     @report.error
     async def report_error(self, ctx: discord.Interaction, error):

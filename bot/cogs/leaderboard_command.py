@@ -31,9 +31,9 @@ class LeaderboardCommand(commands.Cog):
         """
         # Check if user is a lead
         if self.bot.check_if_lead(interaction.user):
-            await interaction.response.defer() # Wait in case process takes a long time
+            await interaction.response.defer()  # Wait in case process takes a long time
 
-            embed = LeaderboardView.create_embed(interaction.created_at, self.bot.embed_color)
+            embed = LeaderboardView.create_embed(self.bot, interaction.created_at)
             embed.set_thumbnail(url=interaction.guild.icon.url)
 
             await interaction.followup.send(embed=embed, view=LeaderboardView(self.bot))
@@ -45,7 +45,6 @@ class LeaderboardCommand(commands.Cog):
                 color=discord.Color.red()
             )
             await interaction.response.send_message(embed=bad_user_embed, ephemeral=True)
-    
 
     @leaderboard.error
     async def leaderboard_error(self, ctx: discord.Interaction, error):

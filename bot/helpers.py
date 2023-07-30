@@ -2,12 +2,7 @@
 all throughout this bot.
 """
 
-import csv
-from typing import Optional, Any
-import json
-
-from bot.claim import Claim
-from bot.status import Status
+import discord
 
 
 def month_number_to_name(month_number: int) -> str:
@@ -63,7 +58,6 @@ def month_string_to_number(month_name: str) -> str:
         'february': '02',
         'march': '03',
         'april': '04',
-        'may': '05',
         'june': '06',
         'july': '07',
         'august': '08',
@@ -76,84 +70,39 @@ def month_string_to_number(month_name: str) -> str:
         s = month_name.strip().lower()
         out = m[s]
         return out
-    except:
+    except Exception:
         raise ValueError('Not a month')
-    
 
-def find_case(case_num='', message_id=-1, user_id=-1, pinged=False) -> Optional[Claim]:
-    """Finds the first case in the log file that matches
-    the provided information and hasn't been pinged.
+
+def create_paginator_embeds(data: list[str], title: str, embed_color: discord.Color) -> list[discord.Embed]:
+    """Creates a list of embeds that can be used with a paginator.
 
     Args:
-        message_id (int): The ID of the original claim message on log.
+        data (list[str]): The list of case descriptions.
+        title (str): The title for each of the embeds
 
     Returns:
-        Optional[Claim]: The claim representation from the log file.
+        list[discord.Embed]: A list of embeds for the paginator.
     """
-    with open('log.csv', 'r') as f:
-        reader = csv.reader(f)
-        for row in reader:
-            # Test case number
-            if len(case_num) != 0 and case_num != row[2]:
-                continue
+    # Create a list of embeds to paginate
+    embeds = []
+    i = 0
+    data_len = len(data)
 
-            # Test if message ID matches
-            if message_id != -1 and row[0] != str(message_id):
-                continue
-            
-            # Test if user ID matches
-            if user_id != -1 and row[3] != str(user_id):
-                continue
-            
-            # Test if pinged
-            if (row[5] == Status.PINGED) != pinged:
-                continue
-            return Claim.load_from_row(row)
-    
-    with open('active_cases.json', 'r') as f:
-        new_data: dict[str, Any] = json.load(f)
-        for key in new_data.keys():
-            claim_case_num = str(new_data[key]["case_num"])
-            claim_user_id = int(new_data[key]["tech_id"])
+    # Go through all cases
+    while i < data_len:
+        # Create an embed for every 10 cases
+        new_embed = discord.Embed(title=title)
+        new_embed.colour = embed_color
+        description = ''
 
-            # Test case number
-            if len(case_num) != 0 and case_num != claim_case_num:
-                continue
+        # Add ten (or fewer) cases
+        for j in range(min(10, len(data))):
+            row = data.pop(0)
+            description += row + '\n'
 
-            # Test if message ID matches
-            if message_id != -1 and int(key) != message_id:
-                continue
-            
-            # Test if user ID matches
-            if user_id != -1 and user_id != claim_user_id:
-                continue
-            return Claim.load_from_json(new_data[key])
-    
-    # Case couldn't be found, return  None
-    return None
+        new_embed.description = description
+        embeds.append(new_embed)
+        i += 10
 
-
-def remove_case(user_id: int, case_num: str) -> None:
-    """Removes the first case in the log file that
-    matches the provided information and hasn't been pinged.
-
-    Args:
-        user_id (int): The user for the case that needs to be pinged.
-        case_num (str): The case number of the case that needs to be pinged.
-    """
-    # Collect rows with this case
-    lines = []
-    found_row = False
-    with open('log.csv', 'r') as f:
-        reader = csv.reader(f)
-        for row in reader:
-            # Exclude row once found
-            if not found_row and row[2] == case_num and row[5] != Status.PINGED and int(row[3]) == user_id:
-                found_row = True
-                continue # Don't add to the lines list
-            
-            lines.append(row)
-                
-    with open('log.csv', 'w', newline='', encoding='utf-8') as f:
-        writer = csv.writer(f)
-        writer.writerows(lines)
+    return embeds

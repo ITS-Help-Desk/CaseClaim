@@ -19,8 +19,7 @@ class GetLogCommand(commands.Cog):
         """
         self.bot = bot
 
-
-    @app_commands.command(description = "Returns the bot's log file.")
+    @app_commands.command(description="Returns the bot's log file.")
     async def getlog(self, interaction: discord.Interaction) -> None:
         """Sends a message back to the user explaining how to use the bot.
 
@@ -33,9 +32,9 @@ class GetLogCommand(commands.Cog):
             msg = f"<@{interaction.user.id}>, you do not have permission to use this command!"
             await interaction.response.send_message(content=msg, ephemeral=True)
             return
-        
-        await interaction.response.send_message(content="Here's the log:", file=discord.File('discord.log'), ephemeral = True, delete_after=300)
-    
+
+        await interaction.response.send_message(content="Here's the log:", file=discord.File('discord.log'),
+                                                ephemeral=True, delete_after=300)
 
     @getlog.error
     async def getlog_error(self, ctx: discord.Interaction, error):

@@ -1,15 +1,18 @@
 from discord import app_commands
 from discord.ext import commands
 import discord
-import csv
 import time
-import datetime
+from bot import paginator
 import traceback
+
+from bot.helpers import create_paginator_embeds
+
+from bot.models.active_claim import ActiveClaim
+from bot.models.completed_claim import CompletedClaim
+from bot.models.checked_claim import CheckedClaim
 
 # Use TYPE_CHECKING to avoid circular import from bot
 from typing import TYPE_CHECKING
-
-from bot.status import Status
 
 if TYPE_CHECKING:
     from ..bot import Bot
@@ -24,93 +27,70 @@ class CaseInfoCommand(commands.Cog):
         """
         self.bot = bot
 
-    
-    @app_commands.command(description="Shows a list of all the previous techs who've worked on a case")
+    @app_commands.command(description="Shows a list of all users a case has been worked on by")
     @app_commands.describe(case_num="Case #")
     async def caseinfo(self, interaction: discord.Interaction, case_num: str) -> None:
-        """Shows a list of all techs who've previously worked on a case, and shows the
-        ping comments if the command sender is a lead.
+        """Shows a list of all users a case has worked on by.
 
         Args:
             interaction (discord.Interaction): Interaction that the slash command originated from
             case_num (str): The case number in Salesforce (e.g. "00960979")
         """
-        await interaction.response.defer(ephemeral=True) # Wait in case process takes a long time
+        await interaction.response.defer(ephemeral=True)  # Wait in case process takes a long time
 
         # Collect rows with this case
-        data = []
-        with open('log.csv', 'r') as f:
-            reader = csv.reader(f)
-            for row in reader:
-                if row[2] == case_num:
-                    data.append(row)
-        
-        for message_id in self.bot.claim_manager.active_claims.keys():
-            c = self.bot.claim_manager.active_claims[message_id]
-            if c.case_num == case_num:
-                data.append(c.log_format())
-        
-        # Check if user is a lead
-        if self.bot.check_if_lead(interaction.user):
-            description = await self.rows_to_str(data, include_comments=True)
-        else:
-            description = await self.rows_to_str(data)
-        
-        # Send data
-        embed = discord.Embed(title=f'History of Case {case_num}')
-        embed.colour = self.bot.embed_color
-        embed.description = description
+        rows: list[ActiveClaim | CompletedClaim | CheckedClaim] = []
+        for result in ActiveClaim.get_all_with_case_num(self.bot.connection, case_num):
+            rows.append(result)
 
-        await interaction.followup.send(embed=embed, ephemeral=True)
-        
-        
-    async def rows_to_str(self, rows: list[str], include_comments=False) -> str:
-        """Converts the rows provided into a string containing only the times and users
-        and (optionally) case comments.
+        for result in CompletedClaim.get_all_with_case_num(self.bot.connection, case_num):
+            rows.append(result)
+
+        for result in CheckedClaim.get_all_with_case_num(self.bot.connection, case_num):
+            rows.append(result)
+
+        # Sort data, create written descriptions
+        rows.sort(key=lambda x: x.claim_time, reverse=True)
+        row_str = self.data_to_rowstr(rows)
+
+        # Create paginator embed
+        title = f'Cases History of {case_num} ({len(rows)})'
+        if len(row_str) <= 10:
+            embed = discord.Embed(title=title)
+            embed.colour = self.bot.embed_color
+            embed.description = '\n'.join(row for row in row_str)
+
+            await interaction.followup.send(embed=embed, ephemeral=True)
+        else:
+            embeds = create_paginator_embeds(row_str, title, self.bot.embed_color)
+            await paginator.Simple(ephemeral=True).start(interaction, embeds)
+
+    def data_to_rowstr(self, rows: list[ActiveClaim | CompletedClaim | CheckedClaim]) -> list[str]:
+        """Converts the raw data into a list of strings
+        that can be used in the embed description.
 
         Args:
-            rows (list[str]): The list of rows that will be converted.
-            include_comments (bool, optional): Whether or not comments will be included (only for leads). Defaults to False.
+            rows (list[ActiveClaim | CompletedClaim | CheckedClaim]): The list of raw strings from the database.
 
         Returns:
-            str: The description containing the list with times, users, and comments.
+            list[str]: The list of descriptions that can be directly used in an embed.
         """
-        copy = rows[:]
-        copy.reverse()
-        s = ''
-        for row in copy:
-            # Include just ID in case user cannot be found
-            try:
-                user = await self.bot.fetch_user(int(row[3]))
-                user = user.display_name
-            except:
-                user = row[3]
-            if user is None:
-                user = row[3]
-            
-            t = row[1]
-
-            if row[5] == "":
-                s += "**[ACTIVE]** "
+        row_str = []
+        for row in rows:
+            s = ''
+            if type(row) == ActiveClaim:
+                s += "**[ACTIVE]**"
 
             # Convert timestamp to UNIX
-            try:
-                t = int(time.mktime(datetime.datetime.strptime(t, "%Y-%m-%d %H:%M:%S.%f").timetuple()))
-                s += f'<t:{t}:f> - {user}'
-            except:
-                s += f'{user}'
+            t = int(time.mktime(row.claim_time.timetuple()))
+            s += f'<t:{t}:f> - <@!{row.tech.discord_id}>'
 
-            # Add comments
-            if include_comments and (row[5] == Status.PINGED or row[5] == Status.RESOLVED):
-                s += f' [**{row[6]}**: {row[7]}]'
+            row_str.append(s)
 
-            s += '\n'
-        
-        return s
-
+        return row_str
 
     @caseinfo.error
-    async def report_error(self, ctx: discord.Interaction, error):
+    async def caseinfo_error(self, ctx: discord.Interaction, error):
         full_error = traceback.format_exc()
 
         ch = await self.bot.fetch_channel(self.bot.error_channel)

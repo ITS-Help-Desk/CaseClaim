@@ -3,6 +3,8 @@ from discord.ext import commands
 import discord
 import traceback
 
+from bot.forms.join_form import JoinForm
+
 # Use TYPE_CHECKING to avoid circular import from bot
 from typing import TYPE_CHECKING
 
@@ -10,32 +12,32 @@ if TYPE_CHECKING:
     from ..bot import Bot
 
 
-class MickieCommand(commands.Cog):
+class JoinCommand(commands.Cog):
     def __init__(self, bot: "Bot") -> None:
-        """Creates the /mickie command using a cog.
+        """Creates the /join command using a cog.
 
         Args:
             bot (Bot): A reference to the original Bot instantiation.
         """
         self.bot = bot
 
-    @app_commands.command(description="you're so fine")
-    async def mickie(self, interaction: discord.Interaction) -> None:
-        """Sends a message back to the user with a funny message (essentially
-        acts as a ping command).
+    @app_commands.command(description="Allows a user to be added to our list")
+    async def join(self, interaction: discord.Interaction) -> None:
+        """Allows a user to join the server by logging their first and last name
+        for data analytic purposes.
 
         Args:
             interaction (discord.Interaction): Interaction that the slash command originated from
         """
-        await interaction.response.send_message(f"Oh {interaction.user.mention} you're so fine, you blow my mind.")
+        await interaction.response.send_modal(JoinForm(self.bot))
 
-    @mickie.error
-    async def mickie_error(self, ctx: discord.Interaction, error):
+    @join.error
+    async def join_error(self, ctx: discord.Interaction, error):
         full_error = traceback.format_exc()
 
         ch = await self.bot.fetch_channel(self.bot.error_channel)
 
-        msg = f"Error with **/mickie** ran by <@!{ctx.user.id}>.\n```{full_error}```"
+        msg = f"Error with **/join** ran by <@!{ctx.user.id}>.\n```{full_error}```"
         if len(msg) > 1993:
             msg = msg[:1993] + "...```"
         await ch.send(msg)
