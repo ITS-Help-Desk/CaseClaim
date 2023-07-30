@@ -6,6 +6,8 @@ import traceback
 from bot.forms.outage_form import OutageForm
 from bot.forms.announcement_form import AnnouncementForm
 
+from bot.models.user import User
+
 # Use TYPE_CHECKING to avoid circular import from bot
 from typing import TYPE_CHECKING
 
@@ -35,6 +37,13 @@ class AnnouncementCommand(commands.Cog):
             interaction (discord.Interaction): Interaction that the slash command originated from.
             choices (Choice[str]): A list of choices for the type of announcement (Outage/Announcement).
         """
+        # Check to see if user is in the list
+        u = User.from_id(self.bot.connection, interaction.user.id)
+        if u is None:
+            msg = f"Please use the **/join** using this command."
+            await interaction.response.send_message(content=msg, ephemeral=True, delete_after=300)
+            return
+
         # Check if user is a PA
         if self.bot.check_if_pa(interaction.user):
             if str(choices.value) == "outage":

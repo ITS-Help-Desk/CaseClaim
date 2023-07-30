@@ -10,6 +10,7 @@ from bot.helpers import create_paginator_embeds
 from bot.models.active_claim import ActiveClaim
 from bot.models.completed_claim import CompletedClaim
 from bot.models.checked_claim import CheckedClaim
+from bot.models.user import User
 
 # Use TYPE_CHECKING to avoid circular import from bot
 from typing import TYPE_CHECKING
@@ -34,6 +35,13 @@ class MyCasesCommand(commands.Cog):
         Args:
             interaction (discord.Interaction): Interaction that the slash command originated from
         """
+        # Check to see if user is in the list
+        u = User.from_id(self.bot.connection, interaction.user.id)
+        if u is None:
+            msg = f"Please use the **/join** command using this command."
+            await interaction.response.send_message(content=msg, ephemeral=True, delete_after=300)
+            return
+
         await interaction.response.defer(ephemeral=True)  # Wait in case process takes a long time
 
         # Collect rows with this case
