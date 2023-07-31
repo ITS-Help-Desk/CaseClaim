@@ -22,7 +22,9 @@ from bot.views.check_view import CheckView
 from bot.views.check_view_red import CheckViewRed
 from bot.views.resolve_ping_view import ResolvePingView
 from bot.views.outage_view import OutageView
+from bot.views.leaderboard_view import LeaderboardView
 from bot.views.leadstats_view import LeadStatsView
+from bot.views.kudos_view import KudosView
 
 from bot.models.outage import Outage
 
@@ -109,6 +111,8 @@ class Bot(commands.Bot):
         self.add_view(ResolvePingView(self))
         self.add_view(OutageView(self))
         self.add_view(LeadStatsView(self))
+        self.add_view(LeaderboardView(self))
+        self.add_view(KudosView(self))
 
     async def on_ready(self):
         """Loads all commands stored in the cogs folder and starts the bot.
