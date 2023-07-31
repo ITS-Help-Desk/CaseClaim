@@ -25,6 +25,7 @@ from bot.views.outage_view import OutageView
 from bot.views.leadstats_view import LeadStatsView
 
 from bot.models.outage import Outage
+from bot.models.checked_claim import CheckedClaim
 
 
 class Bot(commands.Bot):
@@ -95,9 +96,22 @@ class Bot(commands.Bot):
 
     @tasks.loop(seconds=5)  # repeat after every 5 seconds
     async def resend_outages_loop(self):
+        """Resends all the outages to the #cases channel.
+
+        The self.resend_outages bool will be set to True anytime someone claims a case.
+        """
         if self.resend_outages:
             await Outage.resend(self)
             self.resend_outages = False
+
+    @tasks.loop(seconds=1800)  # repeat after every 30 minutes
+    async def reset_connection_loop(self):
+        """Resets the bots connection every 30 minutes.
+
+        Occasionally the bot will disconnect because of inactivity, pinging
+        the MySQL server will prevent this.
+        """
+        CheckedClaim.search(self.connection)
 
     async def setup_hook(self):
         """Sets up the views so that they can be persistently loaded
@@ -133,6 +147,7 @@ class Bot(commands.Bot):
         await self.add_cog(AnnouncementCommand(self))
 
         self.resend_outages_loop.start()
+        self.reset_connection_loop.start()
 
         synced = await self.tree.sync()
         print("{} commands synced".format(len(synced)))
