@@ -47,6 +47,25 @@ class User(DatabaseItem):
 
             return User(result[0], result[1], result[2])
 
+    def activate(self) -> None:
+        pass
+
+    def deactivate(self) -> None:
+        pass
+
+    def add_to_database(self, connection: MySQLConnection) -> None:
+        with connection.cursor() as cursor:
+            sql = "INSERT INTO Users (discord_id, first_name, last_name, active) VALUES (%s, %s, %s, %s)"
+
+            cursor.execute(sql, (self.discord_id, self.first_name, self.last_name, True))
+            connection.commit()
+
+    def remove_from_database(self, connection: MySQLConnection) -> None:
+        with connection.cursor() as cursor:
+            sql = "DELETE FROM Users WHERE discord_id = %s"
+            cursor.execute(sql, (self.discord_id,))
+            connection.commit()
+
     @staticmethod
     def get_all(connection: MySQLConnection) -> list['User']:
         """Gets all the users in the database
@@ -66,25 +85,6 @@ class User(DatabaseItem):
                 users.append(User(result[0], result[1], result[2]))
 
             return users
-
-    def activate(self) -> None:
-        pass
-
-    def deactivate(self) -> None:
-        pass
-
-    def add_to_database(self, connection: MySQLConnection) -> None:
-        with connection.cursor() as cursor:
-            sql = "INSERT INTO Users (discord_id, first_name, last_name, active) VALUES (%s, %s, %s, %s)"
-
-            cursor.execute(sql, (self.discord_id, self.first_name, self.last_name, True))
-            connection.commit()
-
-    def remove_from_database(self, connection: MySQLConnection) -> None:
-        with connection.cursor() as cursor:
-            sql = "DELETE FROM Users WHERE discord_id = %s"
-            cursor.execute(sql, (self.discord_id,))
-            connection.commit()
 
     def export(self) -> list[Any]:
         return [self.discord_id, self.first_name, self.last_name]

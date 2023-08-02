@@ -71,5 +71,17 @@ class Ping(DatabaseItem):
             cursor.execute(sql, (self.thread_id,))
             connection.commit()
 
+    @staticmethod
+    def get_all(connection: MySQLConnection) -> list['Ping']:
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT * FROM Pings")
+            results = cursor.fetchall()
+
+            data = []
+            for result in results:
+                data.append(Ping(result[0], result[1], result[2], result[3]))
+
+            return data
+
     def export(self) -> list[Any]:
         return [self.thread_id, self.message_id, self.severity, self.description]

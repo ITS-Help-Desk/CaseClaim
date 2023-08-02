@@ -151,6 +151,9 @@ This is beneficial because there are many commands which a standard tech wouldn'
 - /casedist **\<days>**
     - Allows a lead to see the distribution of case claim time throughout the day.
     - Uses matplotlib to create a histogram displaying the information.
+- /export
+    - Allows a lead to convert all tables in the MySQL database into CSV files
+    - These files can be stored on another system as a backup
 ## Commands (for PAs)
 - /announcement **<Outage/Announcement>**
   - Allows a PA to make an announcement or an outage.

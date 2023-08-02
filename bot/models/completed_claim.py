@@ -101,5 +101,18 @@ class CompletedClaim(DatabaseItem):
             cursor.execute(sql, (self.checker_message_id,))
             connection.commit()
 
+    @staticmethod
+    def get_all(connection: MySQLConnection) -> list['CompletedClaim']:
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT * FROM CompletedClaims")
+            results = cursor.fetchall()
+
+            data = []
+            for result in results:
+                data.append(
+                    CompletedClaim(result[0], result[1], User.from_id(connection, result[2]), result[3], result[4]))
+
+            return data
+
     def export(self) -> list[Any]:
         return [self.checker_message_id, self.case_num, self.tech.discord_id, self.claim_time, self.complete_time]
