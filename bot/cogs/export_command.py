@@ -70,7 +70,7 @@ class ExportCommand(commands.Cog):
                     for item in data[i]:
                         csv_writer.writerow(item.export())
 
-            await interaction.response.send_message(f"Export finished! Data can be found in **{root}**")
+            await interaction.response.send_message(f"Export finished! Data can be found in **{root}**", ephemeral=True)
         else:
             # Return error message if user is not Lead
             msg = f"<@{interaction.user.id}>, you do not have permission to use this command!"
