@@ -1,6 +1,6 @@
 from datetime import datetime
 from mysql.connector import MySQLConnection
-from typing import Optional
+from typing import Optional, Any
 
 from bot.models.database_item import DatabaseItem
 from bot.models.user import User
@@ -100,3 +100,6 @@ class CompletedClaim(DatabaseItem):
             sql = "DELETE FROM CompletedClaims WHERE checker_message_id = %s"
             cursor.execute(sql, (self.checker_message_id,))
             connection.commit()
+
+    def export(self) -> list[Any]:
+        return [self.checker_message_id, self.case_num, self.tech.discord_id, self.claim_time, self.complete_time]

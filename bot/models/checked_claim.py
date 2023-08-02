@@ -1,8 +1,7 @@
 from datetime import datetime
 
-import discord
 from mysql.connector import MySQLConnection
-from typing import Optional
+from typing import Optional, Any
 
 from bot.models.database_item import DatabaseItem
 from bot.models.user import User
@@ -186,3 +185,20 @@ class CheckedClaim(DatabaseItem):
             sql = "DELETE FROM CheckedClaims WHERE checker_message_id = %s"
             cursor.execute(sql, (self.checker_message_id,))
             connection.commit()
+
+    @staticmethod
+    def get_all(connection: MySQLConnection) -> list['CheckedClaim']:
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT * FROM CheckedClaims")
+            results = cursor.fetchall()
+
+            data = []
+            for result in results:
+                data.append(CheckedClaim(result[0], result[1], User.from_id(connection, result[2]),
+                                         User.from_id(connection, result[3]),
+                                         result[4], result[5], result[6], Status.from_str(result[7]), result[8]))
+
+            return data
+
+    def export(self) -> list[Any]:
+        return [self.checker_message_id, self.case_num, self.tech.discord_id, self.lead.discord_id, self.claim_time, self.complete_time, self.check_time, self.status, self.ping_thread_id]

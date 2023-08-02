@@ -1,6 +1,6 @@
 from datetime import datetime
 from mysql.connector import MySQLConnection
-from typing import Optional
+from typing import Optional, Any
 
 from bot.models.database_item import DatabaseItem
 from bot.models.user import User
@@ -115,3 +115,18 @@ class ActiveClaim(DatabaseItem):
             sql = "DELETE FROM ActiveClaims WHERE claim_message_id = %s"
             cursor.execute(sql, (self.claim_message_id,))
             connection.commit()
+
+    @staticmethod
+    def get_all(connection: MySQLConnection) -> list['ActiveClaim']:
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT * FROM ActiveClaims")
+            results = cursor.fetchall()
+
+            data = []
+            for result in results:
+                data.append(ActiveClaim(result[0], result[1], User.from_id(connection, result[2]), result[3]))
+
+            return data
+
+    def export(self) -> list[Any]:
+        return [self.claim_message_id, self.case_num, self.tech.discord_id, self.claim_time]

@@ -1,5 +1,5 @@
 from mysql.connector import MySQLConnection
-from typing import Optional
+from typing import Optional, Any
 
 from bot.models.database_item import DatabaseItem
 
@@ -70,3 +70,6 @@ class Ping(DatabaseItem):
             sql = "DELETE FROM Pings WHERE thread_id = %s"
             cursor.execute(sql, (self.thread_id,))
             connection.commit()
+
+    def export(self) -> list[Any]:
+        return [self.thread_id, self.message_id, self.severity, self.description]

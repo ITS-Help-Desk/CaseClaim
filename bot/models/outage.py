@@ -1,5 +1,5 @@
 from mysql.connector import MySQLConnection
-from typing import Optional
+from typing import Optional, Any
 
 from bot.models.database_item import DatabaseItem
 from bot.models.user import User
@@ -122,3 +122,6 @@ class Outage(DatabaseItem):
             sql = "DELETE FROM Outages WHERE message_id = %s"
             cursor.execute(sql, (self.message_id,))
             connection.commit()
+
+    def export(self) -> list[Any]:
+        return [self.message_id, self.case_message_id, self.service, self.parent_case, self.description, self.troubleshooting_steps, self.resolution_time, self.user.discord_id, self.active]

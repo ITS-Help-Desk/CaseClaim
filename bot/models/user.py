@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, Any
 from mysql.connector import MySQLConnection
 
 from bot.models.database_item import DatabaseItem
@@ -85,3 +85,6 @@ class User(DatabaseItem):
             sql = "DELETE FROM Users WHERE discord_id = %s"
             cursor.execute(sql, (self.discord_id,))
             connection.commit()
+
+    def export(self) -> list[Any]:
+        return [self.discord_id, self.first_name, self.last_name]
