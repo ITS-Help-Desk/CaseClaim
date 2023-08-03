@@ -1,11 +1,13 @@
-"""Place this f
-
+"""Place this file in the same folder as the CSV files and run in order
+to load the MySQL tables with data from the CSV files.
 """
 
 import csv
 import mysql.connector
 from mysql.connector import Error
 
+
+# Get database login information
 user = input("DB user: ")
 password = input("DB password: ")
 host = input("DB host: ")
@@ -29,6 +31,7 @@ except Error as err:
 file_names = ["users", "pings", "activeclaims", "announcements", "checkedclaims", "completedclaims", "outages"]
 
 
+# Go through each file and add to the database
 for file in file_names:
     with open(f"{file}.csv", "r") as csv_file:
         csv_reader = csv.reader(csv_file)
@@ -37,7 +40,7 @@ for file in file_names:
             for row in csv_reader:
                 if file == "users":
                     sql = "INSERT INTO Users (discord_id, first_name, last_name, active) VALUES (%s, %s, %s, %s)"
-                    cursor.execute(sql, (int(row[0]), row[1], row[2], True))
+                    cursor.execute(sql, (int(row[0]), row[1], row[2], int(bool(row[3]))))
 
                 elif file == "pings":
                     sql = "INSERT INTO Pings (thread_id, message_id, severity, description) VALUES (%s, %s, %s, %s)"
