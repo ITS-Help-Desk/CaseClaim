@@ -39,8 +39,8 @@ for file in file_names:
         with connection.cursor() as cursor:
             for row in csv_reader:
                 if file == "users":
-                    sql = "INSERT INTO Users (discord_id, first_name, last_name, active) VALUES (%s, %s, %s, %s)"
-                    cursor.execute(sql, (int(row[0]), row[1], row[2], int(bool(row[3]))))
+                    sql = "INSERT INTO Users (discord_id, first_name, last_name, team, active) VALUES (%s, %s, %s, %s, %s)"
+                    cursor.execute(sql, (int(row[0]), row[1], row[2], int(row[3]), int(bool(row[4]))))
 
                 elif file == "pings":
                     sql = "INSERT INTO Pings (thread_id, message_id, severity, description) VALUES (%s, %s, %s, %s)"

@@ -1,7 +1,7 @@
 from discord.ext import commands, tasks
 import discord
 from mysql.connector import MySQLConnection
-from typing import Union
+from typing import Any
 
 from bot.cogs.claim_command import ClaimCommand
 from bot.cogs.mickie_command import MickieCommand
@@ -29,6 +29,7 @@ from bot.views.kudos_view import KudosView
 
 from bot.models.outage import Outage
 from bot.models.checked_claim import CheckedClaim
+from bot.models.user import User
 
 
 class Bot(commands.Bot):
@@ -36,9 +37,10 @@ class Bot(commands.Bot):
     claims_channel: int
     error_channel: int
     announcement_channel: int
+    teams: list[int]
     connection: MySQLConnection
 
-    def __init__(self, config: dict[str, Union[int, str]], connection: MySQLConnection):
+    def __init__(self, config: dict[str, Any], connection: MySQLConnection):
         """Initializes the bot (doesn't start it), and initializes some
         instance variables relating to file locations.
         """
@@ -46,6 +48,7 @@ class Bot(commands.Bot):
         self.claims_channel = int(config["claims_channel"])
         self.error_channel = int(config["error_channel"])
         self.announcement_channel = int(config["announcement_channel"])
+        self.teams = config["teams"]
 
         self.connection = connection
 
@@ -99,7 +102,30 @@ class Bot(commands.Bot):
 
     @tasks.loop(seconds=86400)  # repeat once a day
     async def check_teams_loop(self):
-        pass
+        """Checks every user and stores their role in the Users table.
+        This happens once a day to ensure that the Users table is up-to-date.
+        """
+        users = User.get_all(self.connection)
+
+        cases_channel = await self.fetch_channel(self.cases_channel)
+
+        for user in users:
+            try:
+                discord_user = await cases_channel.guild.fetch_member(user.discord_id)
+
+                # Collect all roles of a user
+                role_ids = []
+                for role in discord_user.roles:
+                    role_ids.append(role.id)
+
+                # Go through each team and figure out what team the user is on
+                for team in self.teams:
+                    if team in role_ids and team != user.team:
+                        user.add_team(self.connection, team)
+                        break
+
+            except Exception as e:
+                print(e)
 
     @tasks.loop(seconds=5)  # repeat after every 5 seconds
     async def resend_outages_loop(self):
