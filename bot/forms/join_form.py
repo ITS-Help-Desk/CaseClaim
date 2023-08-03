@@ -29,7 +29,7 @@ class JoinForm(ui.Modal, title='Join Form'):
         Args:
             interaction (discord.Interaction): The submit modal interaction
         """
-        user = User(interaction.user.id, str(self.first_name), str(self.last_name), True)
+        user = User(interaction.user.id, str(self.first_name), str(self.last_name), 0, True)
         user.add_to_database(self.bot.connection)
 
         await interaction.response.send_message(content="👍",

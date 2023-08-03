@@ -55,7 +55,7 @@ class LeaderboardView(ui.View):
         await interaction.response.defer(thinking=False)  # Acknowledge button press
 
         user_id = interaction.user.id
-        data = LeaderboardView.get_data(self.bot.connection, interaction.created_at)
+        data = LeaderboardView.get_data(self.bot, interaction.created_at)
 
         # Create embed
         embed = discord.Embed(title=f"{interaction.user.display_name}'s Ranking")
@@ -117,13 +117,14 @@ class LeaderboardView(ui.View):
         Returns:
             discord.Embed: The embed object with everything already completed for month and semester rankings.
         """
-        month_ranking, semester_ranking = LeaderboardView.create_rankings(bot.connection, interaction_date)
+        month_ranking, semester_ranking, team_ranking = LeaderboardView.create_rankings(bot, interaction_date)
 
         # Create embed
         embed = discord.Embed(title="ITS Case Claim Leaderboard")
         embed.colour = bot.embed_color
 
         embed.add_field(name=f"{month_number_to_name(interaction_date.month)} Ranks", value=month_ranking, inline=True)
+        embed.add_field(name=f"Team Ranks", value=team_ranking, inline=True)
         embed.add_field(name="Semester Ranks", value=semester_ranking, inline=True)
         embed.set_footer(text="Last Updated")
         embed.timestamp = datetime.datetime.now()
@@ -131,18 +132,18 @@ class LeaderboardView(ui.View):
         return embed
 
     @staticmethod
-    def create_rankings(connection: MySQLConnection, interaction_date: datetime.datetime) -> tuple[str, str]:
+    def create_rankings(bot: 'Bot', interaction_date: datetime.datetime) -> tuple[str, str, str]:
         """Creates the ranking strings for monthly and semester ranks.
 
         Args:
-            connection (MySQLConnection): The connection to the database
+            bot (Bot): A reference to the bot class
             interaction_date (datetime.datetime): The time at which this request is made.
 
         Returns:
-            tuple[str, str]: Returns a tuple containing ("1. Andrew\n2. James", "1. James\n2. Andrew") where
+            tuple[str, str, str]: Returns a tuple containing ("1. Andrew\n2. James", "1. James\n2. Andrew") where
             the first element is for monthly and second element is for semester.
         """
-        data = LeaderboardView.get_data(connection, interaction_date)
+        data = LeaderboardView.get_data(bot, interaction_date)
 
         mc = data[0][0]
         sc = data[1][0]
@@ -150,8 +151,12 @@ class LeaderboardView(ui.View):
         mc_sorted_keys = data[0][1]
         sc_sorted_keys = data[1][1]
 
+        tc = data[4][0]
+        tc_sorted_keys = data[4][1]
+
         month_ranks = []
         semester_ranks = []
+        team_ranks = []
 
         # Create month written ranking
         for i in range(min(4, len(mc_sorted_keys))):
@@ -167,11 +172,18 @@ class LeaderboardView(ui.View):
 
         semester_ranking = "\n".join(user for user in semester_ranks)
 
-        return month_ranking, semester_ranking
+        # Create team written ranking
+        for i in range(min(4, len(tc_sorted_keys))):
+            team_id = tc_sorted_keys[i]
+            team_ranks.append(f"**{i + 1}.** <@&{team_id}> ({tc[team_id]})")
+
+        team_ranks = "\n".join(user for user in team_ranks)
+
+        return month_ranking, semester_ranking, team_ranks
 
     @staticmethod
-    def get_data(connection: MySQLConnection, interaction_date: datetime.datetime) -> tuple[
-        tuple[dict[int, int], list[int]], tuple[dict[int, int], list[int]], dict[int, int], dict[int, int]]:
+    def get_data(bot: 'Bot', interaction_date: datetime.datetime) -> tuple[
+        tuple[dict[int, int], list[int]], tuple[dict[int, int], list[int]], dict[int, int], dict[int, int], tuple[dict[int, int], list[int]]]:
         """Collects a large amount of data to be used by various commands and events within this bot.
         This function collects:
             - Total amount of cases claimed by each user by month
@@ -181,7 +193,7 @@ class LeaderboardView(ui.View):
             - Total amount of pinged cases by each user by month
             - Total amount of pinged cases by each user by semester
         Args:
-            connection (MySQLConnection): The connection to the database
+            bot (Bot): A reference to the Bot class
             interaction_date (datetime.datetime): The time that this data was requested at.
 
         Returns:
@@ -195,7 +207,11 @@ class LeaderboardView(ui.View):
         month_ping_counts = {}
         semester_ping_counts = {}
 
-        claims = CheckedClaim.search(connection)
+        teams = {}
+        for team in bot.teams:
+            teams[team] = 0
+
+        claims = CheckedClaim.search(bot.connection)
         for claim in claims:
             # Skip cases that are "done"
             if claim.status == Status.DONE:
@@ -243,9 +259,14 @@ class LeaderboardView(ui.View):
             if claim.status == Status.PINGED or claim.status == Status.RESOLVED:
                 semester_ping_counts[claim.tech.discord_id] += 1
 
+            # Organize team data
+            if claim.tech.team == 0:
+                continue
+            teams[claim.tech.team] += 1
+
+        # Sort data
         semester_counts_sorted_keys = sorted(semester_counts, key=semester_counts.get, reverse=True)
         month_counts_sorted_keys = sorted(month_counts, key=month_counts.get, reverse=True)
+        team_counts_sorted_keys = sorted(teams, key=teams.get, reverse=True)
 
-        return (
-        (month_counts, month_counts_sorted_keys), (semester_counts, semester_counts_sorted_keys), month_ping_counts,
-        semester_ping_counts)
+        return ((month_counts, month_counts_sorted_keys), (semester_counts, semester_counts_sorted_keys), month_ping_counts, semester_ping_counts, (teams, team_counts_sorted_keys))

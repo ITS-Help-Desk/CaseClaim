@@ -101,6 +101,14 @@ Here's how the `config.json` file should be formatted (replace zeros with ID num
   "error_channel": 0,
   "announcement_channel": 0,
   
+  "teams": [
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  
   "db_user": "",
   "db_password": "",
   "db_host": "",

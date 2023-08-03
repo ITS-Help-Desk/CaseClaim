@@ -62,6 +62,7 @@ CREATE TABLE `Users`(
     `discord_id` BIGINT UNSIGNED NOT NULL,
     `first_name` VARCHAR(255) NOT NULL,
     `last_name` VARCHAR(255) NOT NULL,
+    `team` BIGINT UNSIGNED NOT NULL,
     `active` TINYINT(1) NOT NULL
 );
 ALTER TABLE
