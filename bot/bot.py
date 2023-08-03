@@ -84,7 +84,7 @@ class Bot(commands.Bot):
         Returns:
             bool: Whether or not they have the dev role.
         """
-        dev_role = discord.utils.get(user.guild.roles, name="dev")
+        dev_role = discord.utils.get(user.guild.roles, name="Dev")
         return dev_role in user.roles
 
     @staticmethod
