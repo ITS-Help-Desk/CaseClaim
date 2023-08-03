@@ -97,6 +97,10 @@ class Bot(commands.Bot):
         dev_role = discord.utils.get(user.guild.roles, name="Phone Analyst")
         return dev_role in user.roles
 
+    @tasks.loop(seconds=86400)  # repeat once a day
+    async def check_teams_loop(self):
+        pass
+
     @tasks.loop(seconds=5)  # repeat after every 5 seconds
     async def resend_outages_loop(self):
         """Resends all the outages to the #cases channel.
@@ -152,6 +156,7 @@ class Bot(commands.Bot):
 
         await self.add_cog(AnnouncementCommand(self))
 
+        self.check_teams_loop.start()
         self.resend_outages_loop.start()
         self.reset_connection_loop.start()
 
