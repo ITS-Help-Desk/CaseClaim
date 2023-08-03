@@ -36,7 +36,7 @@ class ClaimView(ui.View):
         case = ActiveClaim.from_id(self.bot.connection, interaction.message.id)
 
         if case is None:
-            await interaction.response.send_message("Error, please try again.", ephemeral=True)
+            await interaction.response.send_message("Error, please try again.", ephemeral=True, delete_after=300)
 
             raise AttributeError(f"Case is none (message ID: {interaction.message.id})")
 
@@ -49,7 +49,7 @@ class ClaimView(ui.View):
                                             timestamp=datetime.now())
             completed_embed.set_author(name=f"{case.case_num}", icon_url=f'{interaction.user.display_avatar}')
             completed_embed.set_footer(text="Completed")
-            await interaction.response.send_message(embed=completed_embed, ephemeral=True)
+            await interaction.response.send_message(embed=completed_embed, ephemeral=True, delete_after=300)
 
             # Send a message in the claims channel and add the lead view to it.
             channel = interaction.user.guild.get_channel(self.bot.claims_channel)  # claims channel
