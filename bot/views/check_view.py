@@ -32,6 +32,12 @@ class CheckView(ui.View):
 
     @ui.button(label="Kudos", style=discord.ButtonStyle.success, custom_id="kudos")
     async def button_kudos(self, interaction: discord.Interaction, button: discord.ui.Button):
+        """When pressed by a lead, it allows them to complement a tech's handling of a case.
+
+        Args:
+            interaction (discord.Interaction): The interaction this button press originated from.
+            button (discord.ui.Button): Unused argument that's required to be passed in.
+        """
         # Check to see if user is in the list
         u = User.from_id(self.bot.connection, interaction.user.id)
         if u is None:
@@ -78,6 +84,12 @@ class CheckView(ui.View):
 
     @ui.button(label="Done", style=discord.ButtonStyle.secondary, custom_id="done")
     async def button_done(self, interaction: discord.Interaction, button: discord.ui.Button):
+        """When pressed by a lead, it logs the case as Done (used for SPAM and other simple cases).
+
+        Args:
+            interaction (discord.Interaction): The interaction this button press originated from.
+            button (discord.ui.Button): Unused argument that's required to be passed in.
+        """
         # Check to see if user is in the list
         u = User.from_id(self.bot.connection, interaction.user.id)
         if u is None:

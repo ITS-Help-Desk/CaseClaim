@@ -15,6 +15,7 @@ from bot.cogs.help_command import HelpCommand
 from bot.cogs.leaderboard_command import LeaderboardCommand
 from bot.cogs.case_dist import CaseDistCommand
 from bot.cogs.leadstats_command import LeadStatsCommand
+from bot.cogs.export_command import ExportCommand
 
 from bot.views.claim_view import ClaimView
 from bot.views.affirm_view import AffirmView
@@ -147,6 +148,7 @@ class Bot(commands.Bot):
         await self.add_cog(LeaderboardCommand(self))
         await self.add_cog(CaseDistCommand(self))
         await self.add_cog(LeadStatsCommand(self))
+        await self.add_cog(ExportCommand(self))
 
         await self.add_cog(AnnouncementCommand(self))
 

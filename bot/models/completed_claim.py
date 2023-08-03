@@ -1,6 +1,6 @@
 from datetime import datetime
 from mysql.connector import MySQLConnection
-from typing import Optional
+from typing import Optional, Any
 
 from bot.models.database_item import DatabaseItem
 from bot.models.user import User
@@ -100,3 +100,19 @@ class CompletedClaim(DatabaseItem):
             sql = "DELETE FROM CompletedClaims WHERE checker_message_id = %s"
             cursor.execute(sql, (self.checker_message_id,))
             connection.commit()
+
+    @staticmethod
+    def get_all(connection: MySQLConnection) -> list['CompletedClaim']:
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT * FROM CompletedClaims")
+            results = cursor.fetchall()
+
+            data = []
+            for result in results:
+                data.append(
+                    CompletedClaim(result[0], result[1], User.from_id(connection, result[2]), result[3], result[4]))
+
+            return data
+
+    def export(self) -> list[Any]:
+        return [self.checker_message_id, self.case_num, self.tech.discord_id, self.claim_time, self.complete_time]

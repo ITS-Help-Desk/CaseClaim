@@ -1,6 +1,8 @@
 token.txt
 temp.csv
 config.json
+export/
+
 .vscode
 .DS_Store
 .idea

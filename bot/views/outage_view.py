@@ -18,6 +18,13 @@ class OutageView(ui.View):
 
     @ui.button(label="Update", style=discord.ButtonStyle.primary, custom_id="update")
     async def button_update(self, interaction: discord.Interaction, button: discord.ui.Button):
+        """Allows a PA to update the information for an outage. It prompts a modal for the PA
+        to fill in new information for each field.
+
+        Args:
+            interaction (discord.Interaction): The interaction this button press originated from.
+            button (discord.ui.Button): Unused argument that's required to be passed in.
+        """
         if self.bot.check_if_pa(interaction.user):
             outage = Outage.from_message_id(self.bot.connection, interaction.message.id)
 
@@ -26,6 +33,12 @@ class OutageView(ui.View):
 
     @ui.button(label="Close", style=discord.ButtonStyle.secondary, custom_id="close")
     async def button_close(self, interaction: discord.Interaction, button: discord.ui.Button):
+        """Allows a PA to close an outage and deletes the cases channel message.
+
+        Args:
+            interaction (discord.Interaction): The interaction this button press originated from.
+            button (discord.ui.Button): Unused argument that's required to be passed in.
+        """
         if self.bot.check_if_pa(interaction.user):
             outage = Outage.from_message_id(self.bot.connection, interaction.message.id)
             outage.deactivate(self.bot.connection)
