@@ -29,8 +29,14 @@ class JoinForm(ui.Modal, title='Join Form'):
         Args:
             interaction (discord.Interaction): The submit modal interaction
         """
-        user = User(interaction.user.id, str(self.first_name), str(self.last_name), 0, True)
-        user.add_to_database(self.bot.connection)
 
-        await interaction.response.send_message(content="👍",
-                                                delete_after=0)  # Acknowledge interaction, immediately delete message
+        u = User.from_id(self.bot.connection, interaction.user.id)
+        # Test if user is already in the database
+        if u is not None:
+            u.edit_name(self.bot.connection, str(self.first_name), str(self.last_name))
+        else:
+            # Create new user
+            user = User(interaction.user.id, str(self.first_name), str(self.last_name), 0, True)
+            user.add_to_database(self.bot.connection)
+
+        await interaction.response.send_message(content="👍", ephemeral=True, delete_after=0)  # Acknowledge interaction, immediately delete message

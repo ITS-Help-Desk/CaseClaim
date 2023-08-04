@@ -62,6 +62,21 @@ class User(DatabaseItem):
             cursor.execute(sql, (new_team_id, self.discord_id,))
             connection.commit()
 
+    def edit_name(self, connection: MySQLConnection, new_first: str, new_last: str):
+        """Edit a user's first and last name in the User's table. This is used
+        if a user types the /join command after they've already joined.
+
+        Args:
+            connection (MySQLConnection): The connection to the MySQL database
+            new_first (str): The user's new first name
+            new_last (str): The user's new last name
+        """
+        with connection.cursor() as cursor:
+            sql = "UPDATE Users SET first_name=%s, last_name=%s WHERE discord_id = %s"
+
+            cursor.execute(sql, (new_first, new_last, self.discord_id,))
+            connection.commit()
+
     def activate(self) -> None:
         pass
 
