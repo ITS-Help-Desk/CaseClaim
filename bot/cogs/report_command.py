@@ -2,7 +2,7 @@ from discord import app_commands
 from discord.ext import commands
 import discord
 import csv
-from bot.helpers import month_string_to_number
+from bot.helpers import month_string_to_number, month_number_to_name
 import traceback
 
 from bot.models.checked_claim import CheckedClaim
@@ -50,14 +50,18 @@ class ReportCommand(commands.Cog):
         if self.bot.check_if_lead(interaction.user):
             await interaction.response.defer(ephemeral=True)  # Wait in case process takes a long time
 
+            description = "Here's your report of cases"
+
             if month is not None:
                 month = int(month_string_to_number(month))
-
+                description += f" in **{month_number_to_name(month)}**"
             if user is not None:
                 user = User.from_id(self.bot.connection, user.id)
+                description += f" from user **{user.full_name}**"
 
             if status is not None:
                 status = Status.from_str(status.value)
+                description += f" with status **{status}**"
 
             results = CheckedClaim.search(self.bot.connection, user, month, status)
             row_str = self.data_to_rowstr(results)
@@ -69,7 +73,7 @@ class ReportCommand(commands.Cog):
 
             report = discord.File('temp.csv')
 
-            await interaction.followup.send(content="Here's your report", file=report)
+            await interaction.followup.send(content=f"{description}.", file=report)
         else:
             # Return error message if user is not Lead
             msg = f"<@{interaction.user.id}>, you do not have permission to pull this report!"
