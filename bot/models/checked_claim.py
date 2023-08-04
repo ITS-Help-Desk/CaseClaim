@@ -123,14 +123,14 @@ class CheckedClaim(DatabaseItem):
             connection.commit()
 
     @staticmethod
-    def search(connection: MySQLConnection, user: Optional[User] = None, month: Optional[int] = None, pinged=False) -> list['CheckedClaim']:
+    def search(connection: MySQLConnection, user: Optional[User] = None, month: Optional[int] = None, status: Status = None) -> list['CheckedClaim']:
         """Searches the list of CheckedClaims based on the specified parameters.
         
         Args:
             connection (MySQLConnection): The connection to the MySQL database 
             user (Optional[User]): The user that worked on the CheckedClaim
             month (Optional[int]): The month that the CheckedClaim was claimed in
-            pinged (bool): Whether or not the case has been pinged before
+            status (Status): The status of the case
 
         Returns:
             list[CheckedClaim] - A list of CheckedClaims matching the parameters
@@ -154,8 +154,11 @@ class CheckedClaim(DatabaseItem):
             ending = f"'{now.year}-{now.month}-{end} 23:59:59'"
             sql += f" AND claim_time BETWEEN {beginning} AND {ending}"
 
-        if pinged:
-            sql += " AND ping_thread_id IS NOT null"
+        if status is not None:
+            if status == Status.PINGED:
+                sql += " AND ping_thread_id IS NOT null"
+            else:
+                sql += f" AND `status` = '{status}'"
 
         with connection.cursor() as cursor:
             cursor.execute(sql)

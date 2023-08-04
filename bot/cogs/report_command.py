@@ -8,6 +8,7 @@ import traceback
 from bot.models.checked_claim import CheckedClaim
 from bot.models.ping import Ping
 from bot.models.user import User
+from bot.status import Status
 
 # Use TYPE_CHECKING to avoid circular import from bot
 from typing import TYPE_CHECKING
@@ -28,10 +29,14 @@ class ReportCommand(commands.Cog):
     @app_commands.command(description="Generate a report of cases logged.")
     @app_commands.describe(user="The user the report will be generated for.")
     @app_commands.describe(month="The month for the report (e.g. \"march\").")
-    @app_commands.describe(pinged="Whether or not the case has been pinged.")
+    @app_commands.choices(status=[
+        app_commands.Choice(name="Kudos", value="kudos"),
+        app_commands.Choice(name="Checked", value="checked"),
+        app_commands.Choice(name="Done", value="done"),
+        app_commands.Choice(name="Pinged", value="pinged")
+    ])
     @app_commands.default_permissions(mute_members=True)
-    async def report(self, interaction: discord.Interaction, user: discord.Member = None, month: str = None,
-                     pinged: bool = False):
+    async def report(self, interaction: discord.Interaction, user: discord.Member = None, month: str = None, status: app_commands.Choice[str] = None):
         """Creates a report of all cases, optionally within a certain month and optionally
         for one specific user.
 
@@ -39,7 +44,7 @@ class ReportCommand(commands.Cog):
             interaction (discord.Interaction): Interaction that the slash command originated from.
             user (discord.Member, optional): The user that the report will correspond to. Defaults to None.
             month (str, optional): The month that all the cases comes from. Defaults to None.
-            pinged (bool, optional): Whether or not the case has been pinged. Defaults to False.
+            status (app_command.Choice[str]): The status of cases that will be presented in the report
         """
         # Check if user is a lead
         if self.bot.check_if_lead(interaction.user):
@@ -51,7 +56,10 @@ class ReportCommand(commands.Cog):
             if user is not None:
                 user = User.from_id(self.bot.connection, user.id)
 
-            results = CheckedClaim.search(self.bot.connection, user, month, pinged)
+            if status is not None:
+                status = Status.from_str(status.value)
+
+            results = CheckedClaim.search(self.bot.connection, user, month, status)
             row_str = self.data_to_rowstr(results)
 
             with open('temp.csv', 'w', newline='', encoding='utf-8') as csvfile:
