@@ -2,7 +2,6 @@ from enum import StrEnum
 
 
 class Status(StrEnum):
-    COMPLETED = "Completed",
     CHECKED = "Checked",
     PINGED = "Pinged",
     RESOLVED = "Resolved"
@@ -12,8 +11,6 @@ class Status(StrEnum):
     @staticmethod
     def from_str(s: str) -> 'Status':
         match (s.lower()):
-            case "completed":
-                return Status.COMPLETED
             case "checked":
                 return Status.CHECKED
             case "pinged":
