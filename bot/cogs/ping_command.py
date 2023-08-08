@@ -1,14 +1,8 @@
 from discord import app_commands
 from discord.ext import commands
 import discord
-import time
-from bot import paginator
 import traceback
 
-from bot.helpers import create_paginator_embeds
-
-from bot.models.active_claim import ActiveClaim
-from bot.models.completed_claim import CompletedClaim
 from bot.models.checked_claim import CheckedClaim
 from bot.models.user import User
 
@@ -34,6 +28,13 @@ class PingCommand(commands.Cog):
     @app_commands.describe(user="Tech that will be pinged")
     @app_commands.describe(case_num="Case #")
     async def ping(self, interaction: discord.Interaction, user: discord.Member, case_num: str) -> None:
+        """Allows a lead to manually ping a case.
+
+        Args:
+            interaction (discord.Interaction): Interaction that the slash command originated from
+            user (discord.Member): The user that was responsible for the case
+            case_num (str): The case number in Salesforce (e.g. "00960979")
+        """
         case = CheckedClaim.find_latest_case(self.bot.connection, User.from_id(self.bot.connection, user.id), case_num)
 
         if case is not None:
