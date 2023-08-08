@@ -33,8 +33,7 @@ class LeaderboardCommand(commands.Cog):
         if self.bot.check_if_lead(interaction.user):
             await interaction.response.defer()  # Wait in case process takes a long time
 
-            embed = LeaderboardView.create_embed(self.bot, interaction.created_at)
-            embed.set_thumbnail(url=interaction.guild.icon.url)
+            embed = LeaderboardView.create_embed(self.bot, interaction)
 
             await interaction.followup.send(embed=embed, view=LeaderboardView(self.bot))
         else:

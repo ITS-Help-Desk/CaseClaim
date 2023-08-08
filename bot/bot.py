@@ -1,3 +1,4 @@
+from aiohttp import ClientSession
 from discord.ext import commands, tasks
 import discord
 from mysql.connector import MySQLConnection
@@ -48,7 +49,9 @@ class Bot(commands.Bot):
         self.claims_channel = int(config["claims_channel"])
         self.error_channel = int(config["error_channel"])
         self.announcement_channel = int(config["announcement_channel"])
-        self.teams = config["teams"]
+
+        self.teams: list[int] = config["teams"]
+        self.team_icons: list[str] = config["team_icons"]
 
         self.connection = connection
 
@@ -126,6 +129,23 @@ class Bot(commands.Bot):
 
             except Exception as e:
                 print(e)
+
+        _, _, team_ranks, _, _ = LeaderboardView.get_rankings(CheckedClaim.search(self.connection))
+
+        first_place_index = self.teams.index(list(team_ranks.keys())[0])
+
+        new_icon = self.team_icons[first_place_index]
+        ch = await self.fetch_channel(self.cases_channel)
+
+        '''use aiohttp Clientsession to asynchronously scrape the attachment url and read the data to a variable'''
+        async with ClientSession() as session:
+            async with session.get(new_icon) as response:
+                '''if site response, read the response data into img_data'''
+                if response.status == 200:
+                    img_data = await response.read()
+
+        '''update the guild icon with the data stored in img_data'''
+        await ch.guild.edit(icon=img_data)
 
     @tasks.loop(seconds=5)  # repeat after every 5 seconds
     async def resend_outages_loop(self):
