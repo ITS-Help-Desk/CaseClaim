@@ -19,8 +19,6 @@ class AnnouncementForm(ui.Modal, title='Announcement Form'):
 
     a_title = ui.TextInput(label='Title', style=discord.TextStyle.short)
     description = ui.TextInput(label='Description', style=discord.TextStyle.paragraph)
-    days = ui.TextInput(label='Days Shown (1-14) (Optional, Default=4)', style=discord.TextStyle.paragraph,
-                        required=False)
 
     async def on_submit(self, interaction: discord.Interaction):
         """Creates an announcement message which will be sent to the #announcements channel along with
@@ -32,12 +30,12 @@ class AnnouncementForm(ui.Modal, title='Announcement Form'):
         # Create announcement for AnnouncementManager
         a_title = str(self.a_title)
         description = str(self.description)
-        days = 4 if len(str(self.days)) == 0 else int(str(self.days))
+        days = 4
 
         end_date = datetime.datetime.now() + datetime.timedelta(days=days)
 
         # Create announcement embed
-        announcement_embed = discord.Embed(title=a_title, colour=discord.Color.red())
+        announcement_embed = discord.Embed(title=a_title, colour=discord.Color.yellow())
         announcement_embed.description = description
 
         # Send announcement message
