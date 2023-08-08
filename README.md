@@ -52,7 +52,7 @@ To setup, first download the latest version of MySQL. Then, create a database an
     ├── status.py # Lists case status enum values
     ├── cogs
         ├── announcement_command.py # /announcement
-        ├── case_dist.py # /casedist
+        ├── casedist_command.py # /casedist
         ├── caseinfo_command.py # /caseinfo
         ├── claim_command.py # /claim
         ├── getlog_command.py # /getlog
