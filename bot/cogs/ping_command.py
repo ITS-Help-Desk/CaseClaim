@@ -27,6 +27,7 @@ class PingCommand(commands.Cog):
     @app_commands.command(description="Manually ping a case")
     @app_commands.describe(user="Tech that will be pinged")
     @app_commands.describe(case_num="Case #")
+    @app_commands.default_permissions(mute_members=True)
     async def ping(self, interaction: discord.Interaction, user: discord.Member, case_num: str) -> None:
         """Allows a lead to manually ping a case.
 
