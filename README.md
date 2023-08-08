@@ -60,7 +60,6 @@ To setup, first download the latest version of MySQL. Then, create a database an
         ├── join_command.py # /join
         ├── leaderboard_command.py # /leaderboard
         ├── leaderstats_command.py # /leadstats
-        ├── mickie_command.py # /mickie
         ├── mycases_command.py # /mycases    
         └── report_command.py # /report
     ├── forms
@@ -141,8 +140,6 @@ This is beneficial because there are many commands which a standard tech wouldn'
 - /mycases
     - Allows a user to see a list of cases they've worked on.
     - Shows a paginated list containing the time and case numbers.
-- /mickie
-    - A fun command that essentially allows users to ping the bot and ensure it's online.
 ## Commands (for Leads)
 - /report **\[user]** **\[month]** **\[pinged]**
     - Allows a lead to instantly create a report on filtered cases.
