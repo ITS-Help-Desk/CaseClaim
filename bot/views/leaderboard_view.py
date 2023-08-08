@@ -36,7 +36,7 @@ class LeaderboardView(ui.View):
         """
         await interaction.response.defer(thinking=False)  # Acknowledge button press
 
-        new_embed = LeaderboardView.create_embed(self.bot, interaction.created_at)
+        new_embed = LeaderboardView.create_embed(self.bot, interaction)
 
         message = interaction.message
         if message is not None:
@@ -101,13 +101,13 @@ class LeaderboardView(ui.View):
         await interaction.followup.send(embed=embed, ephemeral=True)
 
     @staticmethod
-    def create_embed(bot: 'Bot', interaction_date: datetime.datetime) -> discord.Embed:
+    def create_embed(bot: 'Bot', interaction: discord.Interaction) -> discord.Embed:
         """Creates the leaderboard embed for the /leaderboard command and for the
         Refresh button.
 
         Args:
             bot (Bot): A reference to the bot class
-            interaction_date (datetime.datetime): The time at which this request is made.
+            interaction (discord.Interaction): The interaction requesting the leaderboard.
 
         Returns:
             discord.Embed: The embed object with everything already completed for month and semester rankings.
@@ -120,29 +120,30 @@ class LeaderboardView(ui.View):
         # Create month written ranking
         for i in range(min(4, len(month_ranks.keys()))):
             user_id = list(month_ranks.keys())[i]
-            month_ranking += f"**{i + 1}.** <@!{user_id}> ({month_ranks[user_id]})\n"
+            month_ranking += f"**{i + 1}.** <@!{user_id}> | {month_ranks[user_id]}\n"
 
         semester_ranking = ""
         # Create semester written ranking
         for i in range(min(4, len(semester_ranks.keys()))):
             user_id = list(semester_ranks.keys())[i]
-            semester_ranking += f"**{i + 1}.** <@!{user_id}> ({semester_ranks[user_id]})\n"
+            semester_ranking += f"**{i + 1}.** <@!{user_id}> | {semester_ranks[user_id]}\n"
 
         team_ranking = ""
         # Create team written ranking
         for i in range(min(4, len(team_ranks))):
             team_id = list(team_ranks.keys())[i]
-            team_ranking += f"**{i + 1}.** <@&{team_id}> ({team_ranks[team_id]})\n"
+            team_ranking += f"**{i + 1}.** <@&{team_id}> | {team_ranks[team_id]}\n"
 
         # Create embed
-        embed = discord.Embed(title="ITS Case Claim Leaderboard")
+        embed = discord.Embed()
         embed.colour = bot.embed_color
 
         # Add leaderboard fields
-        embed.add_field(name=f"{month_number_to_name(interaction_date.month)} Ranks", value=month_ranking, inline=True)
-        embed.add_field(name=f"Team Ranks", value=team_ranking, inline=True)
-        embed.add_field(name="Semester Ranks", value=semester_ranking, inline=True)
+        embed.add_field(name=f"Team", value=team_ranking, inline=True)
+        embed.add_field(name=f"{month_number_to_name(interaction.created_at.month)}", value=month_ranking, inline=True)
+        embed.add_field(name="Semester", value=semester_ranking, inline=True)
 
+        embed.set_author(name="Leaderboard", icon_url=interaction.guild.icon.url)
         embed.set_footer(text="Last Updated")
         embed.timestamp = datetime.datetime.now()
 
