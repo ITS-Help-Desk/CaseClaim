@@ -27,15 +27,16 @@ class CaseDistCommand(commands.Cog):
 
     @app_commands.command(description="Shows a graph of the timing of case claims")
     @app_commands.default_permissions(mute_members=True)
-    async def casedist(self, interaction: discord.Interaction, previous_days: int) -> None:
+    async def casedist(self, interaction: discord.Interaction, month: int, day: int) -> None:
         """Sends a graph of the case claim time distribution
 
         Args:
             interaction (discord.Interaction): Interaction that the slash command originated from.
-            previous_days (int): The amount of days worth of data that will be used.
+            month (int):
+            day (int):
         """
-        start = datetime.datetime.now() - datetime.timedelta(days=previous_days)
-        start = start.replace(hour=7, minute=0, second=0)
+        current = datetime.datetime.now()
+        start = datetime.datetime(year=current.year, month=month, day=day, hour=7, minute=0, second=0)
 
         days = []  # 44 segments
         for i in range(44):
@@ -59,7 +60,7 @@ class CaseDistCommand(commands.Cog):
         labels = self.create_labels()
 
         # Create plot
-        ax.set_title(f"ITS Case Histogram (Starting {start.strftime('%b %d, %Y')})")
+        ax.set_title(f"Total Case Claim-Time Histogram (Starting {start.strftime('%b %d, %Y')})")
         plt.xticks(rotation=90, ha="right")
 
         ax.bar(labels, days, color="b", zorder=3)
@@ -73,11 +74,9 @@ class CaseDistCommand(commands.Cog):
 
         chart = discord.File(data_stream, filename="chart.png")
 
-        embed = discord.Embed(title="ITS Case Histogram")
+        embed = discord.Embed(title="ITSHD Total Case Claim-Time Histogram")
 
-        embed.set_image(
-            url="attachment://chart.png"
-        )
+        embed.set_image(url="attachment://chart.png")
 
         embed.colour = self.bot.embed_color
 

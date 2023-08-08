@@ -13,7 +13,7 @@ from bot.cogs.join_command import JoinCommand
 from bot.cogs.announcement_command import AnnouncementCommand
 from bot.cogs.help_command import HelpCommand
 from bot.cogs.leaderboard_command import LeaderboardCommand
-from bot.cogs.case_dist import CaseDistCommand
+from bot.cogs.casedist_command import CaseDistCommand
 from bot.cogs.leadstats_command import LeadStatsCommand
 from bot.cogs.export_command import ExportCommand
 
