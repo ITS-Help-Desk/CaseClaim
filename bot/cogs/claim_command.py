@@ -11,7 +11,6 @@ from bot.models.completed_claim import CompletedClaim
 from bot.models.checked_claim import CheckedClaim
 
 from bot.views.claim_view import ClaimView
-from bot.views.claim_confirm_view import ClaimConfirmView
 
 # Use TYPE_CHECKING to avoid circular import from bot
 from typing import TYPE_CHECKING
@@ -98,10 +97,12 @@ class ClaimCommand(commands.Cog):
 
         # Send message
         if not recent:
+            # Respond to interaction
             await interaction.response.send_message(embed=message_embed, view=ClaimView(self.bot))
             response = await interaction.original_response()
             message_id = response.id
         else:
+            # Send new message
             msg = await interaction.channel.send(embed=message_embed, view=ClaimView(self.bot))
             message_id = msg.id
 
