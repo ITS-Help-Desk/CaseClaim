@@ -1,5 +1,6 @@
 import discord
 import discord.ui as ui
+from typing import Union
 from datetime import datetime
 
 from bot.models.completed_claim import CompletedClaim
@@ -18,7 +19,7 @@ if TYPE_CHECKING:
 
 
 class PingForm(ui.Modal, title='Feedback Form'):
-    def __init__(self, bot: "Bot", case: CompletedClaim):
+    def __init__(self, bot: "Bot", case: Union[CompletedClaim, CheckedClaim]):
         """Creates a feedback form for the LeadView whenever a lead would
         like to ping a case and provide feedback.
 
@@ -80,16 +81,23 @@ class PingForm(ui.Modal, title='Feedback Form'):
         # Send message
         await interaction.response.send_message(content="Pinged",
                                                 delete_after=0)  # Acknowledge interaction, immediately delete message
-        # Remove unpinged case from log
-        self.case.remove_from_database(self.bot.connection)
 
         ping = Ping(thread.id, message.id, str(self.severity), str(self.description))
         ping.add_to_database(self.bot.connection)
 
-        checked_case = CheckedClaim(self.case.checker_message_id, self.case.case_num, self.case.tech,
-                                    User.from_id(self.bot.connection, interaction.user.id), self.case.claim_time,
-                                    self.case.complete_time, datetime.now(), Status.PINGED, ping.thread_id)
-        checked_case.add_to_database(self.bot.connection)
+        if type(self.case) == CheckedClaim:
+            self.case.add_ping_thread(self.bot.connection, ping.thread_id)
+            self.case.change_status(self.bot.connection, Status.PINGED)
+        elif type(self.case) == CompletedClaim:
+            # Remove unpinged case from log
+            self.case.remove_from_database(self.bot.connection)
 
-        # Delete checker message
-        await interaction.message.delete()
+
+
+            checked_case = CheckedClaim(self.case.checker_message_id, self.case.case_num, self.case.tech,
+                                        User.from_id(self.bot.connection, interaction.user.id), self.case.claim_time,
+                                        self.case.complete_time, datetime.now(), Status.PINGED, ping.thread_id)
+            checked_case.add_to_database(self.bot.connection)
+
+            # Delete checker message
+            await interaction.message.delete()

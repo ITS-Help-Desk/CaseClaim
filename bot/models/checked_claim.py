@@ -106,6 +106,18 @@ class CheckedClaim(DatabaseItem):
 
             return data
 
+    def add_ping_thread(self, connection: MySQLConnection, ping_thread_id: int) -> None:
+        """Updates the database to include a provided ping thread ID.
+
+        Args:
+            connection (MySQLConnection): The connection to the MySQL database
+            ping_thread_id (int): The ID of the ping thread created
+        """
+        with connection.cursor() as cursor:
+            sql = "UPDATE CheckedClaims SET ping_thread_id=%s WHERE checker_message_id=%s"
+            cursor.execute(sql, (ping_thread_id, self.checker_message_id,))
+            connection.commit()
+
     def change_status(self, connection: MySQLConnection, new_status: Status):
         """Changes the status of a CheckedClaim in the database
         
@@ -170,6 +182,30 @@ class CheckedClaim(DatabaseItem):
                                          User.from_id(connection, result[3]),
                                          result[4], result[5], result[6], Status.from_str(result[7]), result[8]))
             return data
+
+    @staticmethod
+    def find_latest_case(connection: MySQLConnection, user: User, case_num: str) -> Optional['CheckedClaim']:
+        """Finds the latest non-pinged case from the user with the case_num provided.
+
+        Args:
+            connection (MySQLConnection): The connection to the MySQL database
+            user (User): The tech responsible for the case
+            case_num (str): The case number in Salesforce
+
+        Returns:
+            Optional[CheckedClaim] - The CheckedClaim (if it can be found)
+        """
+        with connection.cursor() as cursor:
+            sql = "SELECT * FROM CheckedClaims WHERE tech_id=%s AND case_num=%s AND status != %s"
+            cursor.execute(sql, (user.discord_id, case_num, Status.PINGED,))
+            result = cursor.fetchone()
+
+            if result is not None and len(result) != 0:
+                return CheckedClaim(result[0], result[1], User.from_id(connection, result[2]),
+                                    User.from_id(connection, result[3]),
+                                    result[4], result[5], result[6], Status.from_str(result[7]), result[8])
+            else:
+                return None
 
     def add_to_database(self, connection: MySQLConnection) -> None:
         with connection.cursor() as cursor:
