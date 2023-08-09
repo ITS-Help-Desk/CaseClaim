@@ -26,7 +26,7 @@ class ClaimView(ui.View):
         self.bot = bot
 
     @ui.button(label="Complete", style=discord.ButtonStyle.success, custom_id='complete')
-    async def button_claim(self, interaction: discord.Interaction, button: discord.ui.Button):
+    async def button_complete(self, interaction: discord.Interaction, button: discord.ui.Button):
         """When pressed by a tech, it marks the case as complete and allows a lead to review it.
 
         Args:
@@ -44,7 +44,7 @@ class ClaimView(ui.View):
             case.remove_from_database(self.bot.connection)
             await interaction.message.delete()
 
-            completed_embed = discord.Embed(description=f"Has been marked complete by <@{interaction.user.id}>",
+            completed_embed = discord.Embed(description=f"Case has been marked complete, to view all your cases use **/mycases**",
                                             colour=discord.Color.green(),
                                             timestamp=datetime.now())
             completed_embed.set_author(name=f"{case.case_num}", icon_url=f'{interaction.user.display_avatar}')
