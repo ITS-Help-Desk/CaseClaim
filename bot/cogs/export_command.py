@@ -64,7 +64,7 @@ class ExportCommand(commands.Cog):
 
             # Add data
             for i, file in enumerate(file_names):
-                with open(f"{root}{file}.csv", "w") as f:
+                with open(f"{root}{file}.csv", 'w', newline='', encoding='utf-8') as f:
                     csv_writer = csv.writer(f)
 
                     for item in data[i]:
