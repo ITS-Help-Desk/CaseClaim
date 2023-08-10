@@ -49,6 +49,7 @@ class Bot(commands.Bot):
         self.claims_channel = int(config["claims_channel"])
         self.error_channel = int(config["error_channel"])
         self.announcement_channel = int(config["announcement_channel"])
+        self.log_channel = int(config["log_channel"])
 
         self.teams: list[int] = config["teams"]
         self.team_icons: list[str] = config["team_icons"]

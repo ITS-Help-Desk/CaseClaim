@@ -99,6 +99,7 @@ Here's how the `config.json` file should be formatted (replace zeros with ID num
   "claims_channel": 0,
   "error_channel": 0,
   "announcement_channel": 0,
+  "log_channel": 0,
   
   "teams": [
     0,
