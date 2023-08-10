@@ -40,10 +40,13 @@ class ResolvePingView(ui.View):
             await interaction.response.send_message(content="You cannot press this button.", ephemeral=True)
             return
 
-        user = await interaction.channel.fetch_member(case.tech.discord_id)
-
         await interaction.channel.remove_user(interaction.user)  # Remove lead
-        await interaction.channel.remove_user(user)  # Remove tech
+
+        try:
+            user = await interaction.channel.fetch_member(case.tech.discord_id)
+            await interaction.channel.remove_user(user)  # Remove tech
+        except:
+            pass
 
         case.change_status(self.bot.connection, Status.RESOLVED)
 
@@ -63,10 +66,13 @@ class ResolvePingView(ui.View):
             await interaction.response.send_message(content="You cannot press this button.", ephemeral=True)
             return
 
-        user = await interaction.channel.fetch_member(case.tech.discord_id)
-
         await interaction.channel.remove_user(interaction.user)  # Remove lead
-        await interaction.channel.remove_user(user)  # Remove tech
+
+        try:
+            user = await interaction.channel.fetch_member(case.tech.discord_id)
+            await interaction.channel.remove_user(user)  # Remove tech
+        except:
+            pass
 
         await interaction.response.defer(thinking=False)  # Acknowledge button press
 
@@ -91,10 +97,13 @@ class ResolvePingView(ui.View):
             await interaction.response.send_message(content="You cannot press this button.", ephemeral=True)
             return
 
-        user = await interaction.channel.fetch_member(case.tech.discord_id)
-
         await interaction.channel.remove_user(interaction.user)  # Remove lead
-        await interaction.channel.remove_user(user)  # Remove tech
+
+        try:
+            user = await interaction.channel.fetch_member(case.tech.discord_id)
+            await interaction.channel.remove_user(user)  # Remove tech
+        except:
+            pass
 
         # Change Log file
         case.change_status(self.bot.connection, Status.CHECKED)
