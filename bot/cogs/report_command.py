@@ -31,8 +31,6 @@ class ReportCommand(commands.Cog):
     @app_commands.describe(month="The month for the report (e.g. \"march\").")
     @app_commands.choices(status=[
         app_commands.Choice(name="Kudos", value="kudos"),
-        app_commands.Choice(name="Checked", value="checked"),
-        app_commands.Choice(name="Done", value="done"),
         app_commands.Choice(name="Pinged", value="pinged")
     ])
     @app_commands.default_permissions(mute_members=True)
@@ -48,7 +46,13 @@ class ReportCommand(commands.Cog):
         """
         # Check if user is a lead
         if self.bot.check_if_lead(interaction.user):
-            await interaction.response.defer(ephemeral=True)  # Wait in case process takes a long time
+            if interaction.channel_id != self.bot.log_channel:
+                # Return an error if used in the wrong channel
+                msg = f"You can only use this command in the <#{self.bot.log_channel}> channel."
+                await interaction.response.send_message(content=msg, ephemeral=True)
+                return
+
+            await interaction.response.defer()  # Wait in case process takes a long time
 
             description = "Here's your report of cases"
 
