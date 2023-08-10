@@ -1,7 +1,10 @@
+import datetime
+
 import discord
 import discord.ui as ui
 
 from bot.models.outage import Outage
+from bot.models.user import User
 
 # Use TYPE_CHECKING to avoid circular import from bot
 from typing import TYPE_CHECKING
@@ -44,6 +47,8 @@ class EditOutageForm(ui.Modal, title='Outage Update Form'):
         Args:
             interaction (discord.Interaction): The submit modal interaction
         """
+        user = User.from_id(self.bot.connection, interaction.user.id)
+
         new_service = str(self.service)
         new_parent_case = str(self.parent_case)
         new_description = str(self.description)
@@ -57,7 +62,16 @@ class EditOutageForm(ui.Modal, title='Outage Update Form'):
         new_outage.add_to_database(self.bot.connection)
 
         # Create announcement embed
-        announcement_embed = discord.Embed(title=f"{new_service} Outage", colour=discord.Color.red())
+        announcement_embed = discord.Embed(colour=discord.Color.red())
+        announcement_embed.set_author(name=f"{new_service} Outage", icon_url="https://thumbs.gfycat.com/DelayedVacantDassie-size_restricted.gif")
+
+        try:
+            announcement_embed.set_footer(text=user.full_name, icon_url=interaction.user.avatar.url)
+        except:
+            # Avatar not found
+            announcement_embed.set_footer(text=user.full_name)
+
+        announcement_embed.timestamp = datetime.datetime.now()
 
         # Add parent case
         if new_parent_case is not None and len(str(new_parent_case)) != 0:
@@ -76,10 +90,10 @@ class EditOutageForm(ui.Modal, title='Outage Update Form'):
         # Edit announcement message
         announcement_message: discord.Message = await interaction.channel.fetch_message(self.outage.message_id)
         await announcement_message.edit(embed=announcement_embed)
-
         # Create case embed
         case_embed = discord.Embed(title=f"{new_service} Outage", colour=discord.Color.red())
         case_embed.description = f"{announcement_message.jump_url}"
+        case_embed.set_footer()
 
         if new_parent_case is not None and len(str(new_parent_case)) != 0:
             case_embed.description += f"\nParent Case: **{new_parent_case}**"
