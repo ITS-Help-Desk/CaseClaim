@@ -2,6 +2,7 @@ import discord
 import discord.ui as ui
 
 from bot.models.checked_claim import CheckedClaim
+from bot.models.ping import Ping
 
 from bot.views.resolve_ping_view import ResolvePingView
 
@@ -36,6 +37,15 @@ class AffirmForm(ui.Modal, title='Tech Assessment'):
             interaction (discord.Interaction): Interaction that the slash command originated from.
         """
         await interaction.response.send_message(f"<@{self.case.lead.discord_id}> has been pinged.", ephemeral=True)
+
+        # Try to remove the Affirm button
+        try:
+            ping = Ping.from_thread_id(self.bot.connection, interaction.channel_id)
+            ch = await self.bot.fetch_channel(interaction.channel_id)
+            msg = await ch.fetch_message(ping.message_id)
+            await msg.edit(view=None)
+        except Exception as e:
+            print(e)
 
         embed = discord.Embed(
             title="Case Assessment",
