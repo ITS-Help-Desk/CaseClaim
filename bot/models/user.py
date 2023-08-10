@@ -5,7 +5,7 @@ from bot.models.database_item import DatabaseItem
 
 
 class User(DatabaseItem):
-    def __init__(self, discord_id: int, first_name: str, last_name: str, team: int, active: bool):
+    def __init__(self, discord_id: int, first_name: str, last_name: str, team: int):
         """Creates a representation of a user
 
         Args:
@@ -15,7 +15,6 @@ class User(DatabaseItem):
         """
         self.discord_id = discord_id
         self.team = team
-        self.active = active
 
         if first_name[0].isupper():
             self.first_name = first_name
@@ -47,7 +46,7 @@ class User(DatabaseItem):
             if result is None:
                 return None
 
-            return User(result[0], result[1], result[2], int(result[3]), bool(result[4]))
+            return User(result[0], result[1], result[2], int(result[3]))
 
     def add_team(self, connection: MySQLConnection, new_team_id: int):
         """Adds a team to a user's row in the Users table.
@@ -77,17 +76,11 @@ class User(DatabaseItem):
             cursor.execute(sql, (new_first, new_last, self.discord_id,))
             connection.commit()
 
-    def activate(self) -> None:
-        pass
-
-    def deactivate(self) -> None:
-        pass
-
     def add_to_database(self, connection: MySQLConnection) -> None:
         with connection.cursor() as cursor:
-            sql = "INSERT INTO Users (discord_id, first_name, last_name, team, active) VALUES (%s, %s, %s, %s, %s)"
+            sql = "INSERT INTO Users (discord_id, first_name, last_name, team) VALUES (%s, %s, %s, %s)"
 
-            cursor.execute(sql, (self.discord_id, self.first_name, self.last_name, self.team, self.active))
+            cursor.execute(sql, (self.discord_id, self.first_name, self.last_name, self.team))
             connection.commit()
 
     def remove_from_database(self, connection: MySQLConnection) -> None:
@@ -112,9 +105,9 @@ class User(DatabaseItem):
             results = cursor.fetchall()
 
             for result in results:
-                users.append(User(result[0], result[1], result[2], int(result[3]), bool(result[4])))
+                users.append(User(result[0], result[1], result[2], int(result[3])))
 
             return users
 
     def export(self) -> list[Any]:
-        return [self.discord_id, self.first_name, self.last_name, self.team, self.active]
+        return [self.discord_id, self.first_name, self.last_name, self.team]
