@@ -241,8 +241,8 @@ class LeaderboardView(ui.View):
         """Returns the semester that the datetime object is located in.
 
         Jan - May -> Spring
-        Jun - Aug -> Summer
-        Sep - Dec -> Winter
+        Jun - Aug 20 -> Summer
+        Aug 21 - Dec -> Winter
 
         Args:
             t (datetime.datetime): The datetime object
@@ -251,10 +251,12 @@ class LeaderboardView(ui.View):
             str - The name of the semester
         """
         if 1 <= t.month <= 5:
-            sem = "Spring"
-        elif 6 <= t.month <= 8:
-            sem = "Summer"
-        else:
-            sem = "Fall"
+            return "Spring"
 
-        return sem
+        if 6 <= t.month < 8:
+            return "Summer"
+
+        if t.month == 8 and t.day < 21:
+            return "Summer"
+
+        return "Fall"
