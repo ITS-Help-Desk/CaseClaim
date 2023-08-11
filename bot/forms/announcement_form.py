@@ -14,6 +14,13 @@ if TYPE_CHECKING:
 
 class AnnouncementForm(ui.Modal, title='Announcement Form'):
     def __init__(self, bot: "Bot", informational: bool):
+        """Creates a form that can be used to create
+        announcements and informational announcements
+
+        Args:
+            bot (Bot): A reference to the Bot class
+            informational (bool): Whether or not the form will create an info or a normal announcement
+        """
         super().__init__()
         self.bot = bot
         self.informational = informational
