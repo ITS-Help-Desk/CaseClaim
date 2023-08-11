@@ -65,7 +65,6 @@ class ClaimCommand(commands.Cog):
             await interaction.response.send_message(content=msg, ephemeral=True, delete_after=300)
             return
 
-
         # Check if it's been claimed in the last 15 minutes
         potential_cases: list[CompletedClaim, CheckedClaim] = CompletedClaim.get_all_with_case_num(self.bot.connection, case_num)
         checked = CheckedClaim.get_all_with_case_num(self.bot.connection, case_num)
@@ -106,12 +105,20 @@ class ClaimCommand(commands.Cog):
             msg = await interaction.channel.send(embed=message_embed, view=ClaimView(self.bot))
             message_id = msg.id
 
-        # Now that message has been sent, update the active cases
-        # with the new message id
-        tech = User.from_id(self.bot.connection, interaction.user.id)
 
-        case = ActiveClaim(message_id, case_num, tech, datetime.now())
-        case.add_to_database(self.bot.connection)
+        try:
+            # Now that message has been sent, update the active cases
+            # with the new message id
+            tech = User.from_id(self.bot.connection, interaction.user.id)
+
+            case = ActiveClaim(message_id, case_num, tech, datetime.now())
+            case.add_to_database(self.bot.connection)
+        except:
+            # If there's an error in saving it to DB (another user claims case)
+            # delete message
+            ch = await self.bot.fetch_channel(self.bot.cases_channel)
+            message = await ch.fetch_message(message_id)
+            await message.delete()
 
         self.bot.resend_outages = True
         await Announcement.resend(self.bot)
