@@ -194,12 +194,12 @@ class LeaderboardView(ui.View):
                 semester_ping_counts[claim.tech.discord_id] += 1
 
             # User doesn't have a team
-            if claim.tech.team == 0:
+            if claim.tech.team_id is None:
                 continue
 
             # Add team claims
-            team_counts.setdefault(claim.tech.team, 0)
-            team_counts[claim.tech.team] += 1
+            team_counts.setdefault(claim.tech.team_id, 0)
+            team_counts[claim.tech.team_id] += 1
 
             # Filter out cases from different months
             if claim.claim_time.month != current.month:

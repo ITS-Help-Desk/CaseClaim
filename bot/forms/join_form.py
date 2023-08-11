@@ -36,7 +36,8 @@ class JoinForm(ui.Modal, title='Join Form'):
             u.edit_name(self.bot.connection, str(self.first_name), str(self.last_name))
         else:
             # Create new user
-            user = User(interaction.user.id, str(self.first_name), str(self.last_name), 0)
+            user = User(interaction.user.id, str(self.first_name), str(self.last_name), None)
             user.add_to_database(self.bot.connection)
 
         await interaction.response.send_message(content="👍", ephemeral=True, delete_after=0)  # Acknowledge interaction, immediately delete message
+        await self.bot.resend_outages_loop()
