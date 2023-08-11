@@ -74,7 +74,7 @@ class ExportCommand(commands.Cog):
         else:
             # Return error message if user is not Lead
             msg = f"<@{interaction.user.id}>, you do not have permission to use this command!"
-            await interaction.response.send_message(content=msg, ephemeral=True)
+            await interaction.response.send_message(content=msg, ephemeral=True, delete_after=180)
 
     @export.error
     async def export_error(self, ctx: discord.Interaction, error):

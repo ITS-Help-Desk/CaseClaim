@@ -41,7 +41,7 @@ class PingCommand(commands.Cog):
         if case is not None:
             await interaction.response.send_modal(PingForm(self.bot, case))
         else:
-            await interaction.response.send_message(content="Case not found! Please ensure that the correct case number and user are being submitted (double check using /report)", ephemeral=True)
+            await interaction.response.send_message(content="Case not found! Please ensure that the correct case number and user are being submitted (double check using /report)", ephemeral=True, delete_after=180)
 
 
     @ping.error

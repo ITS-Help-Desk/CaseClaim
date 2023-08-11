@@ -30,7 +30,7 @@ class GetLogCommand(commands.Cog):
         if not self.bot.check_if_dev(interaction.user):
             # Return error message if user is not Lead
             msg = f"<@{interaction.user.id}>, you do not have permission to use this command!"
-            await interaction.response.send_message(content=msg, ephemeral=True)
+            await interaction.response.send_message(content=msg, ephemeral=True, delete_after=180)
             return
 
         await interaction.response.send_message(content="Here's the log:", file=discord.File('discord.log'),

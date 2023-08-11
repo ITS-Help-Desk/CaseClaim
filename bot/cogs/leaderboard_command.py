@@ -43,7 +43,7 @@ class LeaderboardCommand(commands.Cog):
                 f"<@{interaction.user.id}>, you do not have permission to use this command!",
                 color=discord.Color.red()
             )
-            await interaction.response.send_message(embed=bad_user_embed, ephemeral=True)
+            await interaction.response.send_message(embed=bad_user_embed, ephemeral=True, delete_after=180)
 
     @leaderboard.error
     async def leaderboard_error(self, ctx: discord.Interaction, error):

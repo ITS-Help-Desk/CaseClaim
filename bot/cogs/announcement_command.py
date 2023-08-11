@@ -53,11 +53,11 @@ class AnnouncementCommand(commands.Cog):
                 announcement_modal = AnnouncementForm(self.bot)
                 await interaction.response.send_modal(announcement_modal)
             else:
-                await interaction.response.send_message(content="Error! Invalid choice selected", ephemeral=True)
+                await interaction.response.send_message(content="Error! Invalid choice selected", ephemeral=True, delete_after=180)
         else:
             # Return error message if user is not PA
             msg = f"<@{interaction.user.id}>, you do not have permission to use this command!"
-            await interaction.response.send_message(content=msg, ephemeral=True)
+            await interaction.response.send_message(content=msg, ephemeral=True, delete_after=180)
 
     @announcement.error
     async def announcement_error(self, ctx: discord.Interaction, error):

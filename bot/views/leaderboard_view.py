@@ -51,8 +51,6 @@ class LeaderboardView(ui.View):
             interaction (discord.Interaction): The interaction this button press originated from.
             button (discord.ui.Button): Unused argument that's required to be passed in.
         """
-        await interaction.response.defer(thinking=False)  # Acknowledge button press
-
         # Create embed
         embed = discord.Embed(title=f"{interaction.user.display_name}'s Ranking")
         embed.colour = self.bot.embed_color
@@ -98,7 +96,7 @@ class LeaderboardView(ui.View):
         except KeyError:
             pass
 
-        await interaction.followup.send(embed=embed, ephemeral=True)
+        await interaction.response.send_message(embed=embed, ephemeral=True, delete_after=180)
 
     @staticmethod
     def create_embed(bot: 'Bot', interaction: discord.Interaction) -> discord.Embed:

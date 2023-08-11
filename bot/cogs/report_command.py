@@ -49,7 +49,7 @@ class ReportCommand(commands.Cog):
             if interaction.channel_id != self.bot.log_channel:
                 # Return an error if used in the wrong channel
                 msg = f"You can only use this command in the <#{self.bot.log_channel}> channel."
-                await interaction.response.send_message(content=msg, ephemeral=True)
+                await interaction.response.send_message(content=msg, ephemeral=True, delete_after=180)
                 return
 
             await interaction.response.defer()  # Wait in case process takes a long time
@@ -81,7 +81,7 @@ class ReportCommand(commands.Cog):
         else:
             # Return error message if user is not Lead
             msg = f"<@{interaction.user.id}>, you do not have permission to pull this report!"
-            await interaction.response.send_message(content=msg, ephemeral=True)
+            await interaction.response.send_message(content=msg, ephemeral=True, delete_after=180)
 
     def data_to_rowstr(self, data: list[CheckedClaim]) -> list[list[str]]:
         """Converts the raw data into a list of strings
