@@ -2,9 +2,11 @@ import datetime
 from collections import OrderedDict
 import discord
 import discord.ui as ui
+from mysql.connector import MySQLConnection
 from bot.helpers import month_number_to_name
 
 from bot.models.checked_claim import CheckedClaim
+from bot.models.team import Team
 
 # Use TYPE_CHECKING to avoid circular import from bot
 from typing import TYPE_CHECKING
@@ -110,9 +112,7 @@ class LeaderboardView(ui.View):
         Returns:
             discord.Embed: The embed object with everything already completed for month and semester rankings.
         """
-        claims = CheckedClaim.search(bot.connection)
-
-        month_ranks, semester_ranks, team_ranks, _, _ = LeaderboardView.get_rankings(claims)
+        month_ranks, semester_ranks, team_ranks, _, _ = LeaderboardView.get_rankings(bot.connection)
 
         month_ranking = ""
         # Create month written ranking
@@ -148,7 +148,7 @@ class LeaderboardView(ui.View):
         return embed
 
     @staticmethod
-    def get_rankings(claims: list[CheckedClaim]) -> tuple[OrderedDict, OrderedDict, OrderedDict, dict, dict]:
+    def get_rankings(connection: MySQLConnection) -> tuple[OrderedDict, OrderedDict, OrderedDict, dict, dict]:
         """Creates various rankings based on many factors for claims and pings. These factors
         are mostly date based.
 
@@ -163,6 +163,8 @@ class LeaderboardView(ui.View):
                 4. The month ping counts
                 5. The semester ping counts
         """
+        claims = CheckedClaim.get_all(connection)
+
         month_counts = {}
         semester_counts = {}
         team_counts = {}
@@ -214,10 +216,17 @@ class LeaderboardView(ui.View):
                 month_ping_counts.setdefault(claim.tech.discord_id, 0)
                 month_ping_counts[claim.tech.discord_id] += 1
 
+        for team in Team.get_all(connection):
+            team_counts.setdefault(team.role_id, 0)
+            team_counts[team.role_id] += team.points
+
         # Sort the data
         month_sorted_keys = sorted(month_counts, key=month_counts.get, reverse=True)
         semester_sorted_keys = sorted(semester_counts, key=semester_counts.get, reverse=True)
         team_sorted_keys = sorted(team_counts, key=team_counts.get, reverse=True)
+
+
+
 
         # Create ordered dictionaries
         ordered_month = OrderedDict()

@@ -22,6 +22,13 @@ class Team(DatabaseItem):
 
             return Team(result[0], result[1], result[2], result[3])
 
+    def give_points(self, connection: MySQLConnection, points: int) -> None:
+        with connection.cursor() as cursor:
+            sql = "UPDATE Teams SET points=%s WHERE role_id = %s"
+
+            cursor.execute(sql, (points, self.role_id,))
+            connection.commit()
+
     def add_to_database(self, connection: MySQLConnection) -> None:
         with connection.cursor() as cursor:
             sql = "INSERT INTO Teams (role_id, color, image_url, points) VALUES (%s, %s, %s, %s)"

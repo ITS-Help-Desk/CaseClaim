@@ -17,6 +17,7 @@ from bot.cogs.casedist_command import CaseDistCommand
 from bot.cogs.leadstats_command import LeadStatsCommand
 from bot.cogs.export_command import ExportCommand
 from bot.cogs.ping_command import PingCommand
+from bot.cogs.award_command import AwardCommand
 
 from bot.views.claim_view import ClaimView
 from bot.views.affirm_view import AffirmView
@@ -128,7 +129,7 @@ class Bot(commands.Bot):
             except Exception as e:
                 print(e)
 
-        _, _, team_ranks, _, _ = LeaderboardView.get_rankings(CheckedClaim.search(self.connection))
+        _, _, team_ranks, _, _ = LeaderboardView.get_rankings(self.connection)
 
         if len(list(team_ranks.keys())) == 0:
             return
@@ -201,6 +202,7 @@ class Bot(commands.Bot):
         await self.add_cog(LeadStatsCommand(self))
         await self.add_cog(ExportCommand(self))
         await self.add_cog(PingCommand(self))
+        await self.add_cog(AwardCommand(self))
 
         await self.add_cog(AnnouncementCommand(self))
 

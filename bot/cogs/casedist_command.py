@@ -32,8 +32,8 @@ class CaseDistCommand(commands.Cog):
 
         Args:
             interaction (discord.Interaction): Interaction that the slash command originated from.
-            month (int):
-            day (int):
+            month (int): The month of when cases will start being counted
+            day (int): The day that cases will start being counted
         """
         current = datetime.datetime.now()
         start = datetime.datetime(year=current.year, month=month, day=day, hour=7, minute=0, second=0)
