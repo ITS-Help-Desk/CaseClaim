@@ -28,6 +28,7 @@ class AnnouncementCommand(commands.Cog):
     @app_commands.choices(choices=[
         app_commands.Choice(name="Outage", value="outage"),
         app_commands.Choice(name="Announcement", value="announcement"),
+        app_commands.Choice(name="Informational", value="informational")
     ])
     @app_commands.default_permissions(administrator=True)
     async def announcement(self, interaction: discord.Interaction, choices: app_commands.Choice[str]) -> None:
@@ -50,7 +51,10 @@ class AnnouncementCommand(commands.Cog):
                 outage_modal = OutageForm(self.bot)
                 await interaction.response.send_modal(outage_modal)
             elif str(choices.value) == "announcement":
-                announcement_modal = AnnouncementForm(self.bot)
+                announcement_modal = AnnouncementForm(self.bot, False)
+                await interaction.response.send_modal(announcement_modal)
+            elif str(choices.value) == "informational":
+                announcement_modal = AnnouncementForm(self.bot, True)
                 await interaction.response.send_modal(announcement_modal)
             else:
                 await interaction.response.send_message(content="Error! Invalid choice selected", ephemeral=True, delete_after=180)
