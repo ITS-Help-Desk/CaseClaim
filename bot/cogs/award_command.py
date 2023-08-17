@@ -21,7 +21,10 @@ class AwardCommand(commands.Cog):
         """
         self.bot = bot
 
-    @app_commands.command()
+    @app_commands.command(description="Shows a graph of the timing of case claims")
+    @app_commands.default_permissions(mute_members=True)
+    @app_commands.describe(team="The team that the points will be awarded to")
+    @app_commands.describe(points="The amount of points that will be awarded")
     async def award(self, interaction: discord.Interaction, team: discord.Role, points: int) -> None:
         """
 

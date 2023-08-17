@@ -65,8 +65,7 @@ class LeaderboardView(ui.View):
         embed.set_footer(text="Last Updated")
         embed.timestamp = interaction.created_at
 
-        claims = CheckedClaim.search(self.bot.connection)
-        month_ranks, semester_ranks, _, month_ping_ranks, semester_ping_ranks = LeaderboardView.get_rankings(claims)
+        month_ranks, semester_ranks, _, month_ping_ranks, semester_ping_ranks = LeaderboardView.get_rankings(self.bot.connection)
 
         try:
             # Get month data
