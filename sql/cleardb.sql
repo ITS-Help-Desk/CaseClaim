@@ -6,4 +6,4 @@ DELETE FROM Announcements;
 
 DELETE FROM Pings;
 DELETE FROM Users;
-
+DELETE FROM Teams;

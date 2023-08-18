@@ -122,6 +122,8 @@ class Bot(commands.Bot):
 
                 # Go through each team and figure out what team the user is on
                 for team in Team.get_all(self.connection):
+                    if team.role_id == 0:
+                        continue
                     if team.role_id in role_ids and team.role_id != user.team_id:
                         user.add_team(self.connection, team)
                         break

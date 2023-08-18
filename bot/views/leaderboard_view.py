@@ -195,7 +195,7 @@ class LeaderboardView(ui.View):
                 semester_ping_counts[claim.tech.discord_id] += 1
 
             # User doesn't have a team
-            if claim.tech.team_id is None:
+            if claim.tech.team_id is None or claim.tech.team_id == 0:
                 continue
 
             # Add team claims
@@ -216,6 +216,8 @@ class LeaderboardView(ui.View):
                 month_ping_counts[claim.tech.discord_id] += 1
 
         for team in Team.get_all(connection):
+            if team.role_id == 0:
+                continue
             team_counts.setdefault(team.role_id, 0)
             team_counts[team.role_id] += team.points
 
