@@ -40,3 +40,4 @@ class JoinForm(ui.Modal, title='Join Form'):
             user.add_to_database(self.bot.connection)
 
         await interaction.response.send_message(content="👍", ephemeral=True, delete_after=0)  # Acknowledge interaction, immediately delete message
+        await self.bot.resend_outages_loop()

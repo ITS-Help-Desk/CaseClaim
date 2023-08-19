@@ -17,6 +17,7 @@ from bot.cogs.casedist_command import CaseDistCommand
 from bot.cogs.leadstats_command import LeadStatsCommand
 from bot.cogs.export_command import ExportCommand
 from bot.cogs.ping_command import PingCommand
+from bot.cogs.award_command import AwardCommand
 
 from bot.views.claim_view import ClaimView
 from bot.views.affirm_view import AffirmView
@@ -31,6 +32,7 @@ from bot.views.kudos_view import KudosView
 from bot.models.outage import Outage
 from bot.models.checked_claim import CheckedClaim
 from bot.models.user import User
+from bot.models.team import Team
 
 
 class Bot(commands.Bot):
@@ -38,7 +40,6 @@ class Bot(commands.Bot):
     claims_channel: int
     error_channel: int
     announcement_channel: int
-    teams: list[int]
     connection: MySQLConnection
 
     def __init__(self, config: dict[str, Any], connection: MySQLConnection):
@@ -50,9 +51,6 @@ class Bot(commands.Bot):
         self.error_channel = int(config["error_channel"])
         self.announcement_channel = int(config["announcement_channel"])
         self.log_channel = int(config["log_channel"])
-
-        self.teams: list[int] = config["teams"]
-        self.team_icons: list[str] = config["team_icons"]
 
         self.connection = connection
 
@@ -123,19 +121,25 @@ class Bot(commands.Bot):
                     role_ids.append(role.id)
 
                 # Go through each team and figure out what team the user is on
-                for team in self.teams:
-                    if team in role_ids and team != user.team:
+                for team in Team.get_all(self.connection):
+                    if team.role_id == 0:
+                        continue
+                    if team.role_id in role_ids and team.role_id != user.team_id:
                         user.add_team(self.connection, team)
                         break
 
             except Exception as e:
                 print(e)
 
-        _, _, team_ranks, _, _ = LeaderboardView.get_rankings(CheckedClaim.search(self.connection))
+        _, _, team_ranks, _, _ = LeaderboardView.get_rankings(self.connection)
 
-        first_place_index = self.teams.index(list(team_ranks.keys())[0])
+        if len(list(team_ranks.keys())) == 0:
+            return
 
-        new_icon = self.team_icons[first_place_index]
+        first_place = list(team_ranks.keys())[0]
+        first_place_team = Team.from_role_id(self.connection, first_place)
+
+        new_icon = first_place_team.image_url
         ch = await self.fetch_channel(self.cases_channel)
 
         '''use aiohttp Clientsession to asynchronously scrape the attachment url and read the data to a variable'''
@@ -200,6 +204,7 @@ class Bot(commands.Bot):
         await self.add_cog(LeadStatsCommand(self))
         await self.add_cog(ExportCommand(self))
         await self.add_cog(PingCommand(self))
+        await self.add_cog(AwardCommand(self))
 
         await self.add_cog(AnnouncementCommand(self))
 

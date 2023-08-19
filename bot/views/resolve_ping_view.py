@@ -37,7 +37,7 @@ class ResolvePingView(ui.View):
         case = CheckedClaim.from_ping_thread_id(self.bot.connection, interaction.channel_id)
 
         if case.lead.discord_id != interaction.user.id:
-            await interaction.response.send_message(content="You cannot press this button.", ephemeral=True)
+            await interaction.response.send_message(content="You cannot press this button.", ephemeral=True, delete_after=180)
             return
 
         await interaction.channel.remove_user(interaction.user)  # Remove lead
@@ -63,7 +63,7 @@ class ResolvePingView(ui.View):
         """
         case = CheckedClaim.from_ping_thread_id(self.bot.connection, interaction.channel_id)
         if case.lead.discord_id != interaction.user.id:
-            await interaction.response.send_message(content="You cannot press this button.", ephemeral=True)
+            await interaction.response.send_message(content="You cannot press this button.", ephemeral=True, delete_after=180)
             return
 
         await interaction.channel.remove_user(interaction.user)  # Remove lead
@@ -90,11 +90,11 @@ class ResolvePingView(ui.View):
         ping = Ping.from_thread_id(self.bot.connection, interaction.channel_id)
 
         if case is None:
-            await interaction.response.send_message(content="Error!", ephemeral=True)
+            await interaction.response.send_message(content="Error!", ephemeral=True, delete_after=180)
             return
 
         if case.lead.discord_id != interaction.user.id:
-            await interaction.response.send_message(content="You cannot press this button.", ephemeral=True)
+            await interaction.response.send_message(content="You cannot press this button.", ephemeral=True, delete_after=180)
             return
 
         await interaction.channel.remove_user(interaction.user)  # Remove lead

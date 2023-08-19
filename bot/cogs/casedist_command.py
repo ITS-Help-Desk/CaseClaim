@@ -27,13 +27,15 @@ class CaseDistCommand(commands.Cog):
 
     @app_commands.command(description="Shows a graph of the timing of case claims")
     @app_commands.default_permissions(mute_members=True)
+    @app_commands.describe(month="The start month number")
+    @app_commands.describe(day="The start day number")
     async def casedist(self, interaction: discord.Interaction, month: int, day: int) -> None:
         """Sends a graph of the case claim time distribution
 
         Args:
             interaction (discord.Interaction): Interaction that the slash command originated from.
-            month (int):
-            day (int):
+            month (int): The month of when cases will start being counted
+            day (int): The day that cases will start being counted
         """
         current = datetime.datetime.now()
         start = datetime.datetime(year=current.year, month=month, day=day, hour=7, minute=0, second=0)

@@ -1,20 +1,22 @@
 from typing import Optional, Any
 from mysql.connector import MySQLConnection
 
+from bot.models.team import Team
 from bot.models.database_item import DatabaseItem
 
 
 class User(DatabaseItem):
-    def __init__(self, discord_id: int, first_name: str, last_name: str, team: int):
+    def __init__(self, discord_id: int, first_name: str, last_name: str, team_id: Optional[int]):
         """Creates a representation of a user
 
         Args:
             discord_id (int): The discord ID of a user
             first_name (str): The first name of a user
             last_name (str): The last name of a user
+            team_id (Optional[int]): The ID of the user's team
         """
         self.discord_id = discord_id
-        self.team = team
+        self.team_id = team_id
 
         if first_name[0].isupper():
             self.first_name = first_name
@@ -46,19 +48,19 @@ class User(DatabaseItem):
             if result is None:
                 return None
 
-            return User(result[0], result[1], result[2], int(result[3]))
+            return User(result[0], result[1], result[2], result[3])
 
-    def add_team(self, connection: MySQLConnection, new_team_id: int):
+    def add_team(self, connection: MySQLConnection, team: Team):
         """Adds a team to a user's row in the Users table.
 
         Args:
             connection (MySQLConnection): The connection to the MySQL database
-            new_team_id (int): The ID of the new team that they'll be placed in
+            team (Team): The new team to add to the user
         """
         with connection.cursor() as cursor:
             sql = "UPDATE Users SET team=%s WHERE discord_id = %s"
 
-            cursor.execute(sql, (new_team_id, self.discord_id,))
+            cursor.execute(sql, (team.role_id, self.discord_id,))
             connection.commit()
 
     def edit_name(self, connection: MySQLConnection, new_first: str, new_last: str):
@@ -80,7 +82,7 @@ class User(DatabaseItem):
         with connection.cursor() as cursor:
             sql = "INSERT INTO Users (discord_id, first_name, last_name, team) VALUES (%s, %s, %s, %s)"
 
-            cursor.execute(sql, (self.discord_id, self.first_name, self.last_name, self.team))
+            cursor.execute(sql, (self.discord_id, self.first_name, self.last_name, self.team_id))
             connection.commit()
 
     def remove_from_database(self, connection: MySQLConnection) -> None:
@@ -105,9 +107,9 @@ class User(DatabaseItem):
             results = cursor.fetchall()
 
             for result in results:
-                users.append(User(result[0], result[1], result[2], int(result[3])))
+                users.append(User(result[0], result[1], result[2], result[3]))
 
             return users
 
     def export(self) -> list[Any]:
-        return [self.discord_id, self.first_name, self.last_name, self.team]
+        return [self.discord_id, self.first_name, self.last_name, self.team_id]

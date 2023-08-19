@@ -34,6 +34,14 @@ ALTER TABLE
     `Pings` ADD PRIMARY KEY(`thread_id`);
 ALTER TABLE
     `Pings` ADD UNIQUE `pings_message_id_unique`(`message_id`);
+CREATE TABLE `Teams`(
+    `role_id` BIGINT UNSIGNED NOT NULL,
+    `color` VARCHAR(7) NOT NULL,
+    `image_url` MEDIUMTEXT NOT NULL,
+    `points` BIGINT NOT NULL
+);
+ALTER TABLE
+    `Teams` ADD PRIMARY KEY(`role_id`);
 CREATE TABLE `Outages`(
     `message_id` BIGINT UNSIGNED NOT NULL,
     `case_message_id` BIGINT NOT NULL,
@@ -62,8 +70,7 @@ CREATE TABLE `Users`(
     `discord_id` BIGINT UNSIGNED NOT NULL,
     `first_name` VARCHAR(255) NOT NULL,
     `last_name` VARCHAR(255) NOT NULL,
-    `team` BIGINT UNSIGNED NOT NULL,
-    `active` TINYINT(1) NOT NULL
+    `team` BIGINT UNSIGNED NULL
 );
 ALTER TABLE
     `Users` ADD PRIMARY KEY(`discord_id`);
@@ -77,6 +84,8 @@ ALTER TABLE
     `ActiveClaims` ADD PRIMARY KEY(`claim_message_id`);
 ALTER TABLE
     `ActiveClaims` ADD UNIQUE `activeclaims_case_num_unique`(`case_num`);
+ALTER TABLE
+    `Users` ADD CONSTRAINT `users_team_foreign` FOREIGN KEY(`team`) REFERENCES `Teams`(`role_id`);
 ALTER TABLE
     `CompletedClaims` ADD CONSTRAINT `completedclaims_tech_id_foreign` FOREIGN KEY(`tech_id`) REFERENCES `Users`(`discord_id`);
 ALTER TABLE
