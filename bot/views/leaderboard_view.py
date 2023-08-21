@@ -185,6 +185,9 @@ class LeaderboardView(ui.View):
             if LeaderboardView.get_semester(claim.claim_time) != current_sem:
                 continue
 
+            if claim.case_num == '12341234':
+                continue
+
             # Add semester claims
             semester_counts.setdefault(claim.tech.discord_id, 0)
             semester_counts[claim.tech.discord_id] += 1
@@ -227,8 +230,6 @@ class LeaderboardView(ui.View):
         team_sorted_keys = sorted(team_counts, key=team_counts.get, reverse=True)
 
 
-
-
         # Create ordered dictionaries
         ordered_month = OrderedDict()
         ordered_semester = OrderedDict()
@@ -264,7 +265,7 @@ class LeaderboardView(ui.View):
         if 6 <= t.month < 8:
             return "Summer"
 
-        if t.month == 8 and t.day < 21:
+        if t.month == 8 and t.day < 25 and t.hour < 15:
             return "Summer"
 
         return "Fall"
