@@ -265,7 +265,7 @@ class LeaderboardView(ui.View):
         if 6 <= t.month < 8:
             return "Summer"
 
-        if t.month == 8 and t.day < 21 and t.hour < 15:
+        if t.month == 8 and t.day < 25 and t.hour < 15:
             return "Summer"
 
         return "Fall"
