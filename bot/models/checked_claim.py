@@ -178,6 +178,8 @@ class CheckedClaim(DatabaseItem):
 
             data = []
             for result in results:
+                if result[1] == '12341234':
+                    continue
                 data.append(CheckedClaim(result[0], result[1], User.from_id(connection, result[2]),
                                          User.from_id(connection, result[3]),
                                          result[4], result[5], result[6], Status.from_str(result[7]), result[8]))

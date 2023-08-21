@@ -185,6 +185,9 @@ class LeaderboardView(ui.View):
             if LeaderboardView.get_semester(claim.claim_time) != current_sem:
                 continue
 
+            if claim.case_num == '12341234':
+                continue
+
             # Add semester claims
             semester_counts.setdefault(claim.tech.discord_id, 0)
             semester_counts[claim.tech.discord_id] += 1
