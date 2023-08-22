@@ -97,6 +97,9 @@ class LeaderboardView(ui.View):
         except KeyError:
             pass
 
+        _, _, team_rankings, _, _ = LeaderboardView.get_rankings(self.bot.connection)
+        await self.bot.update_icon(team_rankings)
+
         await interaction.response.send_message(embed=embed, ephemeral=True, delete_after=180)
 
     @staticmethod
