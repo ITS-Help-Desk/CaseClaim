@@ -44,6 +44,9 @@ class LeaderboardView(ui.View):
         if message is not None:
             await message.edit(embed=new_embed)
 
+        _, _, team_rankings, _, _ = LeaderboardView.get_rankings(self.bot.connection)
+        await self.bot.update_icon(team_rankings)
+
     @ui.button(label="My Rank", style=discord.ButtonStyle.secondary, custom_id="myrank")
     async def button_myrank(self, interaction: discord.Interaction, button: discord.ui.Button):
         """When pressed by a user it shows their personal
@@ -96,9 +99,6 @@ class LeaderboardView(ui.View):
             embed.add_field(name="Semester Rank", value=f"Rank: **{semester_rank}**\nClaims: **{semester_count}**\nCheck Percent: **{semester_checked_rate}%**")
         except KeyError:
             pass
-
-        _, _, team_rankings, _, _ = LeaderboardView.get_rankings(self.bot.connection)
-        await self.bot.update_icon(team_rankings)
 
         await interaction.response.send_message(embed=embed, ephemeral=True, delete_after=180)
 
