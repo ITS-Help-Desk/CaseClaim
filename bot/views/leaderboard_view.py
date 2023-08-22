@@ -44,6 +44,9 @@ class LeaderboardView(ui.View):
         if message is not None:
             await message.edit(embed=new_embed)
 
+        _, _, team_rankings, _, _ = LeaderboardView.get_rankings(self.bot.connection)
+        await self.bot.update_icon(team_rankings)
+
     @ui.button(label="My Rank", style=discord.ButtonStyle.secondary, custom_id="myrank")
     async def button_myrank(self, interaction: discord.Interaction, button: discord.ui.Button):
         """When pressed by a user it shows their personal

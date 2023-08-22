@@ -1,3 +1,5 @@
+from collections import OrderedDict
+
 from aiohttp import ClientSession
 from discord.ext import commands, tasks
 import discord
@@ -132,7 +134,9 @@ class Bot(commands.Bot):
                 print(e)
 
         _, _, team_ranks, _, _ = LeaderboardView.get_rankings(self.connection)
+        await self.update_icon(team_ranks)
 
+    async def update_icon(self, team_ranks: OrderedDict):
         if len(list(team_ranks.keys())) == 0:
             return
 
