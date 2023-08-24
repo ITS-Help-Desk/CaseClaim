@@ -47,6 +47,12 @@ class PingForm(ui.Modal, title='Feedback Form'):
         # Send message
         await interaction.response.send_message(content="Pinged", delete_after=0)  # Acknowledge interaction, immediately delete message
 
+        try:
+            # Delete checker message
+            await interaction.message.delete()
+        except:
+            pass
+            
         fb_embed = discord.Embed(
             description=f"<@{self.case.tech.discord_id}>, this case has been pinged by <@{interaction.user.id}>.",
             colour=discord.Color.red(),
@@ -95,6 +101,3 @@ class PingForm(ui.Modal, title='Feedback Form'):
                                         User.from_id(self.bot.connection, interaction.user.id), self.case.claim_time,
                                         self.case.complete_time, datetime.now(), Status.PINGED, ping.thread_id)
             checked_case.add_to_database(self.bot.connection)
-
-            # Delete checker message
-            await interaction.message.delete()
