@@ -44,6 +44,9 @@ class PingForm(ui.Modal, title='Feedback Form'):
         """
         original_user = await self.bot.fetch_user(self.case.tech.discord_id)
 
+        # Send message
+        await interaction.response.send_message(content="Pinged", delete_after=0)  # Acknowledge interaction, immediately delete message
+
         fb_embed = discord.Embed(
             description=f"<@{self.case.tech.discord_id}>, this case has been pinged by <@{interaction.user.id}>.",
             colour=discord.Color.red(),
@@ -78,10 +81,6 @@ class PingForm(ui.Modal, title='Feedback Form'):
         await thread.add_user(original_user)
         message = await thread.send(embed=fb_embed, view=AffirmView(self.bot))
 
-        # Send message
-        await interaction.response.send_message(content="Pinged",
-                                                delete_after=0)  # Acknowledge interaction, immediately delete message
-
         ping = Ping(thread.id, message.id, str(self.severity), str(self.description))
         ping.add_to_database(self.bot.connection)
 
@@ -91,8 +90,6 @@ class PingForm(ui.Modal, title='Feedback Form'):
         elif type(self.case) == CompletedClaim:
             # Remove unpinged case from log
             self.case.remove_from_database(self.bot.connection)
-
-
 
             checked_case = CheckedClaim(self.case.checker_message_id, self.case.case_num, self.case.tech,
                                         User.from_id(self.bot.connection, interaction.user.id), self.case.claim_time,
