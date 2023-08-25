@@ -45,13 +45,14 @@ class HelpCommand(commands.Cog):
             return
 
         # Add lead commands
-        embed.add_field(name='/report [user] [month] [pinged]',
+        embed.add_field(name='/report',
                         value=f'Shows a report for an optionally given user and month, or if it\'s pinged.')
         embed.add_field(name='/get_log', value='Returns the bot\'s log file.')
         embed.add_field(name='/casedist', value='Returns a graph of the case claim time distribution.')
         embed.add_field(name='/leaderboard', value='Shows a leaderboard of all users by case claim amount.')
         embed.add_field(name='/leadstats', value='Shows a leaderboard of all leads by case check amount.')
         embed.add_field(name='/ping', value='Manually ping a case')
+        embed.add_field(name='/award', value='Award points to a team')
 
         # Check if user is not a lead
         if not self.bot.check_if_pa(interaction.user):
