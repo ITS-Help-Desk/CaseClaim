@@ -2,6 +2,7 @@ token.txt
 temp.csv
 config.json
 export/
+backups/
 
 .vscode
 .DS_Store
