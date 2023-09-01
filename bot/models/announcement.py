@@ -124,6 +124,3 @@ class Announcement(DatabaseItem):
                 announcements.append(Announcement(result[0], result[1], result[2], result[3], User.from_id(connection, result[4]), result[5], bool(result[6])))
 
         return announcements
-
-    def export(self) -> list[Any]:
-        return [self.message_id, self.case_message_id, self.title, self.description, self.user.discord_id, self.end_time, self.active]

@@ -110,6 +110,3 @@ class User(DatabaseItem):
                 users.append(User(result[0], result[1], result[2], result[3]))
 
             return users
-
-    def export(self) -> list[Any]:
-        return [self.discord_id, self.first_name, self.last_name, self.team_id]

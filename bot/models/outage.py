@@ -134,6 +134,3 @@ class Outage(DatabaseItem):
                 data.append(Outage(result[0], result[1], result[2], result[3], result[4], result[5], result[6],
                             User.from_id(connection, result[7]), bool(result[8])))
             return data
-
-    def export(self) -> list[Any]:
-        return [self.message_id, self.case_message_id, self.service, self.parent_case, self.description, self.troubleshooting_steps, self.resolution_time, self.user.discord_id, self.active]

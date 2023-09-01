@@ -127,6 +127,3 @@ class ActiveClaim(DatabaseItem):
                 data.append(ActiveClaim(result[0], result[1], User.from_id(connection, result[2]), result[3]))
 
             return data
-
-    def export(self) -> list[Any]:
-        return [self.claim_message_id, self.case_num, self.tech.discord_id, self.claim_time]
