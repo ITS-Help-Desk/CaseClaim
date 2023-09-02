@@ -1,7 +1,6 @@
 token.txt
 temp.csv
 config.json
-export/
 backups/
 
 .vscode

@@ -101,14 +101,6 @@ Here's how the `config.json` file should be formatted (replace zeros with ID num
   "announcement_channel": 0,
   "log_channel": 0,
   
-  "teams": [
-    0,
-    0,
-    0,
-    0,
-    0
-  ],
-  
   "db_user": "",
   "db_password": "",
   "db_host": "",
@@ -157,9 +149,9 @@ This is beneficial because there are many commands which a standard tech wouldn'
 - /casedist **\<days>**
     - Allows a lead to see the distribution of case claim time throughout the day.
     - Uses matplotlib to create a histogram displaying the information.
-- /export
-    - Allows a lead to convert all tables in the MySQL database into CSV files
-    - These files can be stored on another system as a backup
+- /award
+    - Allows a lead to reward a team points that will be logged in the MySQL database.
+    - Sends a message to the #announcements channel informing everyone of the award.
 ## Commands (for PAs)
 - /announcement **<Outage/Announcement>**
   - Allows a PA to make an announcement or an outage.

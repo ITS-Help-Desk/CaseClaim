@@ -4,6 +4,9 @@ import discord
 import discord.ui as ui
 import matplotlib.pyplot as plt
 
+from bot.helpers import get_semester
+from bot.helpers import month_number_to_name
+
 from bot.models.checked_claim import CheckedClaim
 from bot.models.user import User
 
@@ -98,7 +101,7 @@ class LeadStatsView(ui.View):
             user = User.from_id(bot.connection, key)
             labels.append(user.full_name)
 
-        data_stream = LeadStatsView.convert_to_plot(f"ITS Lead CC Statistics ({'Month' if month else 'Semester'})",
+        data_stream = LeadStatsView.convert_to_plot(f"ITS Lead CC Statistics ({f'{month_number_to_name(interaction.created_at.month)}' if month else 'Semester'})",
                                                     labels, data_points1, data_points2)
         chart = discord.File(data_stream, filename="chart.png")
 
@@ -185,6 +188,8 @@ class LeadStatsView(ui.View):
         month_ping_counts = {}
         semester_ping_counts = {}
 
+        interaction_semester = get_semester(interaction_date)
+
         claims = CheckedClaim.search(bot.connection)
         for claim in claims:
             # Initialize information as zero
@@ -204,7 +209,7 @@ class LeadStatsView(ui.View):
                     month_ping_counts[claim.lead.discord_id] += 1
 
             # Organize data for semester
-            if claim.claim_time.year == interaction_date.year:
+            if get_semester(claim.claim_time) == interaction_semester:
                 if not claim.lead.discord_id in semester_counts.keys():
                     semester_counts[claim.lead.discord_id] = 0
                 semester_counts[claim.lead.discord_id] += 1

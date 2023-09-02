@@ -17,7 +17,6 @@ from bot.cogs.help_command import HelpCommand
 from bot.cogs.leaderboard_command import LeaderboardCommand
 from bot.cogs.casedist_command import CaseDistCommand
 from bot.cogs.leadstats_command import LeadStatsCommand
-from bot.cogs.export_command import ExportCommand
 from bot.cogs.ping_command import PingCommand
 from bot.cogs.award_command import AwardCommand
 
@@ -206,7 +205,6 @@ class Bot(commands.Bot):
         await self.add_cog(LeaderboardCommand(self))
         await self.add_cog(CaseDistCommand(self))
         await self.add_cog(LeadStatsCommand(self))
-        await self.add_cog(ExportCommand(self))
         await self.add_cog(PingCommand(self))
         await self.add_cog(AwardCommand(self))
 

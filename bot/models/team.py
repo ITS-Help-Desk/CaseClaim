@@ -53,6 +53,3 @@ class Team(DatabaseItem):
                 data.append(Team(result[0], result[1], result[2], result[3]))
 
             return data
-
-    def export(self) -> list[Any]:
-        return [self.role_id, self.color, self.image_url, self.points]

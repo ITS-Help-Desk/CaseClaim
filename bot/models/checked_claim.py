@@ -240,6 +240,3 @@ class CheckedClaim(DatabaseItem):
                                          result[4], result[5], result[6], Status.from_str(result[7]), result[8]))
 
             return data
-
-    def export(self) -> list[Any]:
-        return [self.checker_message_id, self.case_num, self.tech.discord_id, self.lead.discord_id, self.claim_time, self.complete_time, self.check_time, self.status, self.ping_thread_id]

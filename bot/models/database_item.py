@@ -16,7 +16,3 @@ class DatabaseItem(ABC):
     @abstractmethod
     def get_all(connection: MySQLConnection) -> list['DatabaseItem']:
         pass
-
-    @abstractmethod
-    def export(self) -> list[Any]:
-        pass

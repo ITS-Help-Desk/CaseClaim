@@ -3,6 +3,7 @@ all throughout this bot.
 """
 
 import discord
+import datetime
 
 
 def month_number_to_name(month_number: int) -> str:
@@ -106,3 +107,32 @@ def create_paginator_embeds(data: list[str], title: str, embed_color: discord.Co
         i += 10
 
     return embeds
+
+
+@staticmethod
+def get_semester(t: datetime.datetime) -> str:
+    """Returns the semester that the datetime object is located in.
+
+    Jan - May -> Spring
+    Jun - Aug 20 -> Summer
+    Aug 21 - Dec -> Winter
+
+    Args:
+        t (datetime.datetime): The datetime object
+
+    Returns:
+        str - The name of the semester
+    """
+    if 1 <= t.month <= 5:
+        return "Spring"
+
+    if 6 <= t.month < 8:
+        return "Summer"
+
+    if t.month == 8 and t.day < 25:
+        return "Summer"
+
+    if t.month == 8 and t.day == 25 and t.hour < 15:
+        return "Summer"
+
+    return "Fall"

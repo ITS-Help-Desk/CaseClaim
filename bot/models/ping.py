@@ -82,6 +82,3 @@ class Ping(DatabaseItem):
                 data.append(Ping(result[0], result[1], result[2], result[3]))
 
             return data
-
-    def export(self) -> list[Any]:
-        return [self.thread_id, self.message_id, self.severity, self.description]

@@ -4,6 +4,7 @@ import discord
 import discord.ui as ui
 from mysql.connector import MySQLConnection
 from bot.helpers import month_number_to_name
+from bot.helpers import get_semester
 
 from bot.models.checked_claim import CheckedClaim
 from bot.models.team import Team
@@ -174,7 +175,7 @@ class LeaderboardView(ui.View):
         semester_ping_counts = {}
 
         current = datetime.datetime.now()
-        current_sem = LeaderboardView.get_semester(current)
+        current_sem = get_semester(current)
         for claim in claims:
             # Filter out DONE cases
             if claim.status == Status.DONE:
@@ -185,7 +186,7 @@ class LeaderboardView(ui.View):
                 continue
 
             # Filter out claims from different semesters
-            if LeaderboardView.get_semester(claim.claim_time) != current_sem:
+            if get_semester(claim.claim_time) != current_sem:
                 continue
 
             if claim.case_num == '12341234':
@@ -247,31 +248,3 @@ class LeaderboardView(ui.View):
             ordered_teams[key] = team_counts[key]
 
         return ordered_month, ordered_semester, ordered_teams, month_ping_counts, semester_ping_counts
-
-    @staticmethod
-    def get_semester(t: datetime.datetime) -> str:
-        """Returns the semester that the datetime object is located in.
-
-        Jan - May -> Spring
-        Jun - Aug 20 -> Summer
-        Aug 21 - Dec -> Winter
-
-        Args:
-            t (datetime.datetime): The datetime object
-
-        Returns:
-            str - The name of the semester
-        """
-        if 1 <= t.month <= 5:
-            return "Spring"
-
-        if 6 <= t.month < 8:
-            return "Summer"
-
-        if t.month == 8 and t.day < 25:
-            return "Summer"
-
-        if t.month == 8 and t.day == 25 and t.hour < 15:
-            return "Summer"
-
-        return "Fall"

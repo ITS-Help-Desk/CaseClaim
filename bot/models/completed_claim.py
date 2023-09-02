@@ -113,6 +113,3 @@ class CompletedClaim(DatabaseItem):
                     CompletedClaim(result[0], result[1], User.from_id(connection, result[2]), result[3], result[4]))
 
             return data
-
-    def export(self) -> list[Any]:
-        return [self.checker_message_id, self.case_num, self.tech.discord_id, self.claim_time, self.complete_time]
