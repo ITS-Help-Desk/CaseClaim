@@ -154,16 +154,16 @@ class CheckedClaim(DatabaseItem):
 
         if month is not None:
             now = datetime.now()
-            beginning = f"'{now.year}-{now.month}-1 00:00:00'"
+            beginning = f"'{now.year}-{month}-1 00:00:00'"
 
-            match now.month:
+            match month:
                 case 1 | 3 | 5 | 7 | 8 | 10 | 12:
                     end = 31
                 case 4 | 6 | 9 | 11:
                     end = 30
                 case 2:
                     end = 28
-            ending = f"'{now.year}-{now.month}-{end} 23:59:59'"
+            ending = f"'{now.year}-{month}-{end} 23:59:59'"
             sql += f" AND claim_time BETWEEN {beginning} AND {ending}"
 
         if status is not None:
@@ -171,6 +171,8 @@ class CheckedClaim(DatabaseItem):
                 sql += " AND ping_thread_id IS NOT null"
             else:
                 sql += f" AND `status` = '{status}'"
+
+        print(sql)
 
         with connection.cursor() as cursor:
             cursor.execute(sql)
