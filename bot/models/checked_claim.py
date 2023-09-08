@@ -172,8 +172,6 @@ class CheckedClaim(DatabaseItem):
             else:
                 sql += f" AND `status` = '{status}'"
 
-        print(sql)
-
         with connection.cursor() as cursor:
             cursor.execute(sql)
             results = cursor.fetchall()
