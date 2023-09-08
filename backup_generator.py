@@ -17,7 +17,7 @@ class SQLBackupCreator:
         """
         mac_cmd = "/usr/local/mysql-8.0.31-macos12-arm64/bin/mysqldump"
         output = f"backups/{int(time.time())}.sql"
-        cmd = f"mysqldump -u {self.username} -p{self.password} {self.database} > {output}"
+        cmd = f"mysqldump -u {self.username} -p\"{self.password}\" {self.database} > {output}"
         subprocess.Popen(cmd, shell=True)
 
         return output
