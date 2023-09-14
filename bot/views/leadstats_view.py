@@ -73,7 +73,7 @@ class LeadStatsView(ui.View):
         Returns:
             discord.Embed: The embed object with everything already completed for month and semester rankings.
         """
-        m, s, mp, sp = LeadStatsView.get_data(bot, interaction.created_at)
+        m, s, mp, sp, mk, sk = LeadStatsView.get_data(bot, interaction.created_at)
 
         month_counts = m[0]
         month_keys = m[1]
@@ -84,25 +84,29 @@ class LeadStatsView(ui.View):
         if month:
             counts = month_counts
             pings = mp
+            kudos = mk
             keys = month_keys
         else:
             counts = semester_counts
             pings = sp
+            kudos = sk
             keys = semester_keys
 
         labels = []
         data_points1 = []
         data_points2 = []
+        data_points3 = []
 
         for key in keys:
             data_points1.append(counts[key] - pings[key])
             data_points2.append(pings[key])
+            data_points3.append(kudos[key])
 
             user = User.from_id(bot.connection, key)
             labels.append(user.full_name)
 
         data_stream = LeadStatsView.convert_to_plot(f"ITS Lead CC Statistics ({f'{month_number_to_name(interaction.created_at.month)}' if month else 'Semester'})",
-                                                    labels, data_points1, data_points2)
+                                                    labels, data_points1, data_points2, data_points3)
         chart = discord.File(data_stream, filename="chart.png")
 
         embed = discord.Embed(title="ITS Case Check Leaderboard")
@@ -118,7 +122,7 @@ class LeadStatsView(ui.View):
         return embed, chart
 
     @staticmethod
-    def convert_to_plot(title: str, labels: list[str], y1: list[int], y2: list[int]) -> io.BytesIO:
+    def convert_to_plot(title: str, labels: list[str], y1: list[int], y2: list[int], y3: list[int]) -> io.BytesIO:
         """Converts data into a plot that can be sent in a Discord message. It uses three
         parallel lists in order to generate the plot using matplotlib
 
@@ -131,26 +135,67 @@ class LeadStatsView(ui.View):
         Returns:
             io.BytesIO: The bytes that can be used to generate the graph
         """
-        data_stream = io.BytesIO()
-        fig, ax = plt.subplots()
+        import pandas
+        users = []
+        for i in range(len(y1)):
+            user = []
+            try:
+                user.append(y1[i])
+            except:
+                pass
+            try:
+                user.append(y2[i])
+            except:
+                pass
+            try:
+                user.append(y3[i])
+            except:
+                pass
 
+            users.append(user)
+
+        df = pandas.DataFrame(users, columns=["Kudos", "Pings", "Checks"], index=labels)
+        ax = df.plot.bar(stacked=True, title=title)
+        plt.xticks(rotation=45, ha="right")
+
+        previous_x = 0
+        for p in ax.patches:
+            if previous_x == 0:
+                previous_x = p.get_xy()[0]
+
+            width, height = p.get_width(), p.get_height()
+            x, y = p.get_xy()
+            ax.text(x + width / 2,
+                    y + height + 0.1,
+                    '{:.0f}%'.format(height),
+                    horizontalalignment='center',
+                    verticalalignment='center')
+        plt.show()
+
+
+        '''data_stream = io.BytesIO()
+        fig, ax = plt.subplots()
+        
         # Create plot
         ax.set_title(title)
         plt.xticks(rotation=45, ha="right")
 
         ax.bar(labels, y1, color="b", zorder=3)
         ax.bar(labels, y2, bottom=y1, color="r", zorder=3)
+        ax.bar(labels, y3, bottom=y1, color="g", zorder=3)
         # ax.grid(zorder=0)
 
         # Show labels on top of bars
-        for i, (x, y1_val, y2_val) in enumerate(zip(labels, y1, y2)):
-            total = y1_val + y2_val
+        for i, (x, y1_val, y2_val, y3_val) in enumerate(zip(labels, y1, y2, y3)):
+            total = y1_val + y2_val + y3_val
+            if total == 0:
+                continue
             percentage = int(round(y2_val / total, 2) * 100)
             label = f"{percentage}%"
             ax.annotate(label, (x, total), ha='center', va='bottom', fontsize=8)
 
         # Create legend
-        colors = {'Pings': 'red', 'Checks': 'blue'}
+        colors = {'Pings': 'red', 'Checks': 'blue', 'Kudos': 'green'}
         ls = list(colors.keys())
         handles = [plt.Rectangle((0, 0), 1, 1, color=colors[label]) for label in ls]
         ax.legend(handles, ls)
@@ -160,7 +205,7 @@ class LeadStatsView(ui.View):
         plt.close()
 
         data_stream.seek(0)
-        return data_stream
+        return data_stream'''
 
     @staticmethod
     def get_data(bot: 'Bot', interaction_date: datetime.datetime) -> tuple[
@@ -179,7 +224,7 @@ class LeadStatsView(ui.View):
 
         Returns:
             tuple[tuple[dict[int, int], list[int]], tuple[dict[int, int], list[int]], dict[int, int], dict[int, int]]:
-            Returns the data in the format ((month counts, sorted month keys), (semester counts, sorted semester keys), month ping counts, semester ping counts)
+            Returns the data in the format ((month counts, sorted month keys), (semester counts, sorted semester keys), month ping counts, semester ping counts, month kudos counts, semester kudos counts)
         """
         # Count the amount of cases worked on by each user
         month_counts = {}
@@ -188,39 +233,49 @@ class LeadStatsView(ui.View):
         month_ping_counts = {}
         semester_ping_counts = {}
 
+        month_kudos_counts = {}
+        semester_kudos_counts = {}
+
         interaction_semester = get_semester(interaction_date)
 
         claims = CheckedClaim.search(bot.connection)
         for claim in claims:
             # Initialize information as zero
-            if not claim.lead.discord_id in month_ping_counts.keys():
-                month_ping_counts[claim.lead.discord_id] = 0
-            if not claim.lead.discord_id in semester_ping_counts.keys():
-                semester_ping_counts[claim.lead.discord_id] = 0
+            month_counts.setdefault(claim.lead.discord_id, 0)
+            semester_counts.setdefault(claim.lead.discord_id, 0)
+
+            month_ping_counts.setdefault(claim.lead.discord_id, 0)
+            semester_ping_counts.setdefault(claim.lead.discord_id, 0)
+
+            month_kudos_counts.setdefault(claim.lead.discord_id, 0)
+            semester_kudos_counts.setdefault(claim.lead.discord_id, 0)
 
             # Organize data for month
             if claim.claim_time.month == interaction_date.month:
-                if not claim.lead.discord_id in month_counts.keys():
-                    month_counts[claim.lead.discord_id] = 0
                 month_counts[claim.lead.discord_id] += 1
 
                 # Add pinged
                 if claim.status == Status.PINGED or claim.status == Status.RESOLVED:
                     month_ping_counts[claim.lead.discord_id] += 1
 
+                # Add kudos
+                if claim.status == Status.KUDOS:
+                    month_kudos_counts[claim.lead.discord_id] += 1
+
+
             # Organize data for semester
             if get_semester(claim.claim_time) == interaction_semester:
-                if not claim.lead.discord_id in semester_counts.keys():
-                    semester_counts[claim.lead.discord_id] = 0
                 semester_counts[claim.lead.discord_id] += 1
 
                 # Add pinged
                 if claim.status == Status.PINGED or claim.status == Status.RESOLVED:
                     semester_ping_counts[claim.lead.discord_id] += 1
 
+                # Add kudos
+                if claim.status == Status.KUDOS:
+                    semester_kudos_counts[claim.lead.discord_id] += 1
+
         semester_counts_sorted_keys = sorted(semester_counts, key=semester_counts.get, reverse=True)
         month_counts_sorted_keys = sorted(month_counts, key=month_counts.get, reverse=True)
 
-        return (
-        (month_counts, month_counts_sorted_keys), (semester_counts, semester_counts_sorted_keys), month_ping_counts,
-        semester_ping_counts)
+        return ((month_counts, month_counts_sorted_keys), (semester_counts, semester_counts_sorted_keys), month_ping_counts, semester_ping_counts, month_kudos_counts, semester_kudos_counts)
