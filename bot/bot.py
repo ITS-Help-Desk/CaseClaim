@@ -129,8 +129,8 @@ class Bot(commands.Bot):
                         user.add_team(self.connection, team)
                         break
 
-            except Exception as e:
-                print(e)
+            except:
+                pass  # ignore exception, usually caused by a user leaving the server
 
         _, _, team_ranks, _, _ = LeaderboardView.get_rankings(self.connection)
         await self.update_icon(team_ranks)

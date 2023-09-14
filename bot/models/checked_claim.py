@@ -240,3 +240,17 @@ class CheckedClaim(DatabaseItem):
                                          result[4], result[5], result[6], Status.from_str(result[7]), result[8]))
 
             return data
+
+    @staticmethod
+    def get_all_leaderboard(connection: MySQLConnection, year: int) -> list['CheckedClaim']:
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT * FROM CheckedClaims WHERE status != %s AND YEAR(claim_time) = %s AND case_num != '12341234'", (str(Status.DONE), year,))
+            results = cursor.fetchall()
+
+            data = []
+            for result in results:
+                data.append(CheckedClaim(result[0], result[1], User.from_id(connection, result[2]),
+                                         User.from_id(connection, result[3]),
+                                         result[4], result[5], result[6], Status.from_str(result[7]), result[8]))
+
+            return data

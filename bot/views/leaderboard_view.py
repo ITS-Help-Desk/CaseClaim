@@ -166,7 +166,8 @@ class LeaderboardView(ui.View):
                 4. The month ping counts
                 5. The semester ping counts
         """
-        claims = CheckedClaim.get_all(connection)
+        today = datetime.date.today()
+        claims = CheckedClaim.get_all_leaderboard(connection, today.year)
 
         month_counts = {}
         semester_counts = {}
@@ -177,19 +178,8 @@ class LeaderboardView(ui.View):
         current = datetime.datetime.now()
         current_sem = get_semester(current)
         for claim in claims:
-            # Filter out DONE cases
-            if claim.status == Status.DONE:
-                continue
-
-            # Filter out claims from different years
-            if claim.claim_time.year != current.year:
-                continue
-
             # Filter out claims from different semesters
             if get_semester(claim.claim_time) != current_sem:
-                continue
-
-            if claim.case_num == '12341234':
                 continue
 
             # Add semester claims
