@@ -80,7 +80,6 @@ class LeadStatsView(ui.View):
 
         semester_counts = s[0]
         semester_keys = s[1]
-    
 
         if month:
             counts = month_counts
@@ -137,6 +136,7 @@ class LeadStatsView(ui.View):
             io.BytesIO: The bytes that can be used to generate the graph
         """
         import pandas
+        data_stream = io.BytesIO()
         users = []
         print(y1)
         print(y2)
@@ -158,10 +158,9 @@ class LeadStatsView(ui.View):
 
             users.append(user)
 
-        print(users)
-
-        df = pandas.DataFrame(users, columns=["Kudos", "Pings", "Checks"], index=labels)
+        df = pandas.DataFrame(users, index=labels)
         ax = df.plot.bar(stacked=True, title=title)
+        ax.legend(["Checks", "Pings", "Kudos"])
         plt.xticks(rotation=45, ha="right")
 
         '''for p in ax.patches:
@@ -172,10 +171,14 @@ class LeadStatsView(ui.View):
                     '{:.0f}%'.format(height),
                     horizontalalignment='center',
                     verticalalignment='center')'''
-        for p in ax.patches:
-            ax.annotate(str(p.get_height()), (p.get_x() * 1.005, p.get_height() * 1.005))
-        plt.show()
+        #for p in ax.patches:
+        #ax.annotate(str(p.get_height()), (p.get_x() * 1.005, p.get_height() * 1.005))
 
+        plt.savefig(data_stream, format='png', bbox_inches="tight", dpi=80)
+        plt.close()
+        data_stream.seek(0)
+
+        return data_stream
 
         '''data_stream = io.BytesIO()
         fig, ax = plt.subplots()
