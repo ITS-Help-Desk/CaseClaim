@@ -84,9 +84,12 @@ class Announcement(DatabaseItem):
 
                 if ann.end_time < datetime.now():
                     # Delete case message
-                    case_channel = await bot.fetch_channel(bot.cases_channel)
-                    case_message = await case_channel.fetch_message(ann.case_message_id)
-                    await case_message.delete()
+                    try:
+                        case_channel = await bot.fetch_channel(bot.cases_channel)
+                        case_message = await case_channel.fetch_message(ann.case_message_id)
+                        await case_message.delete()
+                    except:
+                        pass  # message has already been deleted
 
                     ann.deactivate(bot.connection)
 
