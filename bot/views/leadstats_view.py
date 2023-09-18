@@ -80,6 +80,7 @@ class LeadStatsView(ui.View):
 
         semester_counts = s[0]
         semester_keys = s[1]
+    
 
         if month:
             counts = month_counts
@@ -137,6 +138,9 @@ class LeadStatsView(ui.View):
         """
         import pandas
         users = []
+        print(y1)
+        print(y2)
+        print(y2)
         for i in range(len(y1)):
             user = []
             try:
@@ -154,22 +158,22 @@ class LeadStatsView(ui.View):
 
             users.append(user)
 
+        print(users)
+
         df = pandas.DataFrame(users, columns=["Kudos", "Pings", "Checks"], index=labels)
         ax = df.plot.bar(stacked=True, title=title)
         plt.xticks(rotation=45, ha="right")
 
-        previous_x = 0
-        for p in ax.patches:
-            if previous_x == 0:
-                previous_x = p.get_xy()[0]
-
+        '''for p in ax.patches:
             width, height = p.get_width(), p.get_height()
             x, y = p.get_xy()
             ax.text(x + width / 2,
                     y + height + 0.1,
                     '{:.0f}%'.format(height),
                     horizontalalignment='center',
-                    verticalalignment='center')
+                    verticalalignment='center')'''
+        for p in ax.patches:
+            ax.annotate(str(p.get_height()), (p.get_x() * 1.005, p.get_height() * 1.005))
         plt.show()
 
 
