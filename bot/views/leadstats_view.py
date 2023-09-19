@@ -98,12 +98,14 @@ class LeadStatsView(ui.View):
         data_points3 = []
 
         for key in keys:
-            data_points1.append(counts[key] - pings[key])
+            data_points1.append(counts[key])
             data_points2.append(pings[key])
             data_points3.append(kudos[key])
 
+            total = counts[key] + pings[key] + kudos[key]
+
             user = User.from_id(bot.connection, key)
-            labels.append(user.full_name)
+            labels.append(f"{user.abb_name} ({int((pings[key] / total) * 100)}% | {int((pings[key] / total) * 100)}%)")
 
         data_stream = LeadStatsView.convert_to_plot(f"ITS Lead CC Statistics ({f'{month_number_to_name(interaction.created_at.month)}' if month else 'Semester'})",
                                                     labels, data_points1, data_points2, data_points3)
@@ -138,9 +140,6 @@ class LeadStatsView(ui.View):
         import pandas
         data_stream = io.BytesIO()
         users = []
-        print(y1)
-        print(y2)
-        print(y2)
         for i in range(len(y1)):
             user = []
             try:
@@ -179,40 +178,6 @@ class LeadStatsView(ui.View):
         data_stream.seek(0)
 
         return data_stream
-
-        '''data_stream = io.BytesIO()
-        fig, ax = plt.subplots()
-        
-        # Create plot
-        ax.set_title(title)
-        plt.xticks(rotation=45, ha="right")
-
-        ax.bar(labels, y1, color="b", zorder=3)
-        ax.bar(labels, y2, bottom=y1, color="r", zorder=3)
-        ax.bar(labels, y3, bottom=y1, color="g", zorder=3)
-        # ax.grid(zorder=0)
-
-        # Show labels on top of bars
-        for i, (x, y1_val, y2_val, y3_val) in enumerate(zip(labels, y1, y2, y3)):
-            total = y1_val + y2_val + y3_val
-            if total == 0:
-                continue
-            percentage = int(round(y2_val / total, 2) * 100)
-            label = f"{percentage}%"
-            ax.annotate(label, (x, total), ha='center', va='bottom', fontsize=8)
-
-        # Create legend
-        colors = {'Pings': 'red', 'Checks': 'blue', 'Kudos': 'green'}
-        ls = list(colors.keys())
-        handles = [plt.Rectangle((0, 0), 1, 1, color=colors[label]) for label in ls]
-        ax.legend(handles, ls)
-
-        # Save and send
-        fig.savefig(data_stream, format='png', bbox_inches="tight", dpi=80)
-        plt.close()
-
-        data_stream.seek(0)
-        return data_stream'''
 
     @staticmethod
     def get_data(bot: 'Bot', interaction_date: datetime.datetime) -> tuple[
@@ -259,7 +224,8 @@ class LeadStatsView(ui.View):
 
             # Organize data for month
             if claim.claim_time.month == interaction_date.month:
-                month_counts[claim.lead.discord_id] += 1
+                if claim.status == str(Status.CHECKED) or claim.status == str(Status.DONE):
+                    month_counts[claim.lead.discord_id] += 1
 
                 # Add pinged
                 if claim.status == Status.PINGED or claim.status == Status.RESOLVED:
@@ -272,7 +238,8 @@ class LeadStatsView(ui.View):
 
             # Organize data for semester
             if get_semester(claim.claim_time) == interaction_semester:
-                semester_counts[claim.lead.discord_id] += 1
+                if claim.status == Status.CHECKED or claim.status == Status.DONE:
+                    semester_counts[claim.lead.discord_id] += 1
 
                 # Add pinged
                 if claim.status == Status.PINGED or claim.status == Status.RESOLVED:
