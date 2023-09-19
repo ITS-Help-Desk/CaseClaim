@@ -98,11 +98,13 @@ class LeadStatsView(ui.View):
         data_points3 = []
 
         for key in keys:
+            total = counts[key] + pings[key] + kudos[key]
+            if total == 0:
+                continue
+
             data_points1.append(counts[key])
             data_points2.append(pings[key])
             data_points3.append(kudos[key])
-
-            total = counts[key] + pings[key] + kudos[key]
 
             user = User.from_id(bot.connection, key)
             labels.append(f"{user.abb_name} ({int((pings[key] / total) * 100)}% | {int((pings[key] / total) * 100)}%)")
