@@ -181,7 +181,7 @@ class LeadStatsView(ui.View):
 
     @staticmethod
     def get_data(bot: 'Bot', interaction_date: datetime.datetime) -> tuple[
-        tuple[dict[int, int], list[int]], tuple[dict[int, int], list[int]], dict[int, int], dict[int, int]]:
+        tuple[dict[int, int], list[int]], tuple[dict[int, int], list[int]], dict[int, int], dict[int, int], dict[int, int], dict[int, int]]:
         """Collects a large amount of data to be used by various commands and events within this bot.
         This function collects:
             - Total amount of cases claimed by each user by month
