@@ -109,6 +109,12 @@ class LeadStatsView(ui.View):
             user = User.from_id(bot.connection, key)
             labels.append(f"{user.abb_name} ({int((pings[key] / total) * 100)}% | {int((pings[key] / total) * 100)}%)")
 
+        if len(data_points1) + len(data_points2) + len(data_points3):
+            data_points1 = [0]
+            data_points2 = [0]
+            data_points3 = [0]
+            labels = ["No data"]
+        
         data_stream = LeadStatsView.convert_to_plot(f"ITS Lead CC Statistics ({f'{month_number_to_name(interaction.created_at.month)}' if month else 'Semester'})",
                                                     labels, data_points1, data_points2, data_points3)
         chart = discord.File(data_stream, filename="chart.png")
