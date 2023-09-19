@@ -48,6 +48,7 @@ class LeadStatsCommand(commands.Cog):
     @leadstats.error
     async def check_leaderboard_error(self, ctx: discord.Interaction, error):
         full_error = traceback.format_exc()
+        print(full_error)
 
         ch = await self.bot.fetch_channel(self.bot.error_channel)
 
