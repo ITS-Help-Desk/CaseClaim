@@ -63,7 +63,7 @@ class LeadStatsView(ui.View):
             await message.edit(embed=new_embed, attachments=[file])
 
     @staticmethod
-    async def create_embed(bot: 'Bot', interaction: discord.Interaction, month=True) -> list[discord.Embed, discord.File]:
+    async def create_embed(bot: 'Bot', interaction: discord.Interaction, month=True) -> tuple[discord.Embed, discord.File]:
         """Creates the leaderboard embed for the /leaderboard command and for the
         Refresh button.
 
@@ -109,6 +109,8 @@ class LeadStatsView(ui.View):
             user = User.from_id(bot.connection, key)
             labels.append(f"{user.abb_name} ({int((pings[key] / total) * 100)}% | {int((pings[key] / total) * 100)}%)")
 
+        # If there's no data, create fake data to display the "No data" message
+        # pandas cannot create a plot without data
         if len(data_points1) + len(data_points2) + len(data_points3) == 0:
             data_points1 = [1]
             data_points2 = [0]
@@ -122,9 +124,7 @@ class LeadStatsView(ui.View):
         embed = discord.Embed(title="ITS Case Check Leaderboard")
         embed.colour = bot.embed_color
 
-        embed.set_image(
-            url="attachment://chart.png"
-        )
+        embed.set_image(url="attachment://chart.png")
 
         embed.set_footer(text="Last Updated")
         embed.timestamp = datetime.datetime.now()
@@ -148,6 +148,8 @@ class LeadStatsView(ui.View):
         import pandas
         data_stream = io.BytesIO()
         users = []
+
+        # Each user has to be added as a list of 3 values (checks, pings, kudos)
         for i in range(len(y1)):
             user = []
             try:
@@ -169,17 +171,6 @@ class LeadStatsView(ui.View):
         ax = df.plot.bar(stacked=True, title=title)
         ax.legend(["Checks", "Pings", "Kudos"])
         plt.xticks(rotation=45, ha="right")
-
-        '''for p in ax.patches:
-            width, height = p.get_width(), p.get_height()
-            x, y = p.get_xy()
-            ax.text(x + width / 2,
-                    y + height + 0.1,
-                    '{:.0f}%'.format(height),
-                    horizontalalignment='center',
-                    verticalalignment='center')'''
-        #for p in ax.patches:
-        #ax.annotate(str(p.get_height()), (p.get_x() * 1.005, p.get_height() * 1.005))
 
         plt.savefig(data_stream, format='png', bbox_inches="tight", dpi=80)
         plt.close()
