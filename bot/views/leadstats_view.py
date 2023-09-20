@@ -175,7 +175,7 @@ class LeadStatsView(ui.View):
         #ax.legend(["Checks", "Pings", "Kudos"])
         plt.xticks(rotation=45, ha="right")
 
-        plt.savefig(data_stream, format='png', bbox_inches="tight", dpi=80)
+        plt.savefig(data_stream, format='png', bbox_inches="tight", dpi=400)
         plt.close()
         data_stream.seek(0)
 
