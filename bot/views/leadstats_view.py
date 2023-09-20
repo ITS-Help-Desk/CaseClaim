@@ -171,7 +171,7 @@ class LeadStatsView(ui.View):
 
         df = pandas.DataFrame(users, index=labels)
         ax = df.plot.bar(stacked=True, title=title)
-        ax.legend(["Checks", "Pings", "Kudos"])
+        #ax.legend(["Checks", "Pings", "Kudos"])
         plt.xticks(rotation=45, ha="right")
 
         plt.savefig(data_stream, format='png', bbox_inches="tight", dpi=80)
