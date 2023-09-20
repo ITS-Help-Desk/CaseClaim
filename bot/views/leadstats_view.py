@@ -3,6 +3,7 @@ import io
 import discord
 import discord.ui as ui
 import matplotlib.pyplot as plt
+import pandas
 
 from bot.helpers import get_semester
 from bot.helpers import month_number_to_name
@@ -109,7 +110,7 @@ class LeadStatsView(ui.View):
             data_points3.append(kudos[key])
 
             user = User.from_id(bot.connection, key)
-            labels.append(f"{user.abb_name}\nP{int((pings[key] / total) * 100)}%-K{int((pings[key] / total) * 100)}%")
+            labels.append(f"{user.abb_name}\nP-{int((pings[key] / total) * 100)}%-K-{int((kudos[key] / total) * 100)}%")
 
         # If there's no data, create fake data to display the "No data" message
         # pandas cannot create a plot without data
@@ -143,11 +144,11 @@ class LeadStatsView(ui.View):
             labels (list[str]): The text labels for the bottom X axis of the graph
             y1 (list[int]): The data points for the checks
             y2 (list[int]): The data points for the pings
+            y3 (list[int])
 
         Returns:
             io.BytesIO: The bytes that can be used to generate the graph
         """
-        import pandas
         data_stream = io.BytesIO()
         users = []
 
