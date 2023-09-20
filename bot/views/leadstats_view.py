@@ -81,6 +81,7 @@ class LeadStatsView(ui.View):
         semester_counts = s[0]
         semester_keys = s[1]
 
+        # Get month or semester data
         if month:
             counts = month_counts
             pings = mp
@@ -97,6 +98,7 @@ class LeadStatsView(ui.View):
         data_points2 = []
         data_points3 = []
 
+        # Create labels and datapoints from the raw data
         for key in keys:
             total = counts[key] + pings[key] + kudos[key]
             if total == 0:
@@ -107,7 +109,7 @@ class LeadStatsView(ui.View):
             data_points3.append(kudos[key])
 
             user = User.from_id(bot.connection, key)
-            labels.append(f"{user.abb_name} ({int((pings[key] / total) * 100)}% | {int((pings[key] / total) * 100)}%)")
+            labels.append(f"{user.abb_name}\nP{int((pings[key] / total) * 100)}%-K{int((pings[key] / total) * 100)}%")
 
         # If there's no data, create fake data to display the "No data" message
         # pandas cannot create a plot without data
