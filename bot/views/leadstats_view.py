@@ -63,7 +63,7 @@ class LeadStatsView(ui.View):
             await message.edit(embed=new_embed, attachments=[file])
 
     @staticmethod
-    async def create_embed(bot: 'Bot', interaction: discord.Interaction, month=True) -> list[discord.Embed, discord.File]:
+    async def create_embed(bot: 'Bot', interaction: discord.Interaction, month=True) -> tuple[discord.Embed, discord.File]:
         """Creates the leaderboard embed for the /leaderboard command and for the
         Refresh button.
 
@@ -73,7 +73,7 @@ class LeadStatsView(ui.View):
         Returns:
             discord.Embed: The embed object with everything already completed for month and semester rankings.
         """
-        m, s, mp, sp = LeadStatsView.get_data(bot, interaction.created_at)
+        m, s, mp, sp, mk, sk = LeadStatsView.get_data(bot, interaction.created_at)
 
         month_counts = m[0]
         month_keys = m[1]
@@ -81,36 +81,52 @@ class LeadStatsView(ui.View):
         semester_counts = s[0]
         semester_keys = s[1]
 
+        # Get month or semester data
         if month:
             counts = month_counts
             pings = mp
+            kudos = mk
             keys = month_keys
         else:
             counts = semester_counts
             pings = sp
+            kudos = sk
             keys = semester_keys
 
         labels = []
         data_points1 = []
         data_points2 = []
+        data_points3 = []
 
+        # Create labels and datapoints from the raw data
         for key in keys:
-            data_points1.append(counts[key] - pings[key])
+            total = counts[key] + pings[key] + kudos[key]
+            if total == 0:
+                continue
+
+            data_points1.append(counts[key])
             data_points2.append(pings[key])
+            data_points3.append(kudos[key])
 
             user = User.from_id(bot.connection, key)
-            labels.append(user.full_name)
+            labels.append(f"{user.abb_name}\nP{int((pings[key] / total) * 100)}%-K{int((pings[key] / total) * 100)}%")
 
+        # If there's no data, create fake data to display the "No data" message
+        # pandas cannot create a plot without data
+        if len(data_points1) + len(data_points2) + len(data_points3) == 0:
+            data_points1 = [1]
+            data_points2 = [0]
+            data_points3 = [0]
+            labels = ["No data"]
+        
         data_stream = LeadStatsView.convert_to_plot(f"ITS Lead CC Statistics ({f'{month_number_to_name(interaction.created_at.month)}' if month else 'Semester'})",
-                                                    labels, data_points1, data_points2)
+                                                    labels, data_points1, data_points2, data_points3)
         chart = discord.File(data_stream, filename="chart.png")
 
         embed = discord.Embed(title="ITS Case Check Leaderboard")
         embed.colour = bot.embed_color
 
-        embed.set_image(
-            url="attachment://chart.png"
-        )
+        embed.set_image(url="attachment://chart.png")
 
         embed.set_footer(text="Last Updated")
         embed.timestamp = datetime.datetime.now()
@@ -118,7 +134,7 @@ class LeadStatsView(ui.View):
         return embed, chart
 
     @staticmethod
-    def convert_to_plot(title: str, labels: list[str], y1: list[int], y2: list[int]) -> io.BytesIO:
+    def convert_to_plot(title: str, labels: list[str], y1: list[int], y2: list[int], y3: list[int]) -> io.BytesIO:
         """Converts data into a plot that can be sent in a Discord message. It uses three
         parallel lists in order to generate the plot using matplotlib
 
@@ -131,40 +147,42 @@ class LeadStatsView(ui.View):
         Returns:
             io.BytesIO: The bytes that can be used to generate the graph
         """
+        import pandas
         data_stream = io.BytesIO()
-        fig, ax = plt.subplots()
+        users = []
 
-        # Create plot
-        ax.set_title(title)
+        # Each user has to be added as a list of 3 values (checks, pings, kudos)
+        for i in range(len(y1)):
+            user = []
+            try:
+                user.append(y1[i])
+            except:
+                pass
+            try:
+                user.append(y2[i])
+            except:
+                pass
+            try:
+                user.append(y3[i])
+            except:
+                pass
+
+            users.append(user)
+
+        df = pandas.DataFrame(users, index=labels)
+        ax = df.plot.bar(stacked=True, title=title, legend=False)
+        #ax.legend(["Checks", "Pings", "Kudos"])
         plt.xticks(rotation=45, ha="right")
 
-        ax.bar(labels, y1, color="b", zorder=3)
-        ax.bar(labels, y2, bottom=y1, color="r", zorder=3)
-        # ax.grid(zorder=0)
-
-        # Show labels on top of bars
-        for i, (x, y1_val, y2_val) in enumerate(zip(labels, y1, y2)):
-            total = y1_val + y2_val
-            percentage = int(round(y2_val / total, 2) * 100)
-            label = f"{percentage}%"
-            ax.annotate(label, (x, total), ha='center', va='bottom', fontsize=8)
-
-        # Create legend
-        colors = {'Pings': 'red', 'Checks': 'blue'}
-        ls = list(colors.keys())
-        handles = [plt.Rectangle((0, 0), 1, 1, color=colors[label]) for label in ls]
-        ax.legend(handles, ls)
-
-        # Save and send
-        fig.savefig(data_stream, format='png', bbox_inches="tight", dpi=80)
+        plt.savefig(data_stream, format='png', bbox_inches="tight", dpi=80)
         plt.close()
-
         data_stream.seek(0)
+
         return data_stream
 
     @staticmethod
     def get_data(bot: 'Bot', interaction_date: datetime.datetime) -> tuple[
-        tuple[dict[int, int], list[int]], tuple[dict[int, int], list[int]], dict[int, int], dict[int, int]]:
+        tuple[dict[int, int], list[int]], tuple[dict[int, int], list[int]], dict[int, int], dict[int, int], dict[int, int], dict[int, int]]:
         """Collects a large amount of data to be used by various commands and events within this bot.
         This function collects:
             - Total amount of cases claimed by each user by month
@@ -179,7 +197,7 @@ class LeadStatsView(ui.View):
 
         Returns:
             tuple[tuple[dict[int, int], list[int]], tuple[dict[int, int], list[int]], dict[int, int], dict[int, int]]:
-            Returns the data in the format ((month counts, sorted month keys), (semester counts, sorted semester keys), month ping counts, semester ping counts)
+            Returns the data in the format ((month counts, sorted month keys), (semester counts, sorted semester keys), month ping counts, semester ping counts, month kudos counts, semester kudos counts)
         """
         # Count the amount of cases worked on by each user
         month_counts = {}
@@ -188,39 +206,51 @@ class LeadStatsView(ui.View):
         month_ping_counts = {}
         semester_ping_counts = {}
 
+        month_kudos_counts = {}
+        semester_kudos_counts = {}
+
         interaction_semester = get_semester(interaction_date)
 
         claims = CheckedClaim.search(bot.connection)
         for claim in claims:
             # Initialize information as zero
-            if not claim.lead.discord_id in month_ping_counts.keys():
-                month_ping_counts[claim.lead.discord_id] = 0
-            if not claim.lead.discord_id in semester_ping_counts.keys():
-                semester_ping_counts[claim.lead.discord_id] = 0
+            month_counts.setdefault(claim.lead.discord_id, 0)
+            semester_counts.setdefault(claim.lead.discord_id, 0)
+
+            month_ping_counts.setdefault(claim.lead.discord_id, 0)
+            semester_ping_counts.setdefault(claim.lead.discord_id, 0)
+
+            month_kudos_counts.setdefault(claim.lead.discord_id, 0)
+            semester_kudos_counts.setdefault(claim.lead.discord_id, 0)
 
             # Organize data for month
             if claim.claim_time.month == interaction_date.month:
-                if not claim.lead.discord_id in month_counts.keys():
-                    month_counts[claim.lead.discord_id] = 0
-                month_counts[claim.lead.discord_id] += 1
+                if claim.status == str(Status.CHECKED) or claim.status == str(Status.DONE):
+                    month_counts[claim.lead.discord_id] += 1
 
                 # Add pinged
                 if claim.status == Status.PINGED or claim.status == Status.RESOLVED:
                     month_ping_counts[claim.lead.discord_id] += 1
 
+                # Add kudos
+                if claim.status == Status.KUDOS:
+                    month_kudos_counts[claim.lead.discord_id] += 1
+
+
             # Organize data for semester
             if get_semester(claim.claim_time) == interaction_semester:
-                if not claim.lead.discord_id in semester_counts.keys():
-                    semester_counts[claim.lead.discord_id] = 0
-                semester_counts[claim.lead.discord_id] += 1
+                if claim.status == Status.CHECKED or claim.status == Status.DONE:
+                    semester_counts[claim.lead.discord_id] += 1
 
                 # Add pinged
                 if claim.status == Status.PINGED or claim.status == Status.RESOLVED:
                     semester_ping_counts[claim.lead.discord_id] += 1
 
+                # Add kudos
+                if claim.status == Status.KUDOS:
+                    semester_kudos_counts[claim.lead.discord_id] += 1
+
         semester_counts_sorted_keys = sorted(semester_counts, key=semester_counts.get, reverse=True)
         month_counts_sorted_keys = sorted(month_counts, key=month_counts.get, reverse=True)
 
-        return (
-        (month_counts, month_counts_sorted_keys), (semester_counts, semester_counts_sorted_keys), month_ping_counts,
-        semester_ping_counts)
+        return ((month_counts, month_counts_sorted_keys), (semester_counts, semester_counts_sorted_keys), month_ping_counts, semester_ping_counts, month_kudos_counts, semester_kudos_counts)

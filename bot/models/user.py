@@ -29,6 +29,7 @@ class User(DatabaseItem):
             self.last_name = last_name.capitalize()
 
         self.full_name = first_name + " " + last_name
+        self.abb_name = first_name + " " + last_name[0].upper() + "."
 
     @staticmethod
     def from_id(connection: MySQLConnection, discord_id: int) -> Optional['User']:

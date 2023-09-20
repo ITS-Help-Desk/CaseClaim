@@ -31,7 +31,7 @@ For information about how to run the bot, troubleshooting, and development guide
     - Shows a paginated view of each user and how many cases they've claimed.
 - /leadstats
     - Allows a user to see a leaderboard of all leads by cases they've checked and how many have been pinged
-    - Uses matplotlib to create a stacked bar chart displaying the information
+    - Uses matplotlib and pandas to create a stacked bar chart displaying the information
 - /getlog
     - Allows a lead to get a copy of the log file so that they can view all messages
 - /casedist **\<days>**
@@ -54,5 +54,6 @@ This flowchart shows the process of claiming a case along with the QA process of
 ## Dependencies
 - discord.py [2.2.2](https://pypi.org/project/discord.py/)
 - matplotlib [3.7.2](https://pypi.org/project/matplotlib/)
+- pandas [2.1.0](https://pypi.org/project/pandas/)
 - mysql-connector-python [8.1.0](https://pypi.org/project/mysql-connector-python/)
 - aiohttp [3.8.3](https://pypi.org/project/aiohttp/)
