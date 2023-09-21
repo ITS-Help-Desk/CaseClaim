@@ -167,7 +167,7 @@ class CheckedClaim(DatabaseItem):
             sql += f" AND claim_time BETWEEN {beginning} AND {ending}"
 
         if status is not None:
-            if status == Status.PINGED:
+            if status == Status.PINGED or status == Status.RESOLVED:
                 sql += f" AND (`status` = '{status}' OR `status` = '{Status.RESOLVED}'"
             else:
                 sql += f" AND `status` = '{status}'"
