@@ -5,6 +5,7 @@ from datetime import datetime
 from bot.models.completed_claim import CompletedClaim
 from bot.models.checked_claim import CheckedClaim
 from bot.models.user import User
+from bot.models.ping import Ping
 from bot.status import Status
 from bot.views.kudos_view import KudosView
 
@@ -61,7 +62,11 @@ class KudosForm(ui.Modal, title='Kudos Form'):
         # Add users to thread and send message
         await thread.add_user(interaction.user)
         await thread.add_user(original_user)
-        message = await thread.send(embed=fb_embed, view=KudosView(self))
+        message = await thread.send(embed=fb_embed, view=KudosView(self.bot))
+
+        # Add a Ping class to store the kudos comment data
+        kudo = Ping(thread.id, message.id, "Kudos", str(self.description))
+        kudo.add_to_database(self.bot.connection)
 
         # Send message
         await interaction.response.send_message(content="Complemented!",
@@ -71,7 +76,7 @@ class KudosForm(ui.Modal, title='Kudos Form'):
 
         checked_case = CheckedClaim(self.case.checker_message_id, self.case.case_num, self.case.tech,
                                     User.from_id(self.bot.connection, interaction.user.id), self.case.claim_time,
-                                    self.case.complete_time, datetime.now(), Status.KUDOS, None)
+                                    self.case.complete_time, datetime.now(), Status.KUDOS, kudo.thread_id)
         checked_case.add_to_database(self.bot.connection)
 
         # Delete checker message

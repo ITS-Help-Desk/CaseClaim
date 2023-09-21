@@ -168,7 +168,7 @@ class CheckedClaim(DatabaseItem):
 
         if status is not None:
             if status == Status.PINGED:
-                sql += " AND ping_thread_id IS NOT null"
+                sql += f" AND (`status` = '{status}' OR `status` = '{Status.RESOLVED}'"
             else:
                 sql += f" AND `status` = '{status}'"
 
