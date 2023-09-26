@@ -44,7 +44,7 @@ class OutageForm(ui.Modal, title='Outage Form'):
         user = User.from_id(self.bot.connection, interaction.user.id)
 
         service = str(self.service)
-        parent_case = str(self.parent_case) if 0 < len(str(self.parent_case)) < 8 else None
+        parent_case = str(self.parent_case) if len(str(self.parent_case)) != 0 else None
         description = str(self.description)
         troubleshooting_steps = str(self.troubleshooting_steps) if len(str(self.troubleshooting_steps)) != 0 else None
         resolution_time = str(self.resolution_time) if len(str(self.resolution_time)) != 0 else None
