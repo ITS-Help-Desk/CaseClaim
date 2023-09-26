@@ -44,13 +44,13 @@ class OutageForm(ui.Modal, title='Outage Form'):
         user = User.from_id(self.bot.connection, interaction.user.id)
 
         service = str(self.service)
-        parent_case = str(self.parent_case) if len(str(self.parent_case)) != 0 else None
+        parent_case = str(self.parent_case) if 0 < len(str(self.parent_case)) < 8 else None
         description = str(self.description)
         troubleshooting_steps = str(self.troubleshooting_steps) if len(str(self.troubleshooting_steps)) != 0 else None
         resolution_time = str(self.resolution_time) if len(str(self.resolution_time)) != 0 else None
 
         announcement_embed = discord.Embed(colour=discord.Color.red())
-        announcement_embed.set_author(name=f"{service} Outage", icon_url="https://thumbs.gfycat.com/DelayedVacantDassie-size_restricted.gif")
+        announcement_embed.set_author(name=f"{service} Outage", icon_url="https://www.route66sodas.com/wp-content/uploads/2019/01/Alert.gif")
 
         try:
             announcement_embed.set_footer(text=user.full_name, icon_url=interaction.user.avatar.url)
