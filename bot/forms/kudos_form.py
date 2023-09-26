@@ -59,8 +59,7 @@ class KudosForm(ui.Modal, title='Kudos Form'):
             invitable=False
         )
 
-        # Add users to thread and send message
-        await thread.add_user(interaction.user)
+        # Add user to thread and send message
         await thread.add_user(original_user)
         message = await thread.send(embed=fb_embed, view=KudosView(self.bot))
 
