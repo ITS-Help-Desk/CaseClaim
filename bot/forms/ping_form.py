@@ -53,10 +53,12 @@ class PingForm(ui.Modal, title='Feedback Form'):
         except:
             pass
             
-        fb_embed = discord.Embed(
-            description=f"<@{self.case.tech.discord_id}>, this case has been pinged by <@{interaction.user.id}>.",
-            colour=discord.Color.red(),
-            timestamp=datetime.now())
+        fb_embed = discord.Embed(colour=discord.Color.red(), timestamp=datetime.now())
+        print(datetime.now().hour)
+        if 7 < datetime.now().hour < 18:
+            fb_embed.description = f"<@{self.case.tech.discord_id}>, this case has been pinged by <@{interaction.user.id}>."
+        else:
+            fb_embed.description = f"@silent This case has been pinged by <@{interaction.user.id}>."
 
         fb_embed.add_field(name="Reason", value=str(self.description), inline=False)
 

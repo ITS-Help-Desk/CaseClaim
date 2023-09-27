@@ -3,6 +3,7 @@ import discord.ui as ui
 from datetime import datetime
 
 from bot.views.check_view import CheckView
+from bot.views.force_complete_view import ForceCompleteView
 
 from bot.models.active_claim import ActiveClaim
 from bot.models.completed_claim import CompletedClaim
@@ -63,6 +64,9 @@ class ClaimView(ui.View):
             # Add case to CompletedClaims
             completed_claim = CompletedClaim(msg.id, case.case_num, case.tech, case.claim_time, datetime.now())
             completed_claim.add_to_database(self.bot.connection)
+        elif self.bot.check_if_lead(interaction.user):
+            # Lead force completes a case
+            await interaction.response.send_message(content=f"**{case.case_num}** Are you sure you'd like to force complete this case?", view=ForceCompleteView(self.bot), ephemeral=True, delete_after=30)
         else:
             # Wrong user presses button
             msg = f"<@!{interaction.user.id}>, you didn't claim this case!"

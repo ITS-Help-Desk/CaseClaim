@@ -50,7 +50,7 @@ class OutageForm(ui.Modal, title='Outage Form'):
         resolution_time = str(self.resolution_time) if len(str(self.resolution_time)) != 0 else None
 
         announcement_embed = discord.Embed(colour=discord.Color.red())
-        announcement_embed.set_author(name=f"{service} Outage", icon_url="https://thumbs.gfycat.com/DelayedVacantDassie-size_restricted.gif")
+        announcement_embed.set_author(name=f"{service} Outage", icon_url="https://www.route66sodas.com/wp-content/uploads/2019/01/Alert.gif")
 
         try:
             announcement_embed.set_footer(text=user.full_name, icon_url=interaction.user.avatar.url)

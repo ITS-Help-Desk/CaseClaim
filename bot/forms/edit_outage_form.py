@@ -63,7 +63,7 @@ class EditOutageForm(ui.Modal, title='Outage Update Form'):
 
         # Create announcement embed
         announcement_embed = discord.Embed(colour=discord.Color.red())
-        announcement_embed.set_author(name=f"{new_service} Outage", icon_url="https://thumbs.gfycat.com/DelayedVacantDassie-size_restricted.gif")
+        announcement_embed.set_author(name=f"{new_service} Outage", icon_url="https://www.route66sodas.com/wp-content/uploads/2019/01/Alert.gif")
 
         try:
             announcement_embed.set_footer(text=user.full_name, icon_url=interaction.user.avatar.url)
