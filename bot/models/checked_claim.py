@@ -172,7 +172,7 @@ class CheckedClaim(DatabaseItem):
             else:
                 sql += f" AND `status` = '{status}'"
 
-        with connection.cursor() as cursor:
+        with connection.cursor(buffered=True) as cursor:
             cursor.execute(sql)
             results = cursor.fetchall()
 
@@ -197,7 +197,7 @@ class CheckedClaim(DatabaseItem):
         Returns:
             Optional[CheckedClaim] - The CheckedClaim (if it can be found)
         """
-        with connection.cursor() as cursor:
+        with connection.cursor(buffered=True) as cursor:
             sql = "SELECT * FROM CheckedClaims WHERE tech_id=%s AND case_num=%s AND status != %s"
             cursor.execute(sql, (user.discord_id, case_num, Status.PINGED,))
             result = cursor.fetchone()
