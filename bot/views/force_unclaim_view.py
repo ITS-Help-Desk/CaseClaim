@@ -33,6 +33,7 @@ class ForceUnclaimView(ui.View):
         case = ActiveClaim.from_case_num(self.bot.connection, case_num)
 
         if case is None:
+            # Case can't be found
             await interaction.response.send_message("Error, please try again.", ephemeral=True, delete_after=300)
 
             raise AttributeError(f"Case is none (message ID: {interaction.message.id})")
