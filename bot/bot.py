@@ -29,6 +29,8 @@ from bot.views.outage_view import OutageView
 from bot.views.leaderboard_view import LeaderboardView
 from bot.views.leadstats_view import LeadStatsView
 from bot.views.kudos_view import KudosView
+from bot.views.force_complete_view import ForceCompleteView
+from bot.views.force_unclaim_view import ForceUnclaimView
 
 from bot.models.outage import Outage
 from bot.models.checked_claim import CheckedClaim
@@ -177,15 +179,17 @@ class Bot(commands.Bot):
     async def setup_hook(self):
         """Sets up the views so that they can be persistently loaded
         """
-        self.add_view(ClaimView(self))
         self.add_view(AffirmView(self))
         self.add_view(CheckView(self))
         self.add_view(CheckViewRed(self))
-        self.add_view(ResolvePingView(self))
-        self.add_view(OutageView(self))
-        self.add_view(LeadStatsView(self))
-        self.add_view(LeaderboardView(self))
+        self.add_view(ClaimView(self))
+        self.add_view(ForceCompleteView(self))
+        self.add_view(ForceUnclaimView(self))
         self.add_view(KudosView(self))
+        self.add_view(LeaderboardView(self))
+        self.add_view(LeadStatsView(self))
+        self.add_view(OutageView(self))
+        self.add_view(ResolvePingView(self))
 
     async def on_ready(self):
         """Loads all commands stored in the cogs folder and starts the bot.
