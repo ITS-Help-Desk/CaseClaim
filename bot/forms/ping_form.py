@@ -89,7 +89,7 @@ class PingForm(ui.Modal, title='Feedback Form'):
         await thread.add_user(original_user)
         message = await thread.send(embed=fb_embed, view=AffirmView(self.bot))
 
-        ping = Ping(thread.id, message.id, str(self.severity), str(self.description), Status.SENT)
+        ping = Ping(thread.id, message.id, str(self.severity), str(self.description))
         ping.add_to_database(self.bot.connection)
 
         if type(self.case) == CheckedClaim:

@@ -11,6 +11,13 @@ CREATE TABLE `CheckedClaims`(
 );
 ALTER TABLE
     `CheckedClaims` ADD PRIMARY KEY(`checker_message_id`);
+CREATE TABLE `PendingPings`(
+    `checker_message_id` BIGINT UNSIGNED NOT NULL,
+    `severity` VARCHAR(255) NOT NULL,
+    `description` MEDIUMTEXT NOT NULL
+);
+ALTER TABLE
+    `PendingPings` ADD PRIMARY KEY(`severity`);
 CREATE TABLE `Announcements`(
     `message_id` BIGINT UNSIGNED NOT NULL,
     `case_message_id` BIGINT UNSIGNED NOT NULL,
@@ -46,7 +53,7 @@ CREATE TABLE `Outages`(
     `message_id` BIGINT UNSIGNED NOT NULL,
     `case_message_id` BIGINT NOT NULL,
     `service` VARCHAR(255) NOT NULL,
-    `parent_case` VARCHAR(8) NULL,
+    `parent_case` VARCHAR(255) NULL,
     `description` MEDIUMTEXT NOT NULL,
     `troubleshooting_steps` MEDIUMTEXT NULL,
     `resolution_time` VARCHAR(255) NULL,
@@ -84,6 +91,8 @@ ALTER TABLE
     `ActiveClaims` ADD PRIMARY KEY(`claim_message_id`);
 ALTER TABLE
     `ActiveClaims` ADD UNIQUE `activeclaims_case_num_unique`(`case_num`);
+ALTER TABLE
+    `PendingPings` ADD CONSTRAINT `pendingpings_checker_message_id_foreign` FOREIGN KEY(`checker_message_id`) REFERENCES `CheckedClaims`(`checker_message_id`);
 ALTER TABLE
     `Users` ADD CONSTRAINT `users_team_foreign` FOREIGN KEY(`team`) REFERENCES `Teams`(`role_id`);
 ALTER TABLE
