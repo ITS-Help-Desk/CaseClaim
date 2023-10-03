@@ -1,9 +1,15 @@
 """This file contains functions that are shared by commands and views
 all throughout this bot.
 """
+from collections import OrderedDict
+from typing import Optional
 
 import discord
 import datetime
+
+from bot.models.checked_claim import CheckedClaim
+from bot.models.user import User
+from bot.status import Status
 
 
 def month_number_to_name(month_number: int) -> str:
@@ -136,3 +142,90 @@ def get_semester(t: datetime.datetime) -> str:
         return "Summer"
 
     return "Fall"
+
+
+class LeaderboardResults:
+    def __init__(self, claims: list[CheckedClaim], date: datetime.datetime, user: Optional[User]):
+        """Creates a data structure for storing leaderboard data:
+        counts (dict[int,int]) --> Used for storing how many cases each tech has
+        ping_counts (int) --> The amount of pings a user has
+        sorted_keys (list[int]) --> The keys of the counts dict in order from most to least claims
+        ordered (OrderedDict) --> The ordered dictionary for the counts dict
+
+        Args:
+            claims (list[CheckedClaim]): The list of claims to be sifted through
+            date (datetime.datetime): The date (used for monthly cases)
+            user (Optional[User]): The user (used for pinged counts)
+        """
+        self.month_counts: dict[int, int] = {}  # General check counts for the month
+        self.semester_counts: dict[int, int] = {}  # General check counts for the semester
+
+        self.month_team_counts: dict[int, int] = {}  # General team counts for the month
+        self.semester_team_counts: dict[int, int] = {}  # General team counts for the semester
+
+        self.month_ping_count = 0  # Ping count for the user for the month
+        self.semester_ping_count = 0  # Ping count for the user for the semester
+
+        current_sem = get_semester(date)
+        for claim in claims:
+            # Filter out claims from different semesters
+            if get_semester(claim.claim_time) != current_sem:
+                continue
+
+            # Add semester claims
+            self.semester_counts.setdefault(claim.tech.discord_id, 0)
+            self.semester_counts[claim.tech.discord_id] += 1
+
+            # Add to ping count (if the case was pinged)
+            if user is not None and user.discord_id == claim.tech.discord_id and (claim.status == Status.PINGED or claim.status == Status.RESOLVED):
+                self.semester_ping_count += 1
+
+            # User doesn't have a team
+            if claim.tech.team_id is not None and claim.tech.team_id != 0:
+                # Add team claims
+                self.semester_team_counts.setdefault(claim.tech.team_id, 0)
+                self.semester_team_counts[claim.tech.team_id] += 1
+
+            # Filter out cases from different months
+            if claim.claim_time.month != date.month:
+                continue
+
+            # Add month claims
+            self.month_counts.setdefault(claim.tech.discord_id, 0)
+            self.month_counts[claim.tech.discord_id] += 1
+
+            # User doesn't have a team
+            if claim.tech.team_id is not None and claim.tech.team_id != 0:
+                # Add team claims
+                self.month_team_counts.setdefault(claim.tech.team_id, 0)
+                self.month_team_counts[claim.tech.team_id] += 1
+
+            # Add to ping count (if the case was pinged)
+            if user is not None and user.discord_id == claim.tech.discord_id and (claim.status == Status.PINGED or claim.status == Status.RESOLVED):
+                self.month_ping_count += 1
+
+        # Sort the data
+        self.month_sorted_keys: list[int] = sorted(self.month_counts, key=self.month_counts.get, reverse=True)
+        self.semester_sorted_keys: list[int] = sorted(self.semester_counts, key=self.semester_counts.get, reverse=True)
+
+        self.month_team_sorted_keys: list[int] = sorted(self.month_team_counts, key=self.month_team_counts.get, reverse=True)
+        self.semester_team_sorted_keys: list[int] = sorted(self.semester_team_counts, key=self.semester_team_counts.get, reverse=True)
+
+        # Create ordered dictionaries
+        self.ordered_month: OrderedDict = OrderedDict()
+        self.ordered_semester: OrderedDict = OrderedDict()
+
+        self.ordered_team_month: OrderedDict = OrderedDict()
+        self.ordered_team_semester: OrderedDict = OrderedDict()
+
+        for key in self.month_sorted_keys:
+            self.ordered_month[key] = self.month_counts[key]
+
+        for key in self.semester_sorted_keys:
+            self.ordered_semester[key] = self.semester_counts[key]
+
+        for key in self.month_team_sorted_keys:
+            self.ordered_team_month[key] = self.month_team_counts[key]
+
+        for key in self.semester_team_sorted_keys:
+            self.ordered_team_semester[key] = self.semester_team_counts[key]
