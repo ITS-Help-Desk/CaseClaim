@@ -24,7 +24,7 @@ class LeaderboardCommand(commands.Cog):
     @app_commands.command(description="Shows a list of all cases a user has worked on")
     @app_commands.default_permissions(mute_members=True)
     async def leaderboard(self, interaction: discord.Interaction) -> None:
-        """Shows a leaderboard of all users by case numbers on the log file.
+        """Shows a leaderboard of all users by case numbers on the database.
 
         Args:
             interaction (discord.Interaction): Interaction that the slash command originated from

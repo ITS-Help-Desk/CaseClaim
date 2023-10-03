@@ -1,3 +1,4 @@
+import datetime
 from collections import OrderedDict
 
 from aiohttp import ClientSession
@@ -36,6 +37,8 @@ from bot.models.outage import Outage
 from bot.models.checked_claim import CheckedClaim
 from bot.models.user import User
 from bot.models.team import Team
+
+from bot.helpers import LeaderboardResults
 
 
 class Bot(commands.Bot):
@@ -134,8 +137,8 @@ class Bot(commands.Bot):
             except:
                 pass  # ignore exception, usually caused by a user leaving the server
 
-        _, _, team_ranks, _, _ = LeaderboardView.get_rankings(self.connection)
-        await self.update_icon(team_ranks)
+        result = LeaderboardResults(CheckedClaim.get_all_leaderboard(self.connection, datetime.datetime.now().year), datetime.datetime.now(), None)
+        await self.update_icon(result.ordered_team_month)
 
     async def update_icon(self, team_ranks: OrderedDict):
         if len(list(team_ranks.keys())) == 0:
