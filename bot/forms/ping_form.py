@@ -54,7 +54,7 @@ class PingForm(ui.Modal, title='Feedback Form'):
             pass
             
         fb_embed = discord.Embed(colour=discord.Color.red(), timestamp=datetime.now())
-        print(datetime.now().hour)
+        
         if 7 < datetime.now().hour < 18:
             fb_embed.description = f"<@{self.case.tech.discord_id}>, this case has been pinged by <@{interaction.user.id}>."
         else:
