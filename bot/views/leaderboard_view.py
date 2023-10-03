@@ -88,9 +88,6 @@ class LeaderboardView(ui.View):
             semester_checked_rate = int(((semester_count - result.semester_ping_count) / semester_count) * 100)
             semester_rank = list(result.ordered_semester.keys()).index(interaction.user.id) + 1
 
-            print(semester_count)
-            print(result.semester_ping_count)
-
             embed.add_field(name="Semester Rank", value=f"Rank: **{semester_rank}**\nClaims: **{semester_count}**\nCheck Percent: **{semester_checked_rate}%**\n")
         except (KeyError, ValueError):
             pass
