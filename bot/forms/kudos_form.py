@@ -64,7 +64,7 @@ class KudosForm(ui.Modal, title='Kudos Form'):
         message = await thread.send(embed=fb_embed, view=KudosView(self.bot))
 
         # Add a Ping class to store the kudos comment data
-        kudo = Ping(thread.id, message.id, "Kudos", str(self.description))
+        kudo = Ping(thread.id, message.id, "Kudos", str(self.description), Status.SENT)
         kudo.add_to_database(self.bot.connection)
 
         # Send message

@@ -4,9 +4,11 @@ from enum import StrEnum
 class Status(StrEnum):
     CHECKED = "Checked",
     PINGED = "Pinged",
-    RESOLVED = "Resolved"
-    KUDOS = "Kudos"
-    DONE = "Done"
+    RESOLVED = "Resolved",
+    KUDOS = "Kudos",
+    DONE = "Done",
+    SENT = "Sent",
+    PENDING = "Pending"
 
     @staticmethod
     def from_str(s: str) -> 'Status':
@@ -21,3 +23,7 @@ class Status(StrEnum):
                 return Status.KUDOS
             case "done":
                 return Status.DONE
+            case "sent":
+                return Status.SENT
+            case "pending":
+                return Status.PENDING

@@ -144,6 +144,32 @@ def get_semester(t: datetime.datetime) -> str:
     return "Fall"
 
 
+def is_working_time(t: datetime.datetime, holidays: list[str]) -> bool:
+    """Determines whether or not a provided datetime falls within working hours.
+    Can be used to time pings or other bot operations to only happen
+    during working time.
+
+    Args:
+        t (datetime): The time that is being evaluated
+        holidays (list[str]): The list of holidays ["1-1", "7-5",...]
+
+    Returns:
+        bool - Whether or not the datetime falls in working hours
+    """
+    date = f"{int(t.month)}-{int(t.day)}"
+    if date in holidays:
+        # Holiday
+        return False
+    elif 0 <= t.weekday() <= 3:
+        # Mon - Thur
+        return 7 <= t.hour <= 18
+    elif t.weekday() == 4:
+        # Friday
+        return 7 <= t.hour <= 17
+    else:
+        # Sat - Sun
+        return False
+
 class LeaderboardResults:
     def __init__(self, claims: list[CheckedClaim], date: datetime.datetime, user: Optional[User]):
         """Creates a data structure for storing leaderboard data:

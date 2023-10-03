@@ -47,6 +47,7 @@ class Bot(commands.Bot):
     error_channel: int
     announcement_channel: int
     connection: MySQLConnection
+    holidays: list[str]
 
     def __init__(self, config: dict[str, Any], connection: MySQLConnection):
         """Initializes the bot (doesn't start it), and initializes some
@@ -61,6 +62,7 @@ class Bot(commands.Bot):
         self.connection = connection
 
         self.embed_color = discord.Color.from_rgb(117, 190, 233)
+        self.holidays = config["holidays"]
 
         self.resend_outages = False
 
