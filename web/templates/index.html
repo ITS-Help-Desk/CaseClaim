@@ -1,0 +1,45 @@
+.<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>Case Claim Bot</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link href="{{ stylesheet }}" rel="stylesheet">
+    </head>
+    <body>
+        <div class="control">
+            <form action="/start_bot">
+                <button type="submit">Start Bot</button>
+            </form>
+            <form action="/stop_bot">
+                <button type="submit">Stop Bot</button>
+            </form>
+        </div>
+        <div class="console">
+
+        </div>
+        <div class="config">
+            <div class="token_status">
+                <p>Token Status</p>
+                {% if token %}
+                    <span id="token_box"></span> Token is detected
+                {% else %}
+                    <span id="token_box" style=></span> Token is not detected
+                    <form action="/token" method="post" class="token_input">
+                        <div class="token_input">
+                            <label for="token">Enter your discord bot token:</label>
+                            <input type="text" name="token" id="token" required />
+                        </div>
+                        <div class="token_input">
+                            <input type="submit" />
+                        </div>
+                    </form>
+                {% endif %}
+            </div>
+            <div class="bot_running">
+                <p>Bot Status</p>
+                <p>Bot is {{ bot_running_status }}</p>
+            </div>
+        </div>
+    </body>
+</html>
