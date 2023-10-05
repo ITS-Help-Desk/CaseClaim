@@ -16,8 +16,6 @@ CREATE TABLE `PendingPings`(
     `severity` VARCHAR(255) NOT NULL,
     `description` MEDIUMTEXT NOT NULL
 );
-ALTER TABLE
-    `PendingPings` ADD PRIMARY KEY(`severity`);
 CREATE TABLE `Announcements`(
     `message_id` BIGINT UNSIGNED NOT NULL,
     `case_message_id` BIGINT UNSIGNED NOT NULL,
