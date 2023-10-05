@@ -2,6 +2,7 @@ import datetime
 from collections import OrderedDict
 
 from aiohttp import ClientSession
+import asyncio
 from discord.ext import commands, tasks
 import discord
 from mysql.connector import MySQLConnection
@@ -37,8 +38,13 @@ from bot.models.outage import Outage
 from bot.models.checked_claim import CheckedClaim
 from bot.models.user import User
 from bot.models.team import Team
+from bot.models.pending_ping import PendingPing
+from bot.models.ping import Ping
+
+from bot.status import Status
 
 from bot.helpers import LeaderboardResults
+from bot.helpers import is_working_time
 
 
 class Bot(commands.Bot):
@@ -143,6 +149,9 @@ class Bot(commands.Bot):
         await self.update_icon(result.ordered_team_month)
 
     async def update_icon(self, team_ranks: OrderedDict):
+        """Updates the server icon using the team that is in first place for the month
+        on the leaderboard
+        """
         if len(list(team_ranks.keys())) == 0:
             return
 
@@ -161,6 +170,68 @@ class Bot(commands.Bot):
 
         '''update the guild icon with the data stored in img_data'''
         await ch.guild.edit(icon=img_data)
+
+    @tasks.loop(seconds=3600)  # repeat every hour
+    async def ping_loop(self):
+        """Iterate through all the pending pings and send them out
+        during working hours
+        """
+        now = datetime.datetime.now()
+        pending_pings = PendingPing.get_all(self.connection)
+        if is_working_time(now, self.holidays) and len(pending_pings) != 0:
+            # Only send pings during working time
+            case_channel = await self.fetch_channel(self.cases_channel)
+            for pp in pending_pings:
+                # Ping the case as normal
+                claim = CheckedClaim.from_checker_message_id(self.connection, pp.checker_message_id)
+                claim.change_status(self.connection, Status.PINGED)
+
+                tech = await self.fetch_user(claim.tech.discord_id)
+                lead = await self.fetch_user(claim.lead.discord_id)
+
+                # During working time, send ping as normal
+                fb_embed = discord.Embed(colour=discord.Color.red(), timestamp=now)
+
+                fb_embed.description = f"<@{tech.id}>, this case has been pinged by <@{lead.id}>."
+
+                fb_embed.add_field(name="Reason", value=str(pp.description), inline=False)
+
+                # Add a to-do message if none is passed in
+                if len(str(pp.to_do)) == 0:
+                    fb_embed.add_field(name="To Do",
+                                       value="Please review these details and let us know if you have any questions!",
+                                       inline=False)
+                else:
+                    fb_embed.add_field(name="To Do", value=str(pp.to_do), inline=False)
+
+                fb_embed.set_author(name=f"{claim.case_num}", icon_url=f'{tech.display_avatar}')
+                fb_embed.set_footer(text=f"{pp.severity} severity level")
+
+                # Create thread
+                thread = await case_channel.create_thread(
+                    name=f"{claim.case_num}",
+                    message=None,
+                    auto_archive_duration=4320,
+                    type=discord.ChannelType.private_thread,
+                    reason="Case has been pinged.",
+                    invitable=False
+                )
+
+                # Add users to thread and send message
+                await thread.add_user(tech)
+                await thread.add_user(lead)
+                message = await thread.send(embed=fb_embed, view=AffirmView(self))
+
+                # Create ping object
+                ping = Ping(thread.id, message.id, str(pp.severity), str(pp.description))
+                ping.add_to_database(self.connection)
+                claim.add_ping_thread(self.connection, thread.id)
+
+                # Remove pending ping
+                pp.remove_from_database(self.connection)
+
+                await asyncio.sleep(5)  # prevent rate limiting
+
 
     @tasks.loop(seconds=5)  # repeat after every 5 seconds
     async def resend_outages_loop(self):
@@ -222,6 +293,7 @@ class Bot(commands.Bot):
         self.check_teams_loop.start()
         self.resend_outages_loop.start()
         self.reset_connection_loop.start()
+        self.ping_loop.start()
 
         synced = await self.tree.sync()
         print("{} commands synced".format(len(synced)))
