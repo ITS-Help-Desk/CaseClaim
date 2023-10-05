@@ -48,7 +48,7 @@ class PingForm(ui.Modal, title='Feedback Form'):
         original_user = await self.bot.fetch_user(self.case.tech.discord_id)
 
         # Send message
-        await interaction.response.send_message(content="Pinged", delete_after=0)  # Acknowledge interaction, immediately delete message
+        await interaction.response.send_message(content="Pinged", ephemeral=True, delete_after=0)  # Acknowledge interaction, immediately delete message
 
 
         try:
