@@ -52,6 +52,13 @@ class ReportCommand(commands.Cog):
                 await interaction.response.send_message(content=msg, ephemeral=True, delete_after=180)
                 return
 
+            # Ensure user inputted a valid month
+            try:
+                m = int(month_string_to_number(month))
+            except ValueError:
+                await interaction.response.send_message(content="Invalid month! Please use 3 letter abbreviations (e.g. \"jan\", \"feb\",...)", ephemeral=True, delete_after=180)
+                return
+
             await interaction.response.defer()  # Wait in case process takes a long time
 
             description = "Here's your report of cases"
