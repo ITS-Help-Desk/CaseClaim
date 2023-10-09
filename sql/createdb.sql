@@ -14,7 +14,8 @@ ALTER TABLE
 CREATE TABLE `PendingPings`(
     `checker_message_id` BIGINT UNSIGNED NOT NULL,
     `severity` VARCHAR(255) NOT NULL,
-    `description` MEDIUMTEXT NOT NULL
+    `description` MEDIUMTEXT NOT NULL,
+    `to_do` MEDIUMTEXT NOT NUll
 );
 CREATE TABLE `Announcements`(
     `message_id` BIGINT UNSIGNED NOT NULL,
