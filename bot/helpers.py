@@ -1,6 +1,8 @@
 """This file contains functions that are shared by commands and views
 all throughout this bot.
 """
+import time
+from pytz import timezone
 from collections import OrderedDict
 from typing import Optional
 
@@ -157,15 +159,21 @@ def is_working_time(t: datetime.datetime, holidays: list[str]) -> bool:
         bool - Whether or not the datetime falls in working hours
     """
     date = f"{int(t.month)}-{int(t.day)}"
+
+    t = t.astimezone(timezone("UTC"))
+    now_pst = t.astimezone(timezone('America/Los_Angeles'))
+    print(now_pst)
+
     if date in holidays:
         # Holiday
         return False
-    elif 0 <= t.weekday() <= 3:
+
+    if 0 <= now_pst.weekday() <= 3:
         # Mon - Thur
-        return 7 <= t.hour <= 18
+        return 7 <= now_pst.hour <= 18
     elif t.weekday() == 4:
         # Friday
-        return 7 <= t.hour <= 17
+        return 7 <= now_pst.hour <= 17
     else:
         # Sat - Sun
         return False
