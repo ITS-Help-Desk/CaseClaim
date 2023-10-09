@@ -152,7 +152,7 @@ def is_working_time(t: datetime.datetime, holidays: list[str]) -> bool:
     during working time.
 
     Args:
-        t (datetime): The time that is being evaluated
+        t (datetime): The time that is being evaluated (in UTC)
         holidays (list[str]): The list of holidays ["1-1", "7-5",...]
 
     Returns:
@@ -162,18 +162,22 @@ def is_working_time(t: datetime.datetime, holidays: list[str]) -> bool:
 
     t = t.astimezone(timezone("UTC"))
     now_pst = t.astimezone(timezone('America/Los_Angeles'))
-    print(now_pst)
 
     if date in holidays:
         # Holiday
         return False
 
+    if time.localtime().tm_isdst == 1:
+        offset = 0
+    else:
+        offset = -1
+
     if 0 <= now_pst.weekday() <= 3:
         # Mon - Thur
-        return 7 <= now_pst.hour <= 18
+        return 7 + offset <= now_pst.hour <= 18 + offset
     elif t.weekday() == 4:
         # Friday
-        return 7 <= now_pst.hour <= 17
+        return 7 + offset <= now_pst.hour <= 17 + offset
     else:
         # Sat - Sun
         return False
