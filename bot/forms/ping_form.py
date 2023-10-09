@@ -68,10 +68,12 @@ class PingForm(ui.Modal, title='Feedback Form'):
             # Add a to-do message if none is passed in
             if len(str(self.to_do)) == 0:
                 fb_embed.add_field(name="To Do",
-                                   value="Please review these details and let us know if you have any questions!",
+                                   value="Review and let us know if you have any questions!",
                                    inline=False)
             else:
                 fb_embed.add_field(name="To Do", value=str(self.to_do), inline=False)
+
+            fb_embed.add_field(value=str("*Note: Please review this information and take actions during work hours, not after!*"))
 
             fb_embed.set_author(name=f"{self.case.case_num}", icon_url=f'{original_user.display_avatar}')
             fb_embed.set_footer(text=f"{self.severity} severity level")

@@ -25,7 +25,7 @@ class ResolvePingView(ui.View):
         super().__init__(timeout=None)
         self.bot = bot
 
-    @ui.button(label="Close and Change Status", style=discord.ButtonStyle.success, custom_id="changestatus")
+    @ui.button(label="Mark Resolved", style=discord.ButtonStyle.primary, custom_id="changestatus")
     async def button_change_status(self, interaction: discord.Interaction, button: discord.ui.Button):
         """Allows a lead to close the thread and change the log
         status of a case that's been pinged to Resolved.
@@ -37,7 +37,7 @@ class ResolvePingView(ui.View):
         case = CheckedClaim.from_ping_thread_id(self.bot.connection, interaction.channel_id)
 
         if case.lead.discord_id != interaction.user.id:
-            await interaction.response.send_message(content="You cannot press this button.", ephemeral=True, delete_after=180)
+            await interaction.response.send_message(content="You cannot press this button.", ephemeral=True, delete_after=10)
             return
 
         await interaction.channel.remove_user(interaction.user)  # Remove lead
@@ -49,30 +49,6 @@ class ResolvePingView(ui.View):
             pass
 
         case.change_status(self.bot.connection, Status.RESOLVED)
-
-        await interaction.response.defer(thinking=False)  # Acknowledge button press
-
-    @ui.button(label="Close and Keep Pinged", style=discord.ButtonStyle.danger, custom_id="keeppinged")
-    async def button_keep_pinged(self, interaction: discord.Interaction, button: discord.ui.Button):
-        """Allows a lead to close the thread and keep
-        the status of the case as Pinged in the log file.
-
-        Args:
-            interaction (discord.Interaction): The interaction this button press originated from.
-            button (discord.ui.Button): Unused argument that's required to be passed in.
-        """
-        case = CheckedClaim.from_ping_thread_id(self.bot.connection, interaction.channel_id)
-        if case.lead.discord_id != interaction.user.id:
-            await interaction.response.send_message(content="You cannot press this button.", ephemeral=True, delete_after=180)
-            return
-
-        await interaction.channel.remove_user(interaction.user)  # Remove lead
-
-        try:
-            user = await interaction.channel.fetch_member(case.tech.discord_id)
-            await interaction.channel.remove_user(user)  # Remove tech
-        except:
-            pass
 
         await interaction.response.defer(thinking=False)  # Acknowledge button press
 
@@ -108,5 +84,29 @@ class ResolvePingView(ui.View):
         # Change Log file
         case.change_status(self.bot.connection, Status.CHECKED)
         ping.remove_from_database(self.bot.connection)
+
+        await interaction.response.defer(thinking=False)  # Acknowledge button press
+
+    @ui.button(label="Close", style=discord.ButtonStyle.danger, custom_id="keeppinged")
+    async def button_keep_pinged(self, interaction: discord.Interaction, button: discord.ui.Button):
+        """Allows a lead to close the thread and keep
+        the status of the case as Pinged in the log file.
+
+        Args:
+            interaction (discord.Interaction): The interaction this button press originated from.
+            button (discord.ui.Button): Unused argument that's required to be passed in.
+        """
+        case = CheckedClaim.from_ping_thread_id(self.bot.connection, interaction.channel_id)
+        if case.lead.discord_id != interaction.user.id:
+            await interaction.response.send_message(content="You cannot press this button.", ephemeral=True, delete_after=180)
+            return
+
+        await interaction.channel.remove_user(interaction.user)  # Remove lead
+
+        try:
+            user = await interaction.channel.fetch_member(case.tech.discord_id)
+            await interaction.channel.remove_user(user)  # Remove tech
+        except:
+            pass
 
         await interaction.response.defer(thinking=False)  # Acknowledge button press
