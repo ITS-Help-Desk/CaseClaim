@@ -168,8 +168,10 @@ def is_working_time(t: datetime.datetime, holidays: list[str]) -> bool:
         return False
 
     if time.localtime().tm_isdst == 1:
+        # Daylight savings time
         offset = 0
     else:
+        # Standard time
         offset = -1
 
     if 0 <= now_pst.weekday() <= 3:
