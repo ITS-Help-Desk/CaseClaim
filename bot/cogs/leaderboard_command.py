@@ -35,7 +35,7 @@ class LeaderboardCommand(commands.Cog):
 
             embed = LeaderboardView.create_embed(self.bot, interaction)
 
-            await interaction.followup.send(embed=embed, view=LeaderboardView(self.bot))
+            await interaction.followup.send(embed=embed[0], view=LeaderboardView(self.bot))
         else:
             # Return error message if user is not Lead
             bad_user_embed = discord.Embed(
