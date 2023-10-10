@@ -176,10 +176,10 @@ def is_working_time(t: datetime.datetime, holidays: list[str]) -> bool:
 
     if 0 <= now_pst.weekday() <= 3:
         # Mon - Thur
-        return 7 + offset <= now_pst.hour <= 18 + offset
+        return 7 + offset <= now_pst.hour < 18 + offset
     elif t.weekday() == 4:
         # Friday
-        return 7 + offset <= now_pst.hour <= 17 + offset
+        return 7 + offset <= now_pst.hour < 17 + offset
     else:
         # Sat - Sun
         return False
