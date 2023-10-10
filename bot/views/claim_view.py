@@ -38,20 +38,19 @@ class ClaimView(ui.View):
         case = ActiveClaim.from_id(self.bot.connection, interaction.message.id)
 
         if case is None:
-            await interaction.response.send_message("Error, please try again.", ephemeral=True, delete_after=300)
-
+            await interaction.response.send_message("Error claiming this case, please try again.", ephemeral=True, delete_after=10)
             raise AttributeError(f"Case is none (message ID: {interaction.message.id})")
 
         if case.tech.discord_id == interaction.user.id:
             case.remove_from_database(self.bot.connection)
             await interaction.message.delete()
 
-            completed_embed = discord.Embed(description=f"Case has been marked complete, to view all your cases use **/mycases**",
+            completed_embed = discord.Embed(description=f"This case has been marked as complete! To view the cases you have worked on, use the **/mycases** command.",
                                             colour=discord.Color.green(),
                                             timestamp=datetime.now())
             completed_embed.set_author(name=f"{case.case_num}", icon_url=f'{interaction.user.display_avatar}')
             completed_embed.set_footer(text="Completed")
-            await interaction.response.send_message(embed=completed_embed, ephemeral=True, delete_after=300)
+            await interaction.response.send_message(embed=completed_embed, ephemeral=True, delete_after=10)
 
             # Send a message in the claims channel and add the lead view to it.
             channel = interaction.user.guild.get_channel(self.bot.claims_channel)  # claims channel
@@ -67,11 +66,11 @@ class ClaimView(ui.View):
             completed_claim.add_to_database(self.bot.connection)
         elif self.bot.check_if_lead(interaction.user):
             # Lead force completes a case
-            await interaction.response.send_message(content=f"**{case.case_num}** Are you sure you'd like to force complete this case?", view=ForceCompleteView(self.bot), ephemeral=True, delete_after=30)
+            await interaction.response.send_message(content=f"**{case.case_num}** Are you sure you'd like to force complete this case?", view=ForceCompleteView(self.bot), ephemeral=True, delete_after=10)
         else:
             # Wrong user presses button
             msg = f"<@!{interaction.user.id}>, you didn't claim this case!"
-            await interaction.response.send_message(content=msg, ephemeral=True, delete_after=300)
+            await interaction.response.send_message(content=msg, ephemeral=True, delete_after=10)
 
     @ui.button(label="Unclaim", style=discord.ButtonStyle.secondary, custom_id='unclaim')
     async def button_unclaim(self, interaction: discord.Interaction, button: discord.ui.Button):
@@ -90,7 +89,7 @@ class ClaimView(ui.View):
             # Lead force completes a case
             await interaction.response.send_message(
                 content=f"**{case.case_num}** Are you sure you'd like to force unclaim this case?",
-                view=ForceUnclaimView(self.bot), ephemeral=True, delete_after=30)
+                view=ForceUnclaimView(self.bot), ephemeral=True, delete_after=10)
         else:
             msg = f"<@!{interaction.user.id}>, you didn't claim this case!"
-            await interaction.response.send_message(content=msg, ephemeral=True, delete_after=300)
+            await interaction.response.send_message(content=msg, ephemeral=True, delete_after=10)

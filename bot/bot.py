@@ -67,7 +67,7 @@ class Bot(commands.Bot):
 
         self.connection = connection
 
-        self.embed_color = discord.Color.from_rgb(117, 190, 233)
+        self.embed_color = discord.Color.from_rgb(30, 31, 34)
         self.holidays = config["holidays"]
 
         self.resend_outages = False

@@ -36,7 +36,7 @@ class AffirmForm(ui.Modal, title='Tech Assessment'):
         Args:
             interaction (discord.Interaction): Interaction that the slash command originated from.
         """
-        await interaction.response.send_message(f"<@{self.case.lead.discord_id}> has been pinged.", ephemeral=True)
+        await interaction.response.send_message(f"<@{self.case.lead.discord_id}> has been pinged.", ephemeral=True, delete_after=10)
 
         # Try to remove the Affirm button
         try:
@@ -47,12 +47,4 @@ class AffirmForm(ui.Modal, title='Tech Assessment'):
         except Exception as e:
             print(e)
 
-        embed = discord.Embed(
-            title="Case Assessment",
-            description=f"<@!{self.case.tech.discord_id}> has affirmed this case.")
-        embed.colour = self.bot.embed_color
-
-        if len(str(self.assessment)) != 0:
-            embed.add_field(name="Assessment", value=self.assessment)
-
-        await interaction.channel.send(content=f"<@!{self.case.lead.discord_id}>", embed=embed, view=ResolvePingView(self.bot))
+        await interaction.channel.send(content=f"<@!{self.case.lead.discord_id}> {self.assessment}", view=ResolvePingView(self.bot))
