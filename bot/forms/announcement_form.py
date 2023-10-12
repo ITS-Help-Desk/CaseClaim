@@ -61,7 +61,7 @@ class AnnouncementForm(ui.Modal, title='Announcement Form'):
             announcement_channel = await self.bot.fetch_channel(self.bot.announcement_channel)
             announcement_message = await announcement_channel.send(content="@here", embed=announcement_embed)
 
-            if len(description) > :
+            if len(description) > 50:
                 announcement_embed.description = f"{description[:50]}...\n\n{announcement_message.jump_url}"
             else:
                 announcement_embed.description = f"{description}\n\n{announcement_message.jump_url}"
