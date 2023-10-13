@@ -40,6 +40,7 @@ from bot.models.user import User
 from bot.models.team import Team
 from bot.models.pending_ping import PendingPing
 from bot.models.ping import Ping
+from bot.models.team_point import TeamPoint
 
 from bot.status import Status
 
@@ -145,7 +146,7 @@ class Bot(commands.Bot):
             except:
                 pass  # ignore exception, usually caused by a user leaving the server
 
-        result = LeaderboardResults(CheckedClaim.get_all_leaderboard(self.connection, datetime.datetime.now().year), datetime.datetime.now(), None)
+        result = LeaderboardResults(CheckedClaim.get_all_leaderboard(self.connection, datetime.datetime.now().year), TeamPoint.get_all(self.connection), datetime.datetime.now(), None)
         await self.update_icon(result.ordered_team_month)
 
     async def update_icon(self, team_ranks: OrderedDict):
