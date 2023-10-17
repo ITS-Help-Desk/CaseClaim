@@ -47,7 +47,6 @@ class LeaderboardView(ui.View):
         message = interaction.message
         if message is not None:
             await message.edit(embed=new_embed)
-
         await self.bot.update_icon(result.ordered_team_month)
 
     @ui.button(label="My Rank", style=discord.ButtonStyle.secondary, custom_id="myrank")

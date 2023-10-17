@@ -37,8 +37,6 @@ CREATE TABLE `TeamPoints`(
     `description` MEDIUMTEXT NOT NULL,
     `timestamp` TIMESTAMP NOT NULL
 );
-ALTER TABLE
-    `TeamPoints` ADD PRIMARY KEY(`role_id`);
 CREATE TABLE `Pings`(
     `thread_id` BIGINT UNSIGNED NOT NULL,
     `message_id` BIGINT UNSIGNED NOT NULL,
@@ -52,9 +50,10 @@ ALTER TABLE
 CREATE TABLE `Teams`(
     `role_id` BIGINT UNSIGNED NOT NULL,
     `color` VARCHAR(7) NOT NULL,
-    `image_url` MEDIUMTEXT NOT NULL,
-    `points` BIGINT NOT NULL
+    `image_url` MEDIUMTEXT NOT NULL
 );
+ALTER TABLE
+    `Teams` ADD PRIMARY KEY(`role_id`);
 CREATE TABLE `Outages`(
     `message_id` BIGINT UNSIGNED NOT NULL,
     `case_message_id` BIGINT NOT NULL,
@@ -83,7 +82,7 @@ CREATE TABLE `Users`(
     `discord_id` BIGINT UNSIGNED NOT NULL,
     `first_name` VARCHAR(255) NOT NULL,
     `last_name` VARCHAR(255) NOT NULL,
-    `team` BIGINT UNSIGNED NULL
+    `team` BIGINT UNSIGNED NOT NULL
 );
 ALTER TABLE
     `Users` ADD PRIMARY KEY(`discord_id`);
@@ -116,4 +115,4 @@ ALTER TABLE
 ALTER TABLE
     `Announcements` ADD CONSTRAINT `announcements_user_foreign` FOREIGN KEY(`user`) REFERENCES `Users`(`discord_id`);
 ALTER TABLE
-    `Teams` ADD CONSTRAINT `teams_role_id_foreign` FOREIGN KEY(`role_id`) REFERENCES `TeamPoints`(`role_id`);
+    `TeamPoints` ADD CONSTRAINT `teampoints_role_id_foreign` FOREIGN KEY(`role_id`) REFERENCES `Teams`(`role_id`);

@@ -53,6 +53,7 @@ class Bot(commands.Bot):
     claims_channel: int
     error_channel: int
     announcement_channel: int
+    bot_channel: int
     connection: MySQLConnection
     holidays: list[str]
 
@@ -65,6 +66,7 @@ class Bot(commands.Bot):
         self.error_channel = int(config["error_channel"])
         self.announcement_channel = int(config["announcement_channel"])
         self.log_channel = int(config["log_channel"])
+        self.bot_channel = int(config["bot_channel"])
 
         self.connection = connection
 

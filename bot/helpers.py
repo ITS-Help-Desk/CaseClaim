@@ -274,11 +274,11 @@ class LeaderboardResults:
             self.ordered_team_semester[key] = self.semester_team_counts[key]
 
         for tp in team_points:
-            if not get_semester(tp.timestamp) == get_semester(date) or tp.timestamp.year != date.year:
+            if tp.timestamp.year != date.year or not get_semester(tp.timestamp) == get_semester(date):
                 continue
 
-            self.ordered_semester.setdefault(tp.role_id, 0)
-            self.ordered_semester[tp.role_id] += tp.points
+            self.ordered_team_semester.setdefault(tp.role_id, 0)
+            self.ordered_team_semester[tp.role_id] += tp.points
             if tp.timestamp.month == date.month:
                 self.ordered_team_month.setdefault(tp.role_id, 0)
                 self.ordered_team_month[tp.role_id] += tp.points

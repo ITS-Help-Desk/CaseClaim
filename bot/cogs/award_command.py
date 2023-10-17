@@ -47,11 +47,16 @@ class AwardCommand(commands.Cog):
             await interaction.response.send_message(content=msg, ephemeral=True, delete_after=180)
             return
 
+        if not 0 < points < 9:
+            msg = f"<@{interaction.user.id}>, please award no more than 9 points!"
+            await interaction.response.send_message(content=msg, ephemeral=True, delete_after=180)
+            return
+
         tp = TeamPoint(t.role_id, points, description, interaction.created_at)
         tp.add_to_database(self.bot.connection)
 
-        ch = await interaction.guild.fetch_channel(self.bot.announcement_channel)
-        await ch.send(content=f"<@&{team.id}> has been awarded {points} point{'s' if points != 1 else ''} by <@!{interaction.user.id}>.\n> " + description)
+        ch = await interaction.guild.fetch_channel(self.bot.bot_channel)
+        await ch.send(content=f"<@&{team.id}> has been awarded {points} point{'s' if points != 1 else ''} by <@!{interaction.user.id}>.\n> " + description, silent=True)
 
         await interaction.response.send_message(content="👍", ephemeral=True, delete_after=300)
 
