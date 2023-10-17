@@ -15,7 +15,7 @@ CREATE TABLE `PendingPings`(
     `checker_message_id` BIGINT UNSIGNED NOT NULL,
     `severity` VARCHAR(255) NOT NULL,
     `description` MEDIUMTEXT NOT NULL,
-    `to_do` MEDIUMTEXT NOT NUll
+    `to_do` MEDIUMTEXT NOT NULL
 );
 CREATE TABLE `Announcements`(
     `message_id` BIGINT UNSIGNED NOT NULL,
@@ -30,6 +30,13 @@ ALTER TABLE
     `Announcements` ADD PRIMARY KEY(`message_id`);
 ALTER TABLE
     `Announcements` ADD UNIQUE `announcements_case_message_id_unique`(`case_message_id`);
+CREATE TABLE `TeamPoints`(
+    `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    `role_id` BIGINT UNSIGNED NOT NULL,
+    `points` TINYINT UNSIGNED NOT NULL,
+    `description` MEDIUMTEXT NOT NULL,
+    `timestamp` TIMESTAMP NOT NULL
+);
 CREATE TABLE `Pings`(
     `thread_id` BIGINT UNSIGNED NOT NULL,
     `message_id` BIGINT UNSIGNED NOT NULL,
@@ -43,8 +50,7 @@ ALTER TABLE
 CREATE TABLE `Teams`(
     `role_id` BIGINT UNSIGNED NOT NULL,
     `color` VARCHAR(7) NOT NULL,
-    `image_url` MEDIUMTEXT NOT NULL,
-    `points` BIGINT NOT NULL
+    `image_url` MEDIUMTEXT NOT NULL
 );
 ALTER TABLE
     `Teams` ADD PRIMARY KEY(`role_id`);
@@ -76,7 +82,7 @@ CREATE TABLE `Users`(
     `discord_id` BIGINT UNSIGNED NOT NULL,
     `first_name` VARCHAR(255) NOT NULL,
     `last_name` VARCHAR(255) NOT NULL,
-    `team` BIGINT UNSIGNED NULL
+    `team` BIGINT UNSIGNED NOT NULL
 );
 ALTER TABLE
     `Users` ADD PRIMARY KEY(`discord_id`);
@@ -108,3 +114,5 @@ ALTER TABLE
     `ActiveClaims` ADD CONSTRAINT `activeclaims_tech_id_foreign` FOREIGN KEY(`tech_id`) REFERENCES `Users`(`discord_id`);
 ALTER TABLE
     `Announcements` ADD CONSTRAINT `announcements_user_foreign` FOREIGN KEY(`user`) REFERENCES `Users`(`discord_id`);
+ALTER TABLE
+    `TeamPoints` ADD CONSTRAINT `teampoints_role_id_foreign` FOREIGN KEY(`role_id`) REFERENCES `Teams`(`role_id`);

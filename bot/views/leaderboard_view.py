@@ -9,6 +9,7 @@ from bot.helpers import LeaderboardResults
 
 from bot.models.checked_claim import CheckedClaim
 from bot.models.user import User
+from bot.models.team_point import TeamPoint
 from bot.models.team import Team
 
 # Use TYPE_CHECKING to avoid circular import from bot
@@ -46,7 +47,6 @@ class LeaderboardView(ui.View):
         message = interaction.message
         if message is not None:
             await message.edit(embed=new_embed)
-
         await self.bot.update_icon(result.ordered_team_month)
 
     @ui.button(label="My Rank", style=discord.ButtonStyle.secondary, custom_id="myrank")
@@ -72,7 +72,7 @@ class LeaderboardView(ui.View):
 
         user = User.from_id(self.bot.connection, interaction.user.id)
 
-        result = LeaderboardResults(CheckedClaim.get_all_leaderboard(self.bot.connection, interaction.created_at.year), interaction.created_at, user)
+        result = LeaderboardResults(CheckedClaim.get_all_leaderboard(self.bot.connection, interaction.created_at.year), TeamPoint.get_all(self.bot.connection), interaction.created_at, user)
 
         try:
             month_count = int(result.month_counts[user.discord_id])
@@ -106,7 +106,7 @@ class LeaderboardView(ui.View):
         Returns:
             discord.Embed: The embed object with everything already completed for month and semester rankings.
         """
-        result = LeaderboardResults(CheckedClaim.get_all_leaderboard(bot.connection, interaction.created_at.year), interaction.created_at, None)
+        result = LeaderboardResults(CheckedClaim.get_all_leaderboard(bot.connection, interaction.created_at.year), TeamPoint.get_all(bot.connection), interaction.created_at, None)
 
         month_ranking = ""
         # Create month written ranking

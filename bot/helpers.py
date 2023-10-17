@@ -11,6 +11,7 @@ import datetime
 
 from bot.models.checked_claim import CheckedClaim
 from bot.models.user import User
+from bot.models.team_point import TeamPoint
 from bot.status import Status
 
 
@@ -184,8 +185,9 @@ def is_working_time(t: datetime.datetime, holidays: list[str]) -> bool:
         # Sat - Sun
         return False
 
+
 class LeaderboardResults:
-    def __init__(self, claims: list[CheckedClaim], date: datetime.datetime, user: Optional[User]):
+    def __init__(self, claims: list[CheckedClaim], team_points: list[TeamPoint], date: datetime.datetime, user: Optional[User]):
         """Creates a data structure for storing leaderboard data:
         counts (dict[int,int]) --> Used for storing how many cases each tech has
         ping_counts (int) --> The amount of pings a user has
@@ -194,6 +196,7 @@ class LeaderboardResults:
 
         Args:
             claims (list[CheckedClaim]): The list of claims to be sifted through
+            team_points (list[TeamPoint]): The list of all TeamPoints
             date (datetime.datetime): The date (used for monthly cases)
             user (Optional[User]): The user (used for pinged counts)
         """
@@ -269,3 +272,13 @@ class LeaderboardResults:
 
         for key in self.semester_team_sorted_keys:
             self.ordered_team_semester[key] = self.semester_team_counts[key]
+
+        for tp in team_points:
+            if tp.timestamp.year != date.year or not get_semester(tp.timestamp) == get_semester(date):
+                continue
+
+            self.ordered_team_semester.setdefault(tp.role_id, 0)
+            self.ordered_team_semester[tp.role_id] += tp.points
+            if tp.timestamp.month == date.month:
+                self.ordered_team_month.setdefault(tp.role_id, 0)
+                self.ordered_team_month[tp.role_id] += tp.points
