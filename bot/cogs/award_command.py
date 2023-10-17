@@ -58,7 +58,7 @@ class AwardCommand(commands.Cog):
         ch = await interaction.guild.fetch_channel(self.bot.bot_channel)
         await ch.send(content=f"<@&{team.id}> has been awarded {points} point{'s' if points != 1 else ''} by <@!{interaction.user.id}>.\n> " + description, silent=True)
 
-        await interaction.response.send_message(content="👍", ephemeral=True, delete_after=300)
+        await interaction.response.send_message(content="👍", ephemeral=True, delete_after=0)
 
     @award.error
     async def award_error(self, ctx: discord.Interaction, error):
