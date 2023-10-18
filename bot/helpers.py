@@ -90,6 +90,7 @@ def create_paginator_embeds(data: list[str], title: str, embed_color: discord.Co
     Args:
         data (list[str]): The list of case descriptions.
         title (str): The title for each of the embeds
+        embed_color (discord.Color): The color of the embed
 
     Returns:
         list[discord.Embed]: A list of embeds for the paginator.
@@ -118,7 +119,6 @@ def create_paginator_embeds(data: list[str], title: str, embed_color: discord.Co
     return embeds
 
 
-@staticmethod
 def get_semester(t: datetime.datetime) -> str:
     """Returns the semester that the datetime object is located in.
 
