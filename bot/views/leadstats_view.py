@@ -144,7 +144,7 @@ class LeadStatsView(ui.View):
             labels (list[str]): The text labels for the bottom X axis of the graph
             y1 (list[int]): The data points for the checks
             y2 (list[int]): The data points for the pings
-            y3 (list[int])
+            y3 (list[int]): The data points for the kudos
 
         Returns:
             io.BytesIO: The bytes that can be used to generate the graph
