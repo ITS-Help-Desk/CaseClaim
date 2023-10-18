@@ -1,3 +1,4 @@
+import datetime
 from collections import OrderedDict
 
 from aiohttp import ClientSession
@@ -29,11 +30,15 @@ from bot.views.outage_view import OutageView
 from bot.views.leaderboard_view import LeaderboardView
 from bot.views.leadstats_view import LeadStatsView
 from bot.views.kudos_view import KudosView
+from bot.views.force_complete_view import ForceCompleteView
+from bot.views.force_unclaim_view import ForceUnclaimView
 
 from bot.models.outage import Outage
 from bot.models.checked_claim import CheckedClaim
 from bot.models.user import User
 from bot.models.team import Team
+
+from bot.helpers import LeaderboardResults
 
 
 class Bot(commands.Bot):
@@ -132,8 +137,8 @@ class Bot(commands.Bot):
             except:
                 pass  # ignore exception, usually caused by a user leaving the server
 
-        _, _, team_ranks, _, _ = LeaderboardView.get_rankings(self.connection)
-        await self.update_icon(team_ranks)
+        result = LeaderboardResults(CheckedClaim.get_all_leaderboard(self.connection, datetime.datetime.now().year), datetime.datetime.now(), None)
+        await self.update_icon(result.ordered_team_month)
 
     async def update_icon(self, team_ranks: OrderedDict):
         if len(list(team_ranks.keys())) == 0:
@@ -177,15 +182,17 @@ class Bot(commands.Bot):
     async def setup_hook(self):
         """Sets up the views so that they can be persistently loaded
         """
-        self.add_view(ClaimView(self))
         self.add_view(AffirmView(self))
         self.add_view(CheckView(self))
         self.add_view(CheckViewRed(self))
-        self.add_view(ResolvePingView(self))
-        self.add_view(OutageView(self))
-        self.add_view(LeadStatsView(self))
-        self.add_view(LeaderboardView(self))
+        self.add_view(ClaimView(self))
+        self.add_view(ForceCompleteView(self))
+        self.add_view(ForceUnclaimView(self))
         self.add_view(KudosView(self))
+        self.add_view(LeaderboardView(self))
+        self.add_view(LeadStatsView(self))
+        self.add_view(OutageView(self))
+        self.add_view(ResolvePingView(self))
 
     async def on_ready(self):
         """Loads all commands stored in the cogs folder and starts the bot.

@@ -5,8 +5,10 @@ import discord.ui as ui
 from mysql.connector import MySQLConnection
 from bot.helpers import month_number_to_name
 from bot.helpers import get_semester
+from bot.helpers import LeaderboardResults
 
 from bot.models.checked_claim import CheckedClaim
+from bot.models.user import User
 from bot.models.team import Team
 
 # Use TYPE_CHECKING to avoid circular import from bot
@@ -39,14 +41,13 @@ class LeaderboardView(ui.View):
         """
         await interaction.response.defer(thinking=False)  # Acknowledge button press
 
-        new_embed = LeaderboardView.create_embed(self.bot, interaction)
+        new_embed, result = LeaderboardView.create_embed(self.bot, interaction)
 
         message = interaction.message
         if message is not None:
             await message.edit(embed=new_embed)
 
-        _, _, team_rankings, _, _ = LeaderboardView.get_rankings(self.bot.connection)
-        await self.bot.update_icon(team_rankings)
+        await self.bot.update_icon(result.ordered_team_month)
 
     @ui.button(label="My Rank", style=discord.ButtonStyle.secondary, custom_id="myrank")
     async def button_myrank(self, interaction: discord.Interaction, button: discord.ui.Button):
@@ -69,42 +70,32 @@ class LeaderboardView(ui.View):
         embed.set_footer(text="Last Updated")
         embed.timestamp = interaction.created_at
 
-        month_ranks, semester_ranks, _, month_ping_ranks, semester_ping_ranks = LeaderboardView.get_rankings(self.bot.connection)
+        user = User.from_id(self.bot.connection, interaction.user.id)
+
+        result = LeaderboardResults(CheckedClaim.get_all_leaderboard(self.bot.connection, interaction.created_at.year), interaction.created_at, user)
 
         try:
-            # Get month data
-            month_count = month_ranks[interaction.user.id]
-            month_rank = list(month_ranks.keys()).index(interaction.user.id) + 1
-
-            try:
-                month_ping_count = month_ping_ranks[interaction.user.id]
-                month_checked_rate = int(((month_count - month_ping_count) / month_count) * 100)
-            except KeyError:
-                month_checked_rate = 100
+            month_count = int(result.month_counts[user.discord_id])
+            month_checked_rate = int(((month_count - result.month_ping_count) / month_count) * 100)
+            month_rank = list(result.ordered_month.keys()).index(interaction.user.id) + 1
 
             embed.add_field(name="Month Rank", value=f"Rank: **{month_rank}**\nClaims: **{month_count}**\nCheck Percent: **{month_checked_rate}%**\n")
-        except KeyError:
+        except (KeyError, ValueError):
             pass
 
         try:
-            # Get semester data
-            semester_count = semester_ranks[interaction.user.id]
-            semester_rank = list(semester_ranks.keys()).index(interaction.user.id) + 1
+            semester_count = int(result.semester_counts[user.discord_id])
+            semester_checked_rate = int(((semester_count - result.semester_ping_count) / semester_count) * 100)
+            semester_rank = list(result.ordered_semester.keys()).index(interaction.user.id) + 1
 
-            try:
-                semester_ping_count = semester_ping_ranks[interaction.user.id]
-                semester_checked_rate = int(((semester_count - semester_ping_count) / semester_count) * 100)
-            except KeyError:
-                semester_checked_rate = 100
-
-            embed.add_field(name="Semester Rank", value=f"Rank: **{semester_rank}**\nClaims: **{semester_count}**\nCheck Percent: **{semester_checked_rate}%**")
-        except KeyError:
+            embed.add_field(name="Semester Rank", value=f"Rank: **{semester_rank}**\nClaims: **{semester_count}**\nCheck Percent: **{semester_checked_rate}%**\n")
+        except (KeyError, ValueError):
             pass
 
         await interaction.response.send_message(embed=embed, ephemeral=True, delete_after=180)
 
     @staticmethod
-    def create_embed(bot: 'Bot', interaction: discord.Interaction) -> discord.Embed:
+    def create_embed(bot: 'Bot', interaction: discord.Interaction) -> tuple[discord.Embed, LeaderboardResults]:
         """Creates the leaderboard embed for the /leaderboard command and for the
         Refresh button.
 
@@ -115,126 +106,48 @@ class LeaderboardView(ui.View):
         Returns:
             discord.Embed: The embed object with everything already completed for month and semester rankings.
         """
-        month_ranks, semester_ranks, team_ranks, _, _ = LeaderboardView.get_rankings(bot.connection)
+        result = LeaderboardResults(CheckedClaim.get_all_leaderboard(bot.connection, interaction.created_at.year), interaction.created_at, None)
 
         month_ranking = ""
         # Create month written ranking
-        for i in range(min(4, len(month_ranks.keys()))):
-            user_id = list(month_ranks.keys())[i]
-            month_ranking += f"**{i + 1}.** <@!{user_id}> | {month_ranks[user_id]}\n"
+        for i in range(min(4, len(result.ordered_month.keys()))):
+            user_id = list(result.ordered_month.keys())[i]
+            month_ranking += f"**{i + 1}.** <@!{user_id}> | {result.ordered_month[user_id]}\n"
 
         semester_ranking = ""
         # Create semester written ranking
-        for i in range(min(4, len(semester_ranks.keys()))):
-            user_id = list(semester_ranks.keys())[i]
-            semester_ranking += f"**{i + 1}.** <@!{user_id}> | {semester_ranks[user_id]}\n"
+        for i in range(min(4, len(result.ordered_semester.keys()))):
+            user_id = list(result.ordered_semester.keys())[i]
+            semester_ranking += f"**{i + 1}.** <@!{user_id}> | {result.ordered_semester[user_id]}\n"
 
-        team_ranking = ""
+        month_team_ranking = ""
         # Create team written ranking
-        for i in range(min(4, len(team_ranks))):
-            team_id = list(team_ranks.keys())[i]
-            team_ranking += f"**{i + 1}.** <@&{team_id}> | {team_ranks[team_id]}\n"
+        for i in range(min(4, len(result.ordered_team_month.keys()))):
+            team_id = list(result.ordered_team_month.keys())[i]
+            month_team_ranking += f"**{i + 1}.** <@&{team_id}> | {result.ordered_team_month[team_id]}\n"
+
+        semester_team_ranking = ""
+        # Create team written ranking
+        for i in range(min(4, len(result.ordered_team_semester.keys()))):
+            team_id = list(result.ordered_team_semester.keys())[i]
+            semester_team_ranking += f"**{i + 1}.** <@&{team_id}> | {result.ordered_team_semester[team_id]}\n"
 
         # Create embed
         embed = discord.Embed()
         embed.colour = bot.embed_color
 
         # Add leaderboard fields
-        embed.add_field(name=f"Team", value=team_ranking, inline=True)
-        embed.add_field(name=f"{month_number_to_name(interaction.created_at.month)}", value=month_ranking, inline=True)
-        embed.add_field(name="Semester", value=semester_ranking, inline=True)
+        embed.add_field(name=f"{month_number_to_name(interaction.created_at.month)}", value="", inline=False)
+        embed.add_field(name="", value=month_team_ranking, inline=True)
+        embed.add_field(name="", value=month_ranking, inline=True)
+
+        embed.add_field(name="Semester", value="", inline=False)
+
+        embed.add_field(name="", value=semester_team_ranking, inline=True)
+        embed.add_field(name="", value=semester_ranking, inline=True)
 
         embed.set_author(name="Leaderboard", icon_url=interaction.guild.icon.url)
         embed.set_footer(text="Last Updated")
         embed.timestamp = datetime.datetime.now()
 
-        return embed
-
-    @staticmethod
-    def get_rankings(connection: MySQLConnection) -> tuple[OrderedDict, OrderedDict, OrderedDict, dict, dict]:
-        """Creates various rankings based on many factors for claims and pings. These factors
-        are mostly date based.
-
-        Args:
-            claims (list[CheckedClaim]): The list of CheckedClaims that will be checked through.
-
-        Returns:
-            tuple[OrderedDict, OrderedDict, OrderedDict, dict, dict] - A tuple containing the data as follows:
-                1. The ordered month claim counts
-                2. The ordered semester claim counts
-                3. The ordered semester team counts
-                4. The month ping counts
-                5. The semester ping counts
-        """
-        today = datetime.date.today()
-        claims = CheckedClaim.get_all_leaderboard(connection, today.year)
-
-        month_counts = {}
-        semester_counts = {}
-        team_counts = {}
-        month_ping_counts = {}
-        semester_ping_counts = {}
-
-        current = datetime.datetime.now()
-        current_sem = get_semester(current)
-        for claim in claims:
-            # Filter out claims from different semesters
-            if get_semester(claim.claim_time) != current_sem:
-                continue
-
-            # Add semester claims
-            semester_counts.setdefault(claim.tech.discord_id, 0)
-            semester_counts[claim.tech.discord_id] += 1
-
-            # Add to ping count (if the case was pinged)
-            if claim.status == Status.PINGED or claim.status == Status.RESOLVED:
-                semester_ping_counts.setdefault(claim.tech.discord_id, 0)
-                semester_ping_counts[claim.tech.discord_id] += 1
-
-            # User doesn't have a team
-            if claim.tech.team_id is None or claim.tech.team_id == 0:
-                continue
-
-            # Add team claims
-            team_counts.setdefault(claim.tech.team_id, 0)
-            team_counts[claim.tech.team_id] += 1
-
-            # Filter out cases from different months
-            if claim.claim_time.month != current.month:
-                continue
-
-            # Add month claims
-            month_counts.setdefault(claim.tech.discord_id, 0)
-            month_counts[claim.tech.discord_id] += 1
-
-            # Add to ping count (if the case was pinged)
-            if claim.status == Status.PINGED or claim.status == Status.RESOLVED:
-                month_ping_counts.setdefault(claim.tech.discord_id, 0)
-                month_ping_counts[claim.tech.discord_id] += 1
-
-        for team in Team.get_all(connection):
-            if team.role_id == 0:
-                continue
-            team_counts.setdefault(team.role_id, 0)
-            team_counts[team.role_id] += team.points
-
-        # Sort the data
-        month_sorted_keys = sorted(month_counts, key=month_counts.get, reverse=True)
-        semester_sorted_keys = sorted(semester_counts, key=semester_counts.get, reverse=True)
-        team_sorted_keys = sorted(team_counts, key=team_counts.get, reverse=True)
-
-
-        # Create ordered dictionaries
-        ordered_month = OrderedDict()
-        ordered_semester = OrderedDict()
-        ordered_teams = OrderedDict()
-        for key in month_sorted_keys:
-            ordered_month[key] = month_counts[key]
-
-        for key in semester_sorted_keys:
-            ordered_semester[key] = semester_counts[key]
-
-        for key in team_sorted_keys:
-            ordered_teams[key] = team_counts[key]
-
-        return ordered_month, ordered_semester, ordered_teams, month_ping_counts, semester_ping_counts
+        return embed, result

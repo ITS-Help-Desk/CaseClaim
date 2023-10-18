@@ -4,6 +4,7 @@ from datetime import datetime
 
 from bot.views.check_view import CheckView
 from bot.views.force_complete_view import ForceCompleteView
+from bot.views.force_unclaim_view import ForceUnclaimView
 
 from bot.models.active_claim import ActiveClaim
 from bot.models.completed_claim import CompletedClaim
@@ -82,9 +83,14 @@ class ClaimView(ui.View):
         """
         case = ActiveClaim.from_id(self.bot.connection, interaction.message.id)
 
-        if case.tech.discord_id == interaction.user.id or self.bot.check_if_lead(interaction.user):
+        if case.tech.discord_id == interaction.user.id:
             case.remove_from_database(self.bot.connection)
             await interaction.message.delete()
+        elif self.bot.check_if_lead(interaction.user):
+            # Lead force completes a case
+            await interaction.response.send_message(
+                content=f"**{case.case_num}** Are you sure you'd like to force unclaim this case?",
+                view=ForceUnclaimView(self.bot), ephemeral=True, delete_after=30)
         else:
             msg = f"<@!{interaction.user.id}>, you didn't claim this case!"
             await interaction.response.send_message(content=msg, ephemeral=True, delete_after=300)
