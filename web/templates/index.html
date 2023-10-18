@@ -4,7 +4,7 @@
         <title>Case Claim Bot</title>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
-        <link href="{{ stylesheet }}" rel="stylesheet">
+        <link href="/static/style.css" rel="stylesheet">
     </head>
     <body>
         <div class="control">
@@ -16,7 +16,12 @@
             </form>
         </div>
         <div class="console">
-            {{ console_output }}
+            <div class="stdout">
+                {{ bot_out }}
+            </div>
+            <div class="stderr">
+                {{ bot_err }}
+            </div>
         </div>
         <div class="config">
             <div class="token_status">

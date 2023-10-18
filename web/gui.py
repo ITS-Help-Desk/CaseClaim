@@ -14,7 +14,8 @@ def load_token():
 
 @app.route("/", methods=['GET'])
 def default_page():
-    return render_template("index.html", stylesheet="", token=token, bot_running_status=bot_running_status, console_output="")
+    stdout, stderr = controller.get_buffered_outputs()
+    return render_template("index.html", token=token, bot_running_status=bot_running_status, bot_out=stdout, bot_err=stderr)
 
 @app.route("/login")
 def process_login():
@@ -23,6 +24,8 @@ def process_login():
 @app.post("/token")
 def save_token():
     global token
+    if token != None:
+        abort(403)
     data = request.form
     if "token" not in data:
         abort(400)

@@ -41,7 +41,7 @@ def get_buffered_outputs():
     global _bot_process
     if _bot_process != None:
         try:
-            return _bot_process.communicate(timeout=1)
+            return _bot_process.communicate(timeout=2)
         except subprocess.TimeoutExpired:
             return ("","")
     return ("","")
