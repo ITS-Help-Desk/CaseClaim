@@ -39,7 +39,7 @@ For information about how to run the bot, troubleshooting, and development guide
     - Uses matplotlib to create a histogram displaying the information.
 - /award
     - Allows a lead to reward a team points that will be logged in the MySQL database.
-    - Sends a message to the #announcements channel informing everyone of the award.
+    - Sends a message to the #bot channel informing everyone of the award and the reason why it was given.
 ## Commands (for PAs)
 - /announcement **<Outage/Announcement>**
   - Allows a PA to make an announcement or an outage.
@@ -57,3 +57,4 @@ This flowchart shows the process of claiming a case along with the QA process of
 - pandas [2.1.0](https://pypi.org/project/pandas/)
 - mysql-connector-python [8.1.0](https://pypi.org/project/mysql-connector-python/)
 - aiohttp [3.8.3](https://pypi.org/project/aiohttp/)
+- pytz [2023.3](https://pypi.org/project/pytz/)
