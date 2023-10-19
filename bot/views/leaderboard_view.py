@@ -1,16 +1,12 @@
 import datetime
-from collections import OrderedDict
 import discord
 import discord.ui as ui
-from mysql.connector import MySQLConnection
 from bot.helpers import month_number_to_name
-from bot.helpers import get_semester
 from bot.helpers import LeaderboardResults
 
 from bot.models.checked_claim import CheckedClaim
 from bot.models.user import User
 from bot.models.team_point import TeamPoint
-from bot.models.team import Team
 
 # Use TYPE_CHECKING to avoid circular import from bot
 from typing import TYPE_CHECKING

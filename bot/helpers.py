@@ -8,6 +8,10 @@ from typing import Optional
 
 import discord
 import datetime
+import io
+
+import matplotlib.pyplot as plt
+import pandas
 
 from bot.models.checked_claim import CheckedClaim
 from bot.models.user import User
@@ -282,3 +286,141 @@ class LeaderboardResults:
             if tp.timestamp.month == date.month:
                 self.ordered_team_month.setdefault(tp.role_id, 0)
                 self.ordered_team_month[tp.role_id] += tp.points
+
+
+class LeadstatsResults:
+    def __init__(self, claims: list[CheckedClaim], date: datetime.datetime):
+        self.month_counts = {}
+        self.semester_counts = {}
+
+        self.month_ping_counts = {}
+        self.semester_ping_counts = {}
+
+        self.month_kudos_counts = {}
+        self.semester_kudos_counts = {}
+
+        interaction_semester = get_semester(date)
+
+        for claim in claims:
+            # Initialize information as zero
+            self.month_counts.setdefault(claim.lead.discord_id, 0)
+            self.semester_counts.setdefault(claim.lead.discord_id, 0)
+
+            self.month_ping_counts.setdefault(claim.lead.discord_id, 0)
+            self.semester_ping_counts.setdefault(claim.lead.discord_id, 0)
+
+            self.month_kudos_counts.setdefault(claim.lead.discord_id, 0)
+            self.semester_kudos_counts.setdefault(claim.lead.discord_id, 0)
+
+            # Organize data for month
+            if claim.claim_time.year == date.year and claim.claim_time.month == date.month:
+                if claim.status == Status.CHECKED or claim.status == Status.DONE:
+                    # Add checked/done
+                    self.month_counts[claim.lead.discord_id] += 1
+
+                elif claim.status == Status.PINGED or claim.status == Status.RESOLVED:
+                    # Add pinged/resolved
+                    self.month_ping_counts[claim.lead.discord_id] += 1
+
+                elif claim.status == Status.KUDOS:
+                    # Add kudos
+                    self.month_kudos_counts[claim.lead.discord_id] += 1
+
+            # Organize data for semester
+            if get_semester(claim.claim_time) == interaction_semester:
+                if claim.status == Status.CHECKED or claim.status == Status.DONE:
+                    # Add checked/done
+                    self.semester_counts[claim.lead.discord_id] += 1
+
+                if claim.status == Status.PINGED or claim.status == Status.RESOLVED:
+                    # Add pinged/resolved
+                    self.semester_ping_counts[claim.lead.discord_id] += 1
+
+                if claim.status == Status.KUDOS:
+                    # Add kudos
+                    self.semester_kudos_counts[claim.lead.discord_id] += 1
+
+        self.semester_counts_sorted_keys = sorted(self.semester_counts, key=self.semester_counts.get, reverse=True)
+        self.month_counts_sorted_keys = sorted(self.month_counts, key=self.month_counts.get, reverse=True)
+
+    def convert_to_plot(self, bot: 'Bot', month: bool, title: str) -> io.BytesIO:
+        """Converts data into a plot that can be sent in a Discord message. It uses three
+        parallel lists in order to generate the plot using matplotlib
+
+        Args:
+            bot (Bot): An instance of the Bot class.
+            month (bool): Whether or not the data should be just for the month of the whole semester
+            title (str): The title of the chart
+
+        Returns:
+            io.BytesIO: The bytes that can be used to generate the graph
+        """
+        # Get month or semester data
+        if month:
+            counts = self.month_counts
+            pings = self.month_ping_counts
+            kudos = self.month_kudos_counts
+            keys = self.month_counts_sorted_keys
+        else:
+            counts = self.semester_counts
+            pings = self.semester_ping_counts
+            kudos = self.semester_kudos_counts
+            keys = self.semester_counts_sorted_keys
+
+        labels = []
+        y1 = []
+        y2 = []
+        y3 = []
+
+        # Create labels and datapoints from the raw data
+        for key in keys:
+            total = counts[key] + pings[key] + kudos[key]
+            if total == 0:
+                continue
+
+            y1.append(counts[key])
+            y2.append(pings[key])
+            y3.append(kudos[key])
+
+            user = User.from_id(bot.connection, key)
+            labels.append(f"{user.abb_name}\nP-{int((pings[key] / total) * 100)}%-K-{int((kudos[key] / total) * 100)}%")
+
+        # If there's no data, create fake data to display the "No data" message
+        # pandas cannot create a plot without data
+        if len(y1) + len(y2) + len(y3) == 0:
+            y1 = [1]
+            y2 = [0]
+            y3 = [0]
+            labels = ["No data"]
+
+        data_stream = io.BytesIO()
+        users = []
+
+        # Each user has to be added as a list of 3 values (checks, pings, kudos)
+        for i in range(len(y1)):
+            user = []
+            try:
+                user.append(y1[i])
+            except:
+                pass
+            try:
+                user.append(y2[i])
+            except:
+                pass
+            try:
+                user.append(y3[i])
+            except:
+                pass
+
+            users.append(user)
+
+        df = pandas.DataFrame(users, index=labels)
+        ax = df.plot.bar(stacked=True, title=title, legend=False)
+        #ax.legend(["Checks", "Pings", "Kudos"])
+        plt.xticks(rotation=45, ha="right")
+
+        plt.savefig(data_stream, format='png', bbox_inches="tight", dpi=400)
+        plt.close()
+        data_stream.seek(0)
+
+        return data_stream
