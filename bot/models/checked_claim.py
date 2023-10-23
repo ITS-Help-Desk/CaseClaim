@@ -190,7 +190,7 @@ class CheckedClaim(DatabaseItem):
 
         if status is not None:
             if status == Status.PINGED or status == Status.RESOLVED:
-                sql += f" AND (`status` = '{status}' OR `status` = '{Status.RESOLVED}'"
+                sql += f" AND (`status` = '{status}' OR `status` = '{Status.RESOLVED}')"
             else:
                 sql += f" AND `status` = '{status}'"
 
