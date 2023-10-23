@@ -174,7 +174,7 @@ class Bot(commands.Bot):
         '''update the guild icon with the data stored in img_data'''
         await ch.guild.edit(icon=img_data)
 
-    @tasks.loop(seconds=3600)  # repeat every hour
+    @tasks.loop(seconds=120)  # repeat every two minutes
     async def ping_loop(self):
         """Iterate through all the pending pings and send them out
         during working hours

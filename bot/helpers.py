@@ -255,37 +255,42 @@ class LeaderboardResults:
         self.month_sorted_keys: list[int] = sorted(self.month_counts, key=self.month_counts.get, reverse=True)
         self.semester_sorted_keys: list[int] = sorted(self.semester_counts, key=self.semester_counts.get, reverse=True)
 
-        self.month_team_sorted_keys: list[int] = sorted(self.month_team_counts, key=self.month_team_counts.get, reverse=True)
-        self.semester_team_sorted_keys: list[int] = sorted(self.semester_team_counts, key=self.semester_team_counts.get, reverse=True)
-
         # Create ordered dictionaries
         self.ordered_month: OrderedDict = OrderedDict()
         self.ordered_semester: OrderedDict = OrderedDict()
 
-        self.ordered_team_month: OrderedDict = OrderedDict()
-        self.ordered_team_semester: OrderedDict = OrderedDict()
-
+        # Add data to ordered dictionaries
         for key in self.month_sorted_keys:
             self.ordered_month[key] = self.month_counts[key]
 
         for key in self.semester_sorted_keys:
             self.ordered_semester[key] = self.semester_counts[key]
 
+        # Add extra team points
+        for tp in team_points:
+            if tp.timestamp.year != date.year or not get_semester(tp.timestamp) == get_semester(date):
+                continue
+
+            self.semester_team_counts.setdefault(tp.role_id, 0)
+            self.semester_team_counts[tp.role_id] += tp.points
+            if tp.timestamp.month == date.month:
+                self.month_team_counts.setdefault(tp.role_id, 0)
+                self.month_team_counts[tp.role_id] += tp.points
+
+        # Sort the updated team point counts
+        self.month_team_sorted_keys: list[int] = sorted(self.month_team_counts, key=self.month_team_counts.get, reverse=True)
+        self.semester_team_sorted_keys: list[int] = sorted(self.semester_team_counts, key=self.semester_team_counts.get, reverse=True)
+
+        # Create ordered dictionaries
+        self.ordered_team_month: OrderedDict = OrderedDict()
+        self.ordered_team_semester: OrderedDict = OrderedDict()
+
+        # Add extra team points
         for key in self.month_team_sorted_keys:
             self.ordered_team_month[key] = self.month_team_counts[key]
 
         for key in self.semester_team_sorted_keys:
             self.ordered_team_semester[key] = self.semester_team_counts[key]
-
-        for tp in team_points:
-            if tp.timestamp.year != date.year or not get_semester(tp.timestamp) == get_semester(date):
-                continue
-
-            self.ordered_team_semester.setdefault(tp.role_id, 0)
-            self.ordered_team_semester[tp.role_id] += tp.points
-            if tp.timestamp.month == date.month:
-                self.ordered_team_month.setdefault(tp.role_id, 0)
-                self.ordered_team_month[tp.role_id] += tp.points
 
 
 class LeadstatsResults:
