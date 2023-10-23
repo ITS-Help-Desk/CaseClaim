@@ -46,11 +46,6 @@ For information about how to run the bot, troubleshooting, and development guide
   - Prompts the PA with a modal where they can input information
   - A message will appear in the announcements channel and a sticky message will appear in the cases channel
 
-
-## Case Claim Flow Chart
-This flowchart shows the process of claiming a case along with the QA process of checking cases.
-![Flowchart](flowchart.png)
-
 ## Dependencies
 - discord.py [2.2.2](https://pypi.org/project/discord.py/)
 - matplotlib [3.7.2](https://pypi.org/project/matplotlib/)
