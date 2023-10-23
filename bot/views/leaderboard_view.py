@@ -1,8 +1,7 @@
-import datetime
 import discord
 import discord.ui as ui
-from bot.helpers import month_number_to_name
-from bot.helpers import LeaderboardResults
+from bot.helpers.leaderboard_helpers import LeaderboardResults
+from bot.helpers.other import *
 
 from bot.models.checked_claim import CheckedClaim
 from bot.models.user import User
@@ -10,8 +9,6 @@ from bot.models.team_point import TeamPoint
 
 # Use TYPE_CHECKING to avoid circular import from bot
 from typing import TYPE_CHECKING
-
-from bot.status import Status
 
 if TYPE_CHECKING:
     from ..bot import Bot

@@ -2,7 +2,7 @@ from discord import app_commands
 from discord.ext import commands
 import discord
 import csv
-from bot.helpers import month_string_to_number, month_number_to_name
+from bot.helpers.other import month_string_to_number, month_number_to_name
 import traceback
 
 from bot.models.checked_claim import CheckedClaim

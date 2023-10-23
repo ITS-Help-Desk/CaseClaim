@@ -2,8 +2,8 @@ import datetime
 import discord
 import discord.ui as ui
 
-from bot.helpers import LeadstatsResults
-from bot.helpers import month_number_to_name
+from bot.helpers.leaderboard_helpers import LeadstatsResults
+from bot.helpers.other import month_number_to_name
 
 from bot.models.checked_claim import CheckedClaim
 
