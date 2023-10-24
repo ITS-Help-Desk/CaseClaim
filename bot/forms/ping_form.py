@@ -12,7 +12,7 @@ from bot.models.user import User
 from bot.status import Status
 
 from bot.views.affirm_view import AffirmView
-from bot.helpers import is_working_time
+from bot.helpers.other import is_working_time
 
 # Use TYPE_CHECKING to avoid circular import from bot
 from typing import TYPE_CHECKING

@@ -5,7 +5,7 @@ import time
 from bot import paginator
 import traceback
 
-from bot.helpers import create_paginator_embeds
+from bot.helpers.other import create_paginator_embeds
 
 from bot.models.active_claim import ActiveClaim
 from bot.models.completed_claim import CompletedClaim
