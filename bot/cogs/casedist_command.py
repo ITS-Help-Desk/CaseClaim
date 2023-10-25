@@ -69,17 +69,15 @@ class CaseDistCommand(commands.Cog):
 
         plt.gca().xaxis.set_major_locator(ticker.MaxNLocator(nbins=13))
 
-        # Save and send
+        # Save as stream
         fig.savefig(data_stream, format='png', bbox_inches="tight", dpi=80)
         plt.close()
         data_stream.seek(0)
 
+        # Create embed with chart
         chart = discord.File(data_stream, filename="chart.png")
-
         embed = discord.Embed(title="ITSHD Total Case Claim-Time Histogram")
-
         embed.set_image(url="attachment://chart.png")
-
         embed.colour = self.bot.embed_color
 
         await interaction.response.send_message(embed=embed, file=chart, ephemeral=True)

@@ -1,5 +1,5 @@
 from mysql.connector import MySQLConnection
-from typing import Optional, Any
+from typing import Optional
 
 from bot.models.database_item import DatabaseItem
 

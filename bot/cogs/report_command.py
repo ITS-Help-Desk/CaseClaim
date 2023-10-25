@@ -45,50 +45,53 @@ class ReportCommand(commands.Cog):
             status (app_command.Choice[str]): The status of cases that will be presented in the report
         """
         # Check if user is a lead
-        if self.bot.check_if_lead(interaction.user):
-            if interaction.channel_id != self.bot.log_channel:
-                # Return an error if used in the wrong channel
-                msg = f"You can only use this command in the <#{self.bot.log_channel}> channel."
-                await interaction.response.send_message(content=msg, ephemeral=True, delete_after=180)
-                return
-
-            # Ensure user inputted a valid month
-            try:
-                m = int(month_string_to_number(month))
-            except ValueError:
-                await interaction.response.send_message(content="Invalid month! Please use 3 letter abbreviations (e.g. \"jan\", \"feb\",...)", ephemeral=True, delete_after=180)
-                return
-
-            await interaction.response.defer()  # Wait in case process takes a long time
-
-            description = "Here's your report of cases"
-
-            if month is not None:
-                month = int(month_string_to_number(month))
-                description += f" in **{month_number_to_name(month)}**"
-            if user is not None:
-                user = User.from_id(self.bot.connection, user.id)
-                description += f" from user **{user.full_name}**"
-
-            if status is not None:
-                status = Status.from_str(status.value)
-                description += f" with status **{status}**"
-
-            results = CheckedClaim.search(self.bot.connection, user, month, status)
-            row_str = self.data_to_rowstr(results)
-
-            with open('temp.csv', 'w', newline='', encoding='utf-8') as csvfile:
-                writer = csv.writer(csvfile)
-                for row in row_str:
-                    writer.writerow(row)
-
-            report = discord.File('temp.csv')
-
-            await interaction.followup.send(content=f"{description}.", file=report)
-        else:
+        if not self.bot.check_if_lead(interaction.user):
             # Return error message if user is not Lead
             msg = f"<@{interaction.user.id}>, you do not have permission to pull this report!"
             await interaction.response.send_message(content=msg, ephemeral=True, delete_after=180)
+
+            return
+
+        if interaction.channel_id != self.bot.log_channel:
+            # Return an error if used in the wrong channel
+            msg = f"You can only use this command in the <#{self.bot.log_channel}> channel."
+            await interaction.response.send_message(content=msg, ephemeral=True, delete_after=180)
+            return
+
+        # Ensure user inputted a valid month
+        try:
+            m = int(month_string_to_number(month))
+        except ValueError:
+            await interaction.response.send_message(content="Invalid month! Please use 3 letter abbreviations (e.g. \"jan\", \"feb\",...)", ephemeral=True, delete_after=180)
+            return
+
+        await interaction.response.defer()  # Wait in case process takes a long time
+
+        description = "Here's your report of cases"
+
+        if month is not None:
+            month = int(month_string_to_number(month))
+            description += f" in **{month_number_to_name(month)}**"
+        if user is not None:
+            user = User.from_id(self.bot.connection, user.id)
+            description += f" from user **{user.full_name}**"
+
+        if status is not None:
+            status = Status.from_str(status.value)
+            description += f" with status **{status}**"
+
+        results = CheckedClaim.search(self.bot.connection, user, month, status)
+        row_str = self.data_to_rowstr(results)
+
+        with open('temp.csv', 'w', newline='', encoding='utf-8') as csvfile:
+            writer = csv.writer(csvfile)
+            for row in row_str:
+                writer.writerow(row)
+
+        report = discord.File('temp.csv')
+
+        await interaction.followup.send(content=f"{description}.", file=report)
+
 
     def data_to_rowstr(self, data: list[CheckedClaim]) -> list[list[str]]:
         """Converts the raw data into a list of strings

@@ -143,6 +143,9 @@ class Bot(commands.Bot):
     async def update_icon(self, team_ranks: OrderedDict):
         """Updates the server icon using the team that is in first place for the month
         on the leaderboard
+
+        Args:
+            team_ranks (OrderedDict): An ordered dictionary of all the teams and their counts
         """
         if len(list(team_ranks.keys())) == 0:
             return
@@ -153,14 +156,14 @@ class Bot(commands.Bot):
         new_icon = first_place_team.image_url
         ch = await self.fetch_channel(self.cases_channel)
 
-        '''use aiohttp Clientsession to asynchronously scrape the attachment url and read the data to a variable'''
+        # Use aiohttp Clientsession to asynchronously scrape the attachment url and read the data to a variable
         async with ClientSession() as session:
             async with session.get(new_icon) as response:
-                '''if site response, read the response data into img_data'''
+                # If site response, read the response data into img_data
                 if response.status == 200:
                     img_data = await response.read()
 
-        '''update the guild icon with the data stored in img_data'''
+        # Update the guild icon with the data stored in img_data
         await ch.guild.edit(icon=img_data)
 
     @tasks.loop(seconds=120)  # repeat every two minutes
@@ -177,7 +180,7 @@ class Bot(commands.Bot):
                 if pp.severity.lower() != "kudos":
                     await send_pending_ping(self, pp, case_channel)
                 else:
-                    await send_pending_kudos(pp, case_channel)
+                    await send_pending_kudos(self, pp, case_channel)
 
                 await asyncio.sleep(5)  # prevent rate limiting
 

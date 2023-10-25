@@ -1,4 +1,4 @@
-from typing import Optional, Any
+from typing import Optional
 from mysql.connector import MySQLConnection
 
 from bot.models.team import Team
@@ -18,11 +18,13 @@ class User(DatabaseItem):
         self.discord_id = discord_id
         self.team_id = team_id
 
+        # Ensure first name is capitalized
         if first_name[0].isupper():
             self.first_name = first_name
         else:
             self.first_name = first_name.capitalize()
 
+        # Ensure last name is capitalized
         if last_name[0].isupper():
             self.last_name = last_name
         else:

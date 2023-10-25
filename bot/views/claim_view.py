@@ -42,6 +42,7 @@ class ClaimView(ui.View):
             raise AttributeError(f"Case is none (message ID: {interaction.message.id})")
 
         if case.tech.discord_id == interaction.user.id:
+            # Case completed by the tech
             case.remove_from_database(self.bot.connection)
             await interaction.message.delete()
 

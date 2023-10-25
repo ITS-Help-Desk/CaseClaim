@@ -69,7 +69,6 @@ class ClaimCommand(commands.Cog):
         potential_cases: list[CompletedClaim, CheckedClaim] = CompletedClaim.get_all_with_case_num(self.bot.connection, case_num)
         checked = CheckedClaim.get_all_with_case_num(self.bot.connection, case_num)
         potential_cases.extend(checked)
-
         recent = False
         for case in potential_cases:
             if case.tech.discord_id == interaction.user.id:
@@ -79,13 +78,11 @@ class ClaimCommand(commands.Cog):
 
             if diff_mins <= 15:
                 # Send ephemeral
-                await interaction.response.send_message(content=f"<@!{interaction.user.id}> WARNING: **{case_num}** was claimed by <@!{case.tech.discord_id}> in the last 15 minutes.",
-                                                        ephemeral=True,
-                                                        delete_after=60)
+                await interaction.response.send_message(content=f"<@!{interaction.user.id}> WARNING: **{case_num}** was claimed by <@!{case.tech.discord_id}> in the last 15 minutes.", ephemeral=True, delete_after=60)
                 recent = True
                 break
 
-        # User has claimed the case successfully, create the embed and techview.
+        # User has claimed the case successfully, create the embed
         message_embed = discord.Embed(
             description=f"Is being worked on by <@{interaction.user.id}>",
             colour=self.bot.embed_color,
@@ -104,7 +101,6 @@ class ClaimCommand(commands.Cog):
             # Send new message
             msg = await interaction.channel.send(embed=message_embed, view=ClaimView(self.bot))
             message_id = msg.id
-
 
         try:
             # Now that message has been sent, update the active cases

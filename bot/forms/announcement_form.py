@@ -36,11 +36,11 @@ class AnnouncementForm(ui.Modal, title='Announcement Form'):
             interaction (discord.Interaction): The submit modal interaction
         """
         user = User.from_id(self.bot.connection, interaction.user.id)
-        # Create announcement for AnnouncementManager
         a_title = str(self.a_title)
         description = str(self.description)
 
         if not self.informational:
+            # Send announcement
             days = 4
 
             end_date = datetime.datetime.now() + datetime.timedelta(days=days)
@@ -80,6 +80,7 @@ class AnnouncementForm(ui.Modal, title='Announcement Form'):
 
             await announcement_message.edit(content="")
         else:
+            # Send informational announcement (no message to cases channel)
             announcement_embed = discord.Embed(title=a_title, colour=discord.Color.green())
             announcement_embed.description = description
 
