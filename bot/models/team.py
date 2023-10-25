@@ -12,6 +12,15 @@ class Team(DatabaseItem):
 
     @staticmethod
     def from_role_id(connection: MySQLConnection, role_id: int) -> Optional['Team']:
+        """Returns a Team (if found) based on a provided role id.
+
+        Args:
+            connection (MySQLConnection): The connection to the MySQL database
+            role_id (int): The id of the role
+
+        Returns:
+            Optional[Team] - A representation of the team
+        """
         with connection.cursor() as cursor:
             cursor.execute("SELECT * FROM Teams WHERE role_id = %s", (role_id,))
             result = cursor.fetchone()

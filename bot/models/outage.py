@@ -13,7 +13,7 @@ if TYPE_CHECKING:
 
 class Outage(DatabaseItem):
     def __init__(self, message_id: int, case_message_id: int, service: str, parent_case: Optional[str], description: str, troubleshooting_steps: Optional[str], resolution_time: Optional[str], user: User, active: bool):
-        """
+        """Create an outage object that can store the following fields.
 
         Args:
             message_id (int): The ID of the announcement message
@@ -42,7 +42,7 @@ class Outage(DatabaseItem):
 
         Args:
             connection (MySQLConnection): The connection to the MySQL database
-            message_id (int): The announcment message ID
+            message_id (int): The announcement message ID
 
         Returns:
             Optional[Outage] - The outage that matches the message id

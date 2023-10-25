@@ -67,6 +67,7 @@ class LeaderboardView(ui.View):
 
         result = LeaderboardResults(CheckedClaim.get_all_leaderboard(self.bot.connection, interaction.created_at.year), TeamPoint.get_all(self.bot.connection), interaction.created_at, user)
 
+        # Organize month data
         try:
             month_count = int(result.month_counts[user.discord_id])
             month_checked_rate = int(((month_count - result.month_ping_count) / month_count) * 100)
@@ -76,6 +77,7 @@ class LeaderboardView(ui.View):
         except (KeyError, ValueError):
             pass
 
+        # Organize semester data
         try:
             semester_count = int(result.semester_counts[user.discord_id])
             semester_checked_rate = int(((semester_count - result.semester_ping_count) / semester_count) * 100)

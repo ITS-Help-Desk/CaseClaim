@@ -21,7 +21,7 @@ class GetLogCommand(commands.Cog):
 
     @app_commands.command(description="Returns the bot's log file.")
     async def getlog(self, interaction: discord.Interaction) -> None:
-        """Sends a message back to the user explaining how to use the bot.
+        """Sends a message with the bot's log file attached. Only for use by devs
 
         Args:
             interaction (discord.Interaction): Interaction that the slash command originated from
