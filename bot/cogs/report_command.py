@@ -59,11 +59,12 @@ class ReportCommand(commands.Cog):
             return
 
         # Ensure user inputted a valid month
-        try:
-            m = int(month_string_to_number(month))
-        except ValueError:
-            await interaction.response.send_message(content="Invalid month! Please use 3 letter abbreviations (e.g. \"jan\", \"feb\",...)", ephemeral=True, delete_after=180)
-            return
+        if month is not None:
+            try:
+                m = int(month_string_to_number(month))
+            except ValueError:
+                await interaction.response.send_message(content="Invalid month! Please use 3 letter abbreviations (e.g. \"jan\", \"feb\",...)", ephemeral=True, delete_after=180)
+                return
 
         await interaction.response.defer()  # Wait in case process takes a long time
 
