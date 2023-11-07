@@ -29,10 +29,8 @@ class OutageForm(ui.Modal, title='Outage Form'):
     service = ui.TextInput(label='Service', style=discord.TextStyle.short)
     parent_case = ui.TextInput(label='Parent Case # (Optional)', style=discord.TextStyle.short, required=False)
     description = ui.TextInput(label='Description of Outage', style=discord.TextStyle.paragraph)
-    troubleshooting_steps = ui.TextInput(label='How to Troubleshoot (Optional)', style=discord.TextStyle.paragraph,
-                                         required=False)
-    resolution_time = ui.TextInput(label='Expected Resolution Time (Optional)', style=discord.TextStyle.short,
-                                   required=False)
+    troubleshooting_steps = ui.TextInput(label='How to Troubleshoot (Optional)', style=discord.TextStyle.paragraph, required=False)
+    resolution_time = ui.TextInput(label='Expected Resolution Time (Optional)', style=discord.TextStyle.short, required=False)
 
     async def on_submit(self, interaction: discord.Interaction):
         """Creates an outage object and saves it to the database. Also sends a message
@@ -43,6 +41,7 @@ class OutageForm(ui.Modal, title='Outage Form'):
         """
         user = User.from_id(self.bot.connection, interaction.user.id)
 
+        # Collect information from form
         service = str(self.service)
         parent_case = str(self.parent_case) if len(str(self.parent_case)) != 0 else None
         description = str(self.description)
@@ -59,7 +58,6 @@ class OutageForm(ui.Modal, title='Outage Form'):
             announcement_embed.set_footer(text=user.full_name)
 
         announcement_embed.timestamp = datetime.datetime.now()
-
 
         # Add parent case
         if parent_case is not None and len(str(parent_case)) != 0:

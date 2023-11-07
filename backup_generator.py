@@ -10,7 +10,7 @@ class SQLBackupCreator:
         self.database = database
 
     def create_backup(self) -> str:
-        """Creates a local backup of the database using the MySQLDump command.
+        """Creates a local backup of the database using the MySQLDump command in the terminal.
 
         Returns:
             str - The location of the backup that was generated

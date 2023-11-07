@@ -49,6 +49,7 @@ class EditOutageForm(ui.Modal, title='Outage Update Form'):
         """
         user = User.from_id(self.bot.connection, interaction.user.id)
 
+        # Collect form information
         new_service = str(self.service)
         new_parent_case = str(self.parent_case)
         new_description = str(self.description)

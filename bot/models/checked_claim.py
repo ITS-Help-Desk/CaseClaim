@@ -61,6 +61,28 @@ class CheckedClaim(DatabaseItem):
                                 result[4], result[5], result[6], Status.from_str(result[7]), result[8])
 
     @staticmethod
+    def from_checker_message_id(connection: MySQLConnection, checker_message_id: int) -> Optional['CheckedClaim']:
+        """Returns a CheckedClaim (if found) based on a checker message id.
+
+        Args:
+            connection (MySQLConnection): The connection to the MySQL database
+            checker_message_id (int): The ID of the ping thread
+
+        Returns:
+            Optional[CheckedClaim] - A representation of a checked case
+        """
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT * FROM CheckedClaims WHERE checker_message_id = %s", (checker_message_id,))
+            result = cursor.fetchone()
+
+            if result is None:
+                return None
+
+            return CheckedClaim(result[0], result[1], User.from_id(connection, result[2]),
+                                User.from_id(connection, result[3]),
+                                result[4], result[5], result[6], Status.from_str(result[7]), result[8])
+
+    @staticmethod
     def get_all_with_tech_id(connection: MySQLConnection, tech_id: int) -> list['CheckedClaim']:
         """Returns a list of CheckedClaim based on a tech id.
 
@@ -168,7 +190,7 @@ class CheckedClaim(DatabaseItem):
 
         if status is not None:
             if status == Status.PINGED or status == Status.RESOLVED:
-                sql += f" AND (`status` = '{status}' OR `status` = '{Status.RESOLVED}'"
+                sql += f" AND (`status` = '{status}' OR `status` = '{Status.RESOLVED}')"
             else:
                 sql += f" AND `status` = '{status}'"
 

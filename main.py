@@ -53,8 +53,10 @@ def main():
             claims_channel = config_data["claims_channel"]
             error_channel = config_data["error_channel"]
             announcement_channel = config_data["announcement_channel"]
+            bot_channel = config_data["bot_channel"]
+            holidays = config_data["holidays"]
             
-            if cases_channel == 0 or claims_channel == 0 or error_channel == 0 or announcement_channel == 0:
+            if cases_channel == 0 or claims_channel == 0 or error_channel == 0 or announcement_channel == 0 or bot_channel == 0 or holidays is None:
                 raise ValueError()
     except Exception:
         raise ValueError("Please add the required config information into config.json")

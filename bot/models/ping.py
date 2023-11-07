@@ -1,12 +1,12 @@
 from mysql.connector import MySQLConnection
-from typing import Optional, Any
+from typing import Optional
 
 from bot.models.database_item import DatabaseItem
 
 
 class Ping(DatabaseItem):
     def __init__(self, thread_id: int, message_id: int, severity: str, description: str):
-        """
+        """Creates a Ping object to store data such as severity and description.
 
         Args:
             thread_id (int): The id of the thread that was created when the ping was sent

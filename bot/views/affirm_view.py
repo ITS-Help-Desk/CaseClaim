@@ -22,7 +22,7 @@ class AffirmView(ui.View):
         super().__init__(timeout=None)
         self.bot = bot
 
-    @ui.button(label="Affirm", style=discord.ButtonStyle.primary, custom_id="affirm")
+    @ui.button(label="Acknowledged", style=discord.ButtonStyle.primary, custom_id="affirm")
     async def button_affirm(self, interaction: discord.Interaction, button: discord.ui.Button):
         """Allows a tech to affirm a case of theirs that's
         been pinged.

@@ -1,8 +1,8 @@
 from abc import ABC, abstractmethod
 from mysql.connector import MySQLConnection
-from typing import Any
 
 
+# The abstract class to represent all items in the database
 class DatabaseItem(ABC):
     @abstractmethod
     def add_to_database(self, connection: MySQLConnection) -> None:

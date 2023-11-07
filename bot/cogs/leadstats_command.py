@@ -30,13 +30,7 @@ class LeadStatsCommand(commands.Cog):
             interaction (discord.Interaction): Interaction that the slash command originated from
         """
         # Check if user is a lead
-        if self.bot.check_if_lead(interaction.user):
-            await interaction.response.defer()  # Wait in case process takes a long time
-
-            embed, file = await LeadStatsView.create_embed(self.bot, interaction)
-
-            await interaction.followup.send(embed=embed, view=LeadStatsView(self.bot), file=file)
-        else:
+        if not self.bot.check_if_lead(interaction.user):
             # Return error message if user is not Lead
             bad_user_embed = discord.Embed(
                 description=
@@ -44,6 +38,13 @@ class LeadStatsCommand(commands.Cog):
                 color=discord.Color.red()
             )
             await interaction.response.send_message(embed=bad_user_embed, ephemeral=True, delete_after=180)
+            return
+
+        # Generate and send leadstats
+        await interaction.response.defer()  # Wait in case process takes a long time
+        embed, file = await LeadStatsView.create_embed(self.bot, interaction)
+        await interaction.followup.send(embed=embed, view=LeadStatsView(self.bot), file=file)
+
 
     @leadstats.error
     async def check_leaderboard_error(self, ctx: discord.Interaction, error):

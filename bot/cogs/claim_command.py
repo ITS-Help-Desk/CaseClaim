@@ -42,20 +42,20 @@ class ClaimCommand(commands.Cog):
         # Ensure user is claiming case in the correct channel
         if interaction.channel_id != self.bot.cases_channel:
             msg = f"Cases cannot be claimed in this channel. Please go to <#{self.bot.cases_channel}>"
-            await interaction.response.send_message(content=msg, ephemeral=True, delete_after=300)
+            await interaction.response.send_message(content=msg, ephemeral=True, delete_after=10)
             return
 
         # Check if case_num is an 8-digit number
         if case_num is None or len(case_num) != 8 or not case_num.isdigit():
             msg = f"**{case_num}** is an invalid case number!"
-            await interaction.response.send_message(content=msg, ephemeral=True, delete_after=300)
+            await interaction.response.send_message(content=msg, ephemeral=True, delete_after=10)
             return
 
         # Check to see if the case claimed has already been claimed and is in progress.
         case = ActiveClaim.from_case_num(self.bot.connection, case_num)
         if case is not None:
             msg = f"**{case_num}** has already been claimed!"
-            await interaction.response.send_message(content=msg, ephemeral=True, delete_after=300)
+            await interaction.response.send_message(content=msg, ephemeral=True, delete_after=10)
             return
 
         # Check to see if user is in the list
@@ -69,7 +69,6 @@ class ClaimCommand(commands.Cog):
         potential_cases: list[CompletedClaim, CheckedClaim] = CompletedClaim.get_all_with_case_num(self.bot.connection, case_num)
         checked = CheckedClaim.get_all_with_case_num(self.bot.connection, case_num)
         potential_cases.extend(checked)
-
         recent = False
         for case in potential_cases:
             if case.tech.discord_id == interaction.user.id:
@@ -79,13 +78,11 @@ class ClaimCommand(commands.Cog):
 
             if diff_mins <= 15:
                 # Send ephemeral
-                await interaction.response.send_message(content=f"<@!{interaction.user.id}> WARNING: **{case_num}** was claimed by <@!{case.tech.discord_id}> in the last 15 minutes.",
-                                                        ephemeral=True,
-                                                        delete_after=180)
+                await interaction.response.send_message(content=f"<@!{interaction.user.id}> WARNING: **{case_num}** was claimed by <@!{case.tech.discord_id}> in the last 15 minutes.", ephemeral=True, delete_after=60)
                 recent = True
                 break
 
-        # User has claimed the case successfully, create the embed and techview.
+        # User has claimed the case successfully, create the embed
         message_embed = discord.Embed(
             description=f"Is being worked on by <@{interaction.user.id}>",
             colour=self.bot.embed_color,
@@ -104,7 +101,6 @@ class ClaimCommand(commands.Cog):
             # Send new message
             msg = await interaction.channel.send(embed=message_embed, view=ClaimView(self.bot))
             message_id = msg.id
-
 
         try:
             # Now that message has been sent, update the active cases

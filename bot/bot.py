@@ -1,9 +1,6 @@
-import datetime
-from collections import OrderedDict
-
 from aiohttp import ClientSession
+import asyncio
 from discord.ext import commands, tasks
-import discord
 from mysql.connector import MySQLConnection
 from typing import Any
 
@@ -22,7 +19,6 @@ from bot.cogs.ping_command import PingCommand
 from bot.cogs.award_command import AwardCommand
 
 from bot.views.claim_view import ClaimView
-from bot.views.affirm_view import AffirmView
 from bot.views.check_view import CheckView
 from bot.views.check_view_red import CheckViewRed
 from bot.views.resolve_ping_view import ResolvePingView
@@ -34,11 +30,11 @@ from bot.views.force_complete_view import ForceCompleteView
 from bot.views.force_unclaim_view import ForceUnclaimView
 
 from bot.models.outage import Outage
-from bot.models.checked_claim import CheckedClaim
-from bot.models.user import User
 from bot.models.team import Team
 
-from bot.helpers import LeaderboardResults
+from bot.helpers.other import *
+from bot.helpers.leaderboard_helpers import *
+from bot.helpers.pings_and_kudos import *
 
 
 class Bot(commands.Bot):
@@ -46,7 +42,9 @@ class Bot(commands.Bot):
     claims_channel: int
     error_channel: int
     announcement_channel: int
+    bot_channel: int
     connection: MySQLConnection
+    holidays: list[str]
 
     def __init__(self, config: dict[str, Any], connection: MySQLConnection):
         """Initializes the bot (doesn't start it), and initializes some
@@ -57,10 +55,12 @@ class Bot(commands.Bot):
         self.error_channel = int(config["error_channel"])
         self.announcement_channel = int(config["announcement_channel"])
         self.log_channel = int(config["log_channel"])
+        self.bot_channel = int(config["bot_channel"])
 
         self.connection = connection
 
-        self.embed_color = discord.Color.from_rgb(117, 190, 233)
+        self.embed_color = discord.Color.from_rgb(30, 31, 34)
+        self.holidays = config["holidays"]
 
         self.resend_outages = False
 
@@ -137,10 +137,16 @@ class Bot(commands.Bot):
             except:
                 pass  # ignore exception, usually caused by a user leaving the server
 
-        result = LeaderboardResults(CheckedClaim.get_all_leaderboard(self.connection, datetime.datetime.now().year), datetime.datetime.now(), None)
+        result = LeaderboardResults(CheckedClaim.get_all_leaderboard(self.connection, datetime.datetime.now().year), TeamPoint.get_all(self.connection), datetime.datetime.now(), None)
         await self.update_icon(result.ordered_team_month)
 
     async def update_icon(self, team_ranks: OrderedDict):
+        """Updates the server icon using the team that is in first place for the month
+        on the leaderboard
+
+        Args:
+            team_ranks (OrderedDict): An ordered dictionary of all the teams and their counts
+        """
         if len(list(team_ranks.keys())) == 0:
             return
 
@@ -150,15 +156,33 @@ class Bot(commands.Bot):
         new_icon = first_place_team.image_url
         ch = await self.fetch_channel(self.cases_channel)
 
-        '''use aiohttp Clientsession to asynchronously scrape the attachment url and read the data to a variable'''
+        # Use aiohttp Clientsession to asynchronously scrape the attachment url and read the data to a variable
         async with ClientSession() as session:
             async with session.get(new_icon) as response:
-                '''if site response, read the response data into img_data'''
+                # If site response, read the response data into img_data
                 if response.status == 200:
                     img_data = await response.read()
 
-        '''update the guild icon with the data stored in img_data'''
+        # Update the guild icon with the data stored in img_data
         await ch.guild.edit(icon=img_data)
+
+    @tasks.loop(seconds=120)  # repeat every two minutes
+    async def ping_loop(self):
+        """Iterate through all the pending pings and send them out
+        during working hours
+        """
+        now = datetime.datetime.now()
+        pending_pings = PendingPing.get_all(self.connection)
+        if is_working_time(now, self.holidays) and len(pending_pings) != 0:
+            # Only send pings during working time
+            case_channel = await self.fetch_channel(self.cases_channel)
+            for pp in pending_pings:
+                if pp.severity.lower() != "kudos":
+                    await send_pending_ping(self, pp, case_channel)
+                else:
+                    await send_pending_kudos(self, pp, case_channel)
+
+                await asyncio.sleep(5)  # prevent rate limiting
 
     @tasks.loop(seconds=5)  # repeat after every 5 seconds
     async def resend_outages_loop(self):
@@ -220,6 +244,7 @@ class Bot(commands.Bot):
         self.check_teams_loop.start()
         self.resend_outages_loop.start()
         self.reset_connection_loop.start()
+        self.ping_loop.start()
 
         synced = await self.tree.sync()
         print("{} commands synced".format(len(synced)))

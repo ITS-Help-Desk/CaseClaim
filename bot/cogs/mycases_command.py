@@ -5,7 +5,7 @@ import time
 from bot import paginator
 import traceback
 
-from bot.helpers import create_paginator_embeds
+from bot.helpers.other import create_paginator_embeds
 
 from bot.models.active_claim import ActiveClaim
 from bot.models.completed_claim import CompletedClaim
@@ -30,7 +30,7 @@ class MyCasesCommand(commands.Cog):
 
     @app_commands.command(description="Shows a list of all cases a user has worked on")
     async def mycases(self, interaction: discord.Interaction) -> None:
-        """Shows a list of all cases a user has worked on.
+        """Shows a list of all cases a user has worked on in a paginator view.
 
         Args:
             interaction (discord.Interaction): Interaction that the slash command originated from
@@ -76,7 +76,7 @@ class MyCasesCommand(commands.Cog):
         that can be used in the embed description.
 
         Args:
-            rows (list[str]): The list of raw strings from the database.
+            rows (list[ActiveClaim | CompletedClaim | CheckedClaim]): The list of raw strings from the database.
 
         Returns:
             list[str]: The list of descriptions that can be directly used in an embed.

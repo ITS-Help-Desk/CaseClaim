@@ -1,20 +1,14 @@
 import datetime
-import io
 import discord
 import discord.ui as ui
-import matplotlib.pyplot as plt
-import pandas
 
-from bot.helpers import get_semester
-from bot.helpers import month_number_to_name
+from bot.helpers.leaderboard_helpers import LeadstatsResults
+from bot.helpers.other import month_number_to_name
 
 from bot.models.checked_claim import CheckedClaim
-from bot.models.user import User
 
 # Use TYPE_CHECKING to avoid circular import from bot
 from typing import TYPE_CHECKING
-
-from bot.status import Status
 
 if TYPE_CHECKING:
     from ..bot import Bot
@@ -70,58 +64,14 @@ class LeadStatsView(ui.View):
 
         Args:
             bot (Bot): An instance of the Bot class.
-            interaction_date (datetime.datetime): The time at which this request is made.
+            interaction (discord.Interaction): The interaction that generated this request
+            month (bool): Whether or not the data will be sampled for the month or whole semester
         Returns:
             discord.Embed: The embed object with everything already completed for month and semester rankings.
         """
-        m, s, mp, sp, mk, sk = LeadStatsView.get_data(bot, interaction.created_at)
-
-        month_counts = m[0]
-        month_keys = m[1]
-
-        semester_counts = s[0]
-        semester_keys = s[1]
-
-        # Get month or semester data
-        if month:
-            counts = month_counts
-            pings = mp
-            kudos = mk
-            keys = month_keys
-        else:
-            counts = semester_counts
-            pings = sp
-            kudos = sk
-            keys = semester_keys
-
-        labels = []
-        data_points1 = []
-        data_points2 = []
-        data_points3 = []
-
-        # Create labels and datapoints from the raw data
-        for key in keys:
-            total = counts[key] + pings[key] + kudos[key]
-            if total == 0:
-                continue
-
-            data_points1.append(counts[key])
-            data_points2.append(pings[key])
-            data_points3.append(kudos[key])
-
-            user = User.from_id(bot.connection, key)
-            labels.append(f"{user.abb_name}\nP-{int((pings[key] / total) * 100)}%-K-{int((kudos[key] / total) * 100)}%")
-
-        # If there's no data, create fake data to display the "No data" message
-        # pandas cannot create a plot without data
-        if len(data_points1) + len(data_points2) + len(data_points3) == 0:
-            data_points1 = [1]
-            data_points2 = [0]
-            data_points3 = [0]
-            labels = ["No data"]
-        
-        data_stream = LeadStatsView.convert_to_plot(f"ITS Lead CC Statistics ({f'{month_number_to_name(interaction.created_at.month)}' if month else 'Semester'})",
-                                                    labels, data_points1, data_points2, data_points3)
+        claims = CheckedClaim.search(bot.connection)
+        results = LeadstatsResults(claims, interaction.created_at)
+        data_stream = results.convert_to_plot(bot, month, f"ITS Lead CC Statistics ({f'{month_number_to_name(interaction.created_at.month)}' if month else 'Semester'})")
         chart = discord.File(data_stream, filename="chart.png")
 
         embed = discord.Embed(title="ITS Case Check Leaderboard")
@@ -255,3 +205,4 @@ class LeadStatsView(ui.View):
         month_counts_sorted_keys = sorted(month_counts, key=month_counts.get, reverse=True)
 
         return ((month_counts, month_counts_sorted_keys), (semester_counts, semester_counts_sorted_keys), month_ping_counts, semester_ping_counts, month_kudos_counts, semester_kudos_counts)
+

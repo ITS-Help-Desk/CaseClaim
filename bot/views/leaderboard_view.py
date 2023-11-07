@@ -1,20 +1,14 @@
-import datetime
-from collections import OrderedDict
 import discord
 import discord.ui as ui
-from mysql.connector import MySQLConnection
-from bot.helpers import month_number_to_name
-from bot.helpers import get_semester
-from bot.helpers import LeaderboardResults
+from bot.helpers.leaderboard_helpers import LeaderboardResults
+from bot.helpers.other import *
 
 from bot.models.checked_claim import CheckedClaim
 from bot.models.user import User
-from bot.models.team import Team
+from bot.models.team_point import TeamPoint
 
 # Use TYPE_CHECKING to avoid circular import from bot
 from typing import TYPE_CHECKING
-
-from bot.status import Status
 
 if TYPE_CHECKING:
     from ..bot import Bot
@@ -46,7 +40,6 @@ class LeaderboardView(ui.View):
         message = interaction.message
         if message is not None:
             await message.edit(embed=new_embed)
-
         await self.bot.update_icon(result.ordered_team_month)
 
     @ui.button(label="My Rank", style=discord.ButtonStyle.secondary, custom_id="myrank")
@@ -72,8 +65,9 @@ class LeaderboardView(ui.View):
 
         user = User.from_id(self.bot.connection, interaction.user.id)
 
-        result = LeaderboardResults(CheckedClaim.get_all_leaderboard(self.bot.connection, interaction.created_at.year), interaction.created_at, user)
+        result = LeaderboardResults(CheckedClaim.get_all_leaderboard(self.bot.connection, interaction.created_at.year), TeamPoint.get_all(self.bot.connection), interaction.created_at, user)
 
+        # Organize month data
         try:
             month_count = int(result.month_counts[user.discord_id])
             month_checked_rate = int(((month_count - result.month_ping_count) / month_count) * 100)
@@ -83,6 +77,7 @@ class LeaderboardView(ui.View):
         except (KeyError, ValueError):
             pass
 
+        # Organize semester data
         try:
             semester_count = int(result.semester_counts[user.discord_id])
             semester_checked_rate = int(((semester_count - result.semester_ping_count) / semester_count) * 100)
@@ -106,7 +101,7 @@ class LeaderboardView(ui.View):
         Returns:
             discord.Embed: The embed object with everything already completed for month and semester rankings.
         """
-        result = LeaderboardResults(CheckedClaim.get_all_leaderboard(bot.connection, interaction.created_at.year), interaction.created_at, None)
+        result = LeaderboardResults(CheckedClaim.get_all_leaderboard(bot.connection, interaction.created_at.year), TeamPoint.get_all(bot.connection), interaction.created_at, None)
 
         month_ranking = ""
         # Create month written ranking
