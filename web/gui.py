@@ -1,8 +1,12 @@
 from flask import Flask, abort, request, render_template, redirect
+
 import os
+import mysql.connector
+
 import web.controller as controller
 
 token = None
+connection = None
 app = Flask(__name__)
 bot_running_status = "not running"
 
@@ -11,6 +15,9 @@ def load_token():
     token = os.environ.get("DISCORD_TOKEN")
     print(f"[FROM GUI]: Token = {token}")
 
+def load_db_connector(connector: mysql.connector.MySQLConnection):
+    global connection
+    connection = connector
 
 @app.route("/", methods=['GET'])
 def default_page():
