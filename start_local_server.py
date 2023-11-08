@@ -39,7 +39,8 @@ def main():
     except Error as err:
         print(f"Error: '{err}'")
         quit(1)
-
+    
+    gui.load_db_connector(connection)
     gui.load_token()
     gui.app.run()
 

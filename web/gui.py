@@ -1,9 +1,14 @@
-from flask import Flask, abort, request, render_template, redirect
+from flask import Flask, Response, abort, request, render_template, redirect
+
 
 import os
 import mysql.connector
+import base64
 
 import web.controller as controller
+import graphs.leadstats as graphs
+
+import datetime
 
 token = None
 connection = None
@@ -27,6 +32,11 @@ def default_page():
 @app.route("/login")
 def process_login():
     return "gaming"
+
+@app.route("/leadstats.png")
+def generate_leadstats_plot():
+    png_data = graphs.generate_leadstats_graph(connection, datetime.datetime.now().isoformat())
+    return Response(png_data.getvalue(), mimetype="image/png")
 
 @app.post("/token")
 def save_token():

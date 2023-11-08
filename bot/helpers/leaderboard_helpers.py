@@ -239,6 +239,10 @@ class LeadstatsResults:
                 pass
 
             users.append(user)
+        
+        # Change matlib pyplot backend to prevent gui's from being spawned. It is causing issues with the flask webserver/
+        # See https://github.com/matplotlib/matplotlib/issues/14304/
+        plt.switch_backend('Agg')
 
         df = pandas.DataFrame(users, index=labels)
         ax = df.plot.bar(stacked=True, title=title, legend=False)
