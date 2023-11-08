@@ -7,28 +7,29 @@
         <link href="/static/style.css" rel="stylesheet">
     </head>
     <body>
-        <div class="control">
-            <form action="/start_bot"> 
-                <button type="submit">Start Bot</button>
-            </form>
-            <form action="/stop_bot">
-                <button type="submit">Stop Bot</button>
-            </form>
-        </div>
-        <div class="console">
-            <div class="stdout">
-                {{ bot_out }}
+        <div class="grid">
+            <div class="control">
+                <form action="/start_bot"> 
+                    <button type="submit">Start Bot</button>
+                </form>
+                <form action="/stop_bot">
+                    <button type="submit">Stop Bot</button>
+                </form>
             </div>
-            <div class="stderr">
-                {{ bot_err }}
+            <div class="console">
+                <div class="stdout">
+                    {{ bot_out }}
+                </div>
+                <div class="stderr">
+                    {{ bot_err }}
+                </div>
             </div>
-        </div>
-        <div class="config">
-            <div class="token_status">
-                <p>Token Status</p>
-                {% if token %}
+            <div class="config">
+                <div class="token_status">
+                    <p>Token Status</p>
+                    {% if token %}
                     <span id="token_box"></span> Token is detected
-                {% else %}
+                    {% else %}
                     <span id="token_box" style=></span> Token is not detected
                     <form action="/token" method="post" class="token_input">
                         <div class="token_input">
@@ -39,11 +40,15 @@
                             <input type="submit" />
                         </div>
                     </form>
-                {% endif %}
+                    {% endif %}
+                </div>
+                <div class="bot_running">
+                    <p>Bot Status</p>
+                    <p>Bot is {{ bot_running_status }}</p>
+                </div>
             </div>
-            <div class="bot_running">
-                <p>Bot Status</p>
-                <p>Bot is {{ bot_running_status }}</p>
+            <div class="graphs">
+                
             </div>
         </div>
     </body>

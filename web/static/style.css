@@ -1,0 +1,21 @@
+.grid {
+    display: grid;
+}
+
+.control {
+    grid-column: 1 / span 1;
+    background: #00F;
+    grid-row: 0 / span 2;
+}
+
+.config {
+    grid-column: 2 / span 1;
+    background: #0F0;
+    grid-row: 0 / 2;
+}
+
+.bot_running {
+    grid-row: 0 / 2;
+    background: #F00;
+    grid-column: 0 / span 1;
+}
