@@ -2,6 +2,8 @@ import io
 import datetime
 from typing import Optional
 
+from mysql.connector import MySQLConnection
+
 from bot.models.checked_claim import CheckedClaim
 from bot.models.team_point import TeamPoint
 from bot.models.user import User
@@ -167,7 +169,7 @@ class LeadstatsResults:
         self.semester_counts_sorted_keys = sorted(self.semester_counts, key=self.semester_counts.get, reverse=True)
         self.month_counts_sorted_keys = sorted(self.month_counts, key=self.month_counts.get, reverse=True)
 
-    def convert_to_plot(self, bot: 'Bot', month: bool, title: str) -> io.BytesIO:
+    def convert_to_plot(self, connection: MySQLConnection, month: bool, title: str) -> io.BytesIO:
         """Converts data into a plot that can be sent in a Discord message. It uses three
         parallel lists in order to generate the plot using matplotlib
 
@@ -206,7 +208,7 @@ class LeadstatsResults:
             y2.append(pings[key])
             y3.append(kudos[key])
 
-            user = User.from_id(bot.connection, key)
+            user = User.from_id(connection, key)
             labels.append(f"{user.abb_name}\nP-{int((pings[key] / total) * 100)}%-K-{int((kudos[key] / total) * 100)}%")
 
         # If there's no data, create fake data to display the "No data" message

@@ -71,7 +71,7 @@ class LeadStatsView(ui.View):
         """
         claims = CheckedClaim.search(bot.connection)
         results = LeadstatsResults(claims, interaction.created_at)
-        data_stream = results.convert_to_plot(bot, month, f"ITS Lead CC Statistics ({f'{month_number_to_name(interaction.created_at.month)}' if month else 'Semester'})")
+        data_stream = results.convert_to_plot(bot.connection, month, f"ITS Lead CC Statistics ({f'{month_number_to_name(interaction.created_at.month)}' if month else 'Semester'})")
         chart = discord.File(data_stream, filename="chart.png")
 
         embed = discord.Embed(title="ITS Case Check Leaderboard")
