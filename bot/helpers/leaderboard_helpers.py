@@ -37,7 +37,7 @@ class LeaderboardResults:
 
         current_sem = get_semester(date)
         for claim in claims:
-            # Filter out claims from different semesters
+            # Filter out claims from different semesters (and resolve any issues with August)
             if get_semester(claim.claim_time) != current_sem and not (claim.claim_time.month == 8 and claim.claim_time.month == date.month):
                 continue
 

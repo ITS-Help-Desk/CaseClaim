@@ -1,14 +1,10 @@
-import datetime
 import calendar
 
 from discord import app_commands
 from discord.ext import commands
 import discord
 import traceback
-from typing import Optional
 
-from bot.models.checked_claim import CheckedClaim
-from bot.models.team_point import TeamPoint
 from bot.helpers.leaderboard_helpers import *
 
 from bot.views.leaderboard_view import LeaderboardView
@@ -31,7 +27,6 @@ class HLeaderboardCommand(commands.Cog):
 
     @app_commands.command(description="Shows a list of all cases a user has worked on")
     @app_commands.describe(date="The date the leaderboard starts (MM/YY).")
-    @app_commands.default_permissions(mute_members=True)
     async def hleaderboard(self, interaction: discord.Interaction, date: str) -> None:
         """Shows a leaderboard of all users by case numbers on the database.
 

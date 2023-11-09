@@ -21,6 +21,9 @@ For information about how to run the bot, troubleshooting, and development guide
 - /mycases
     - Allows a user to see a list of cases they've worked on.
     - Shows a paginated list containing the time and case numbers.
+- /hleaderboard
+  - Allows a user to see a leaderboard from any month and year.
+  - Shows an ephemeral message in the same format as the normal leaderboard.
 ## Commands (for Leads)
 - /report **\[user]** **\[month]** **\[pinged]**
     - Allows a lead to instantly create a report on filtered cases.
