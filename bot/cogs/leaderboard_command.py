@@ -3,6 +3,8 @@ from discord.ext import commands
 import discord
 import traceback
 
+from bot.helpers.leaderboard_helpers import *
+
 from bot.views.leaderboard_view import LeaderboardView
 
 # Use TYPE_CHECKING to avoid circular import from bot
@@ -29,21 +31,24 @@ class LeaderboardCommand(commands.Cog):
         Args:
             interaction (discord.Interaction): Interaction that the slash command originated from
         """
-        # Check if user is a lead
         if not self.bot.check_if_lead(interaction.user):
             # Return error message if user is not Lead
             bad_user_embed = discord.Embed(
                 description=
-                f"<@{interaction.user.id}>, you do not have permission to use this command!",
+                f"<@{interaction.user.id}>, you do not have permission to use this command.",
                 color=discord.Color.red()
             )
             await interaction.response.send_message(embed=bad_user_embed, ephemeral=True, delete_after=180)
             return
 
-        # Generate and send leaderboard
+        # Show current leaderboard
         await interaction.response.defer()  # Wait in case process takes a long time
-        embed = LeaderboardView.create_embed(self.bot, interaction)
-        await interaction.followup.send(embed=embed[0], view=LeaderboardView(self.bot))
+        result = LeaderboardResults(
+            CheckedClaim.get_all_leaderboard(self.bot.connection, interaction.created_at.year),
+            TeamPoint.get_all(self.bot.connection), interaction.created_at, None)
+
+        embed = LeaderboardView.create_embed(self.bot, interaction, result)
+        await interaction.followup.send(embed=embed, view=LeaderboardView(self.bot))
 
     @leaderboard.error
     async def leaderboard_error(self, ctx: discord.Interaction, error):
