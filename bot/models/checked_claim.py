@@ -278,10 +278,23 @@ class CheckedClaim(DatabaseItem):
             results = cursor.fetchall()
 
             data = []
+            users = {}  # Memoization for next for loop
             for result in results:
-                data.append(CheckedClaim(result[0], result[1], User.from_id(connection, result[2]),
-                                         User.from_id(connection, result[3]),
-                                         result[4], result[5], result[6], Status.from_str(result[7]), result[8]))
+                # Find tech
+                if result[2] in users:
+                    tech = users[result[2]]
+                else:
+                    tech = User.from_id(connection, result[2])
+                    users[result[2]] = tech
+
+                # Find lead
+                if result[3] in users:
+                    lead = users[result[3]]
+                else:
+                    lead = User.from_id(connection, result[3])
+                    users[result[3]] = lead
+
+                data.append(CheckedClaim(result[0], result[1], tech, lead, result[4], result[5], result[6], Status.from_str(result[7]), result[8]))
 
             return data
 
