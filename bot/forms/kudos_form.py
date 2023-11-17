@@ -5,8 +5,8 @@ from datetime import datetime
 from bot.models.completed_claim import CompletedClaim
 from bot.models.checked_claim import CheckedClaim
 from bot.models.user import User
-from bot.models.ping import Ping
-from bot.models.pending_ping import PendingPing
+from bot.models.feedback import Feedback
+from bot.models.pending_feedback import PendingFeedback
 
 from bot.status import Status
 from bot.views.kudos_view import KudosView
@@ -77,7 +77,7 @@ class KudosForm(ui.Modal, title='Kudos Form'):
             message = await thread.send(embed=fb_embed, view=KudosView(self.bot))
 
             # Add a Ping class to store the kudos comment data
-            kudo = Ping(thread.id, message.id, "Kudos", str(self.description))
+            kudo = Feedback(thread.id, message.id, "Kudos", str(self.description))
             kudo.add_to_database(self.bot.connection)
 
             # Remove unpinged case from log
@@ -101,5 +101,5 @@ class KudosForm(ui.Modal, title='Kudos Form'):
             checked_case.add_to_database(self.bot.connection)
 
             # Add a PendingPing
-            pending_ping = PendingPing(self.case.checker_message_id, "Kudos", str(self.description), "")
+            pending_ping = PendingFeedback(self.case.checker_message_id, "Kudos", str(self.description), "")
             pending_ping.add_to_database(self.bot.connection)

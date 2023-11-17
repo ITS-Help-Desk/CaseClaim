@@ -16,8 +16,8 @@ import pandas
 from bot.models.checked_claim import CheckedClaim
 from bot.models.user import User
 from bot.models.team_point import TeamPoint
-from bot.models.pending_ping import PendingPing
-from bot.models.ping import Ping
+from bot.models.pending_feedback import PendingFeedback
+from bot.models.feedback import Feedback
 
 from bot.views.affirm_view import AffirmView
 

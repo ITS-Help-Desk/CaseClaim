@@ -173,7 +173,7 @@ class Bot(commands.Bot):
         during working hours
         """
         now = datetime.datetime.now()
-        pending_pings = PendingPing.get_all(self.connection)
+        pending_pings = PendingFeedback.get_all(self.connection)
         if is_working_time(now, self.holidays) and len(pending_pings) != 0:
             # Only send pings during working time
             case_channel = await self.fetch_channel(self.cases_channel)
