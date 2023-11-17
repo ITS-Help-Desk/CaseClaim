@@ -30,9 +30,10 @@ class AnnouncementCommand(commands.Cog):
         app_commands.Choice(name="Announcement", value="announcement"),
         app_commands.Choice(name="Informational", value="informational")
     ])
-    @app_commands.default_permissions(administrator=True)
+    @app_commands.default_permissions(mute_members=True)
     async def announcement(self, interaction: discord.Interaction, choices: app_commands.Choice[str]) -> None:
-        """This command allows a PA to create an announcement.
+        """This command allows a PA or lead to create an announcement. Both can create outages and
+        informational announcements, while PAs can solely create announcements.
 
         Args:
             interaction (discord.Interaction): Interaction that the slash command originated from.
@@ -45,19 +46,21 @@ class AnnouncementCommand(commands.Cog):
             await interaction.response.send_message(content=msg, ephemeral=True, delete_after=300)
             return
 
-        # Check if user is a PA
-        if self.bot.check_if_pa(interaction.user):
+        if self.bot.check_if_pa(interaction.user) and str(choices.value) == "announcement":
+            # PA using announcement
+            announcement_modal = AnnouncementForm(self.bot, False)
+            await interaction.response.send_modal(announcement_modal)
+        elif self.bot.check_if_lead(interaction.user):
             if str(choices.value) == "outage":
+                # Lead/PA using outage
                 outage_modal = OutageForm(self.bot)
                 await interaction.response.send_modal(outage_modal)
-            elif str(choices.value) == "announcement":
-                announcement_modal = AnnouncementForm(self.bot, False)
-                await interaction.response.send_modal(announcement_modal)
             elif str(choices.value) == "informational":
+                # Lead/PA using informational
                 announcement_modal = AnnouncementForm(self.bot, True)
                 await interaction.response.send_modal(announcement_modal)
             else:
-                await interaction.response.send_message(content="Error! Invalid choice selected", ephemeral=True, delete_after=180)
+                await interaction.response.send_message(content="You do not have permission to create this announcement.", ephemeral=True, delete_after=180)
         else:
             # Return error message if user is not PA
             msg = f"<@{interaction.user.id}>, you do not have permission to use this command!"
