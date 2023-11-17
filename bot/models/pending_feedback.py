@@ -47,7 +47,7 @@ class PendingFeedback(DatabaseItem):
 
     def remove_from_database(self, connection: MySQLConnection) -> None:
         with connection.cursor() as cursor:
-            sql = "DELETE FROM P WHERE checker_message_id = %s"
+            sql = "DELETE FROM PendingFeedback WHERE checker_message_id = %s"
             cursor.execute(sql, (self.checker_message_id,))
             connection.commit()
 
