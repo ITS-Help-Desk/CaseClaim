@@ -6,7 +6,7 @@ from bot.helpers.other import month_string_to_number, month_number_to_name
 import traceback
 
 from bot.models.checked_claim import CheckedClaim
-from bot.models.ping import Ping
+from bot.models.feedback import Feedback
 from bot.models.user import User
 from bot.status import Status
 
@@ -106,12 +106,12 @@ class ReportCommand(commands.Cog):
         """
         new_list = []
         for claim in data:
-            t = claim.claim_time.strftime("%b %d %Y %#I:%M %p")  # Format time
+            t = claim.claim_time.strftime("%b %d %Y %#I:%M %p")  # Format time (replace '#' with '-' for Unix)
             row = [str(t), str(claim.case_num), str(claim.tech.full_name), str(claim.lead.full_name), str(claim.status)]
 
             # Add ping data
             if claim.ping_thread_id is not None:
-                p = Ping.from_thread_id(self.bot.connection, claim.ping_thread_id)
+                p = Feedback.from_thread_id(self.bot.connection, claim.ping_thread_id)
                 row.append(p.severity)
                 row.append(p.description)
 

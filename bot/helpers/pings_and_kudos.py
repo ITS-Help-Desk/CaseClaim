@@ -2,8 +2,8 @@ import datetime
 import discord
 
 from bot.models.checked_claim import CheckedClaim
-from bot.models.pending_ping import PendingPing
-from bot.models.ping import Ping
+from bot.models.feedback import Feedback
+from bot.models.pending_feedback import PendingFeedback
 
 from bot.views.affirm_view import AffirmView
 from bot.views.kudos_view import KudosView
@@ -11,7 +11,7 @@ from bot.views.kudos_view import KudosView
 from bot.status import Status
 
 
-async def send_pending_ping(bot: 'Bot', pp: PendingPing, case_channel: discord.TextChannel):
+async def send_pending_ping(bot: 'Bot', pp: PendingFeedback, case_channel: discord.TextChannel):
     now = datetime.datetime.now()
     # Ping the case as normal
     claim = CheckedClaim.from_checker_message_id(bot.connection, pp.checker_message_id)
@@ -55,7 +55,7 @@ async def send_pending_ping(bot: 'Bot', pp: PendingPing, case_channel: discord.T
     message = await thread.send(embed=fb_embed, view=AffirmView(bot))
 
     # Create ping object
-    ping = Ping(thread.id, message.id, str(pp.severity), str(pp.description))
+    ping = Feedback(thread.id, message.id, str(pp.severity), str(pp.description))
     ping.add_to_database(bot.connection)
     claim.add_ping_thread(bot.connection, thread.id)
 
@@ -63,7 +63,7 @@ async def send_pending_ping(bot: 'Bot', pp: PendingPing, case_channel: discord.T
     pp.remove_from_database(bot.connection)
 
 
-async def send_pending_kudos(bot: 'Bot', pp: PendingPing, case_channel: discord.TextChannel):
+async def send_pending_kudos(bot: 'Bot', pp: PendingFeedback, case_channel: discord.TextChannel):
     now = datetime.datetime.now()
     claim = CheckedClaim.from_checker_message_id(bot.connection, pp.checker_message_id)
     tech = await bot.fetch_user(claim.tech.discord_id)
@@ -93,7 +93,7 @@ async def send_pending_kudos(bot: 'Bot', pp: PendingPing, case_channel: discord.
     message = await thread.send(embed=fb_embed, view=KudosView(bot))
 
     # Add a Ping class to store the kudos comment data
-    kudo = Ping(thread.id, message.id, "Kudos", str(pp.description))
+    kudo = Feedback(thread.id, message.id, "Kudos", str(pp.description))
     kudo.add_to_database(bot.connection)
 
     claim.add_ping_thread(bot.connection, kudo.thread_id)

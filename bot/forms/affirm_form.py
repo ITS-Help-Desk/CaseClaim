@@ -2,7 +2,7 @@ import discord
 import discord.ui as ui
 
 from bot.models.checked_claim import CheckedClaim
-from bot.models.ping import Ping
+from bot.models.feedback import Feedback
 
 from bot.views.resolve_ping_view import ResolvePingView
 
@@ -40,7 +40,7 @@ class AffirmForm(ui.Modal, title='Tech Assessment'):
 
         # Try to remove the Affirm button
         try:
-            ping = Ping.from_thread_id(self.bot.connection, interaction.channel_id)
+            ping = Feedback.from_thread_id(self.bot.connection, interaction.channel_id)
             ch = await self.bot.fetch_channel(interaction.channel_id)
             msg = await ch.fetch_message(ping.message_id)
             await msg.edit(view=None)
