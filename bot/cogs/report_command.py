@@ -106,7 +106,7 @@ class ReportCommand(commands.Cog):
         """
         new_list = []
         for claim in data:
-            t = claim.claim_time.strftime("%b %d %Y %#I:%M %p")  # Format time
+            t = claim.claim_time.strftime("%b %d %Y %#I:%M %p")  # Format time (replace '#' with '-' for Unix)
             row = [str(t), str(claim.case_num), str(claim.tech.full_name), str(claim.lead.full_name), str(claim.status)]
 
             # Add ping data
