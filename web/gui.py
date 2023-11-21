@@ -6,12 +6,15 @@ import mysql.connector
 import base64
 
 import web.controller as controller
-import graphs.leadstats as graphs
+from bot.models.checked_claim import CheckedClaim
+import graphs.leadstats as leadstats_graphs
+import graphs.casedist as casedist_graphs
 
 import datetime
 
 token = None
 connection = None
+claims = None
 app = Flask(__name__)
 bot_running_status = "not running"
 
@@ -26,8 +29,16 @@ def load_db_connector(connector: mysql.connector.MySQLConnection):
 
 @app.route("/", methods=['GET'])
 def default_page():
-    stdout, stderr = controller.get_buffered_outputs()
-    return render_template("index.html", token=token, bot_running_status=bot_running_status, bot_out=stdout, bot_err=stderr)
+    global claims
+    claims = CheckedClaim.search(connection)
+    return render_template("index.html", token=token, bot_running_status=bot_running_status)
+
+@app.route("/stats")
+def stats_page():
+    global claims
+    claims = CheckedClaim.search(connection)
+    return render_template("stats.html")
+
 
 @app.route("/login")
 def process_login():
@@ -35,8 +46,14 @@ def process_login():
 
 @app.route("/leadstats.png")
 def generate_leadstats_plot():
-    png_data = graphs.generate_leadstats_graph(connection, datetime.datetime.now().isoformat())
+    png_data = leadstats_graphs.generate_leadstats_graph(claims, connection, datetime.datetime.now().isoformat())
     return Response(png_data.getvalue(), mimetype="image/png")
+
+@app.route("/casedist.png")
+def generate_casedist():
+    cd_png_data = casedist_graphs.generate_casedist_plot(claims, datetime.datetime.now().month, datetime.datetime.now().day-1)
+    return Response(cd_png_data.getvalue(), mimetype="image/png")
+
 
 @app.post("/token")
 def save_token():

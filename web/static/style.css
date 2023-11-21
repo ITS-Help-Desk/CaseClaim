@@ -1,21 +1,96 @@
+body {
+  font-family: sans-serif;
+  margin: 0;
+  padding: 0;
+}
+
 .grid {
-    display: grid;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
 }
 
 .control {
-    grid-column: 1 / span 1;
-    background: #00F;
-    grid-row: 0 / span 2;
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.control form {
+  display: inline-block;
+  margin: 0 10px;
+}
+
+.control button {
+  padding: 10px 20px;
+  background-color: #007bff;
+  color: #fff;
+  border: none;
+  cursor: pointer;
+}
+
+.console {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  border: 1px solid #ccc;
+  padding: 10px;
+}
+
+.stdout, .stderr {
+  margin-bottom: 10px;
+  font-family: monospace;
 }
 
 .config {
-    grid-column: 2 / span 1;
-    background: #0F0;
-    grid-row: 0 / 2;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  border: 1px solid #ccc;
+  padding: 10px;
 }
 
-.bot_running {
-    grid-row: 0 / 2;
-    background: #F00;
-    grid-column: 0 / span 1;
+.token_status {
+  margin-bottom: 20px;
 }
+
+.token_status p {
+  font-weight: bold;
+  margin-bottom: 5px;
+}
+
+#token_box {
+  font-style: italic;
+}
+
+.token_input {
+  margin-bottom: 10px;
+}
+
+.token_input label {
+  display: block;
+  margin-bottom: 5px;
+}
+
+.token_input input {
+  padding: 5px;
+  border: 1px solid #ccc;
+}
+
+.bot_running p {
+  font-weight: bold;
+  margin-bottom: 5px;
+}
+
+.graphs {
+  width: 100%;
+}
+
+.graphs img {
+  width: 100%;
+  height: auto;
+}
+

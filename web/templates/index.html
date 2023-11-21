@@ -15,8 +15,12 @@
                 <form action="/stop_bot">
                     <button type="submit">Stop Bot</button>
                 </form>
+                <form action="/stats">
+                    <button type="submit">Stats Page</button>
+                </form>
             </div>
             <div class="console">
+                <h4>Console</h4>
                 <div class="stdout">
                     {{ bot_out }}
                 </div>
@@ -49,6 +53,7 @@
             </div>
             <div class="graphs">
                 <img src="/leadstats.png" alt="">
+                <img src="/casedist.png" alt="">
             </div>
         </div>
     </body>

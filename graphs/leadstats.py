@@ -1,5 +1,4 @@
 import io
-import mysql
 
 # Not ideal but better than a full rewrite right now
 from bot.models.checked_claim import CheckedClaim
@@ -8,8 +7,7 @@ from bot.helpers.leaderboard_helpers import LeadstatsResults
 from mysql.connector import MySQLConnection
 from datetime import datetime
 
-def generate_leadstats_graph(connection: MySQLConnection, date: str) -> io.BytesIO:
-    claims = CheckedClaim.search(connection)
+def generate_leadstats_graph(claims: list[CheckedClaim], connection: MySQLConnection, date: str) -> io.BytesIO:
     results = LeadstatsResults(claims, datetime.fromisoformat(date))
 
     # Force only current month mode. In the future give choice between semester and month
