@@ -25,7 +25,7 @@ class OutageView(ui.View):
             interaction (discord.Interaction): The interaction this button press originated from.
             button (discord.ui.Button): Unused argument that's required to be passed in.
         """
-        if self.bot.check_if_pa(interaction.user):
+        if self.bot.check_if_lead(interaction.user):
             outage = Outage.from_message_id(self.bot.connection, interaction.message.id)
 
             edit_modal = EditOutageForm(self.bot, outage)
@@ -39,7 +39,7 @@ class OutageView(ui.View):
             interaction (discord.Interaction): The interaction this button press originated from.
             button (discord.ui.Button): Unused argument that's required to be passed in.
         """
-        if self.bot.check_if_pa(interaction.user):
+        if self.bot.check_if_lead(interaction.user):
             outage = Outage.from_message_id(self.bot.connection, interaction.message.id)
             outage.deactivate(self.bot.connection)
 

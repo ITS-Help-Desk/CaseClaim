@@ -17,6 +17,7 @@ from bot.cogs.casedist_command import CaseDistCommand
 from bot.cogs.leadstats_command import LeadStatsCommand
 from bot.cogs.ping_command import PingCommand
 from bot.cogs.award_command import AwardCommand
+from bot.cogs.hleaderboard_command import HLeaderboardCommand
 
 from bot.views.claim_view import ClaimView
 from bot.views.check_view import CheckView
@@ -172,7 +173,7 @@ class Bot(commands.Bot):
         during working hours
         """
         now = datetime.datetime.now()
-        pending_pings = PendingPing.get_all(self.connection)
+        pending_pings = PendingFeedback.get_all(self.connection)
         if is_working_time(now, self.holidays) and len(pending_pings) != 0:
             # Only send pings during working time
             case_channel = await self.fetch_channel(self.cases_channel)
@@ -233,7 +234,10 @@ class Bot(commands.Bot):
 
         await self.add_cog(GetLogCommand(self))
         await self.add_cog(ReportCommand(self))
+
         await self.add_cog(LeaderboardCommand(self))
+        await self.add_cog(HLeaderboardCommand(self))
+
         await self.add_cog(CaseDistCommand(self))
         await self.add_cog(LeadStatsCommand(self))
         await self.add_cog(PingCommand(self))

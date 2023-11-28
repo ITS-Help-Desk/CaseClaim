@@ -5,8 +5,8 @@ from datetime import datetime
 
 from bot.models.completed_claim import CompletedClaim
 from bot.models.checked_claim import CheckedClaim
-from bot.models.ping import Ping
-from bot.models.pending_ping import PendingPing
+from bot.models.feedback import Feedback
+from bot.models.pending_feedback import PendingFeedback
 from bot.models.user import User
 
 from bot.status import Status
@@ -94,7 +94,7 @@ class PingForm(ui.Modal, title='Feedback Form'):
             await thread.add_user(original_user)
             message = await thread.send(embed=fb_embed, view=AffirmView(self.bot))
 
-            ping = Ping(thread.id, message.id, str(self.severity), str(self.description))
+            ping = Feedback(thread.id, message.id, str(self.severity), str(self.description))
             ping.add_to_database(self.bot.connection)
 
             if type(self.case) == CheckedClaim:
@@ -113,7 +113,7 @@ class PingForm(ui.Modal, title='Feedback Form'):
         else:
             # Not during work hours, create a PendingPing
             if type(self.case) == CheckedClaim:
-                pending_ping = PendingPing(self.case.checker_message_id, str(self.severity), str(self.description), str(self.to_do))
+                pending_ping = PendingFeedback(self.case.checker_message_id, str(self.severity), str(self.description), str(self.to_do))
                 pending_ping.add_to_database(self.bot.connection)
             elif type(self.case) == CompletedClaim:
                 # Remove CompletedClaim from log
@@ -127,5 +127,5 @@ class PingForm(ui.Modal, title='Feedback Form'):
                 checked_case.add_to_database(self.bot.connection)
 
                 # Add a PendingPing
-                pending_ping = PendingPing(self.case.checker_message_id, str(self.severity), str(self.description), str(self.to_do))
+                pending_ping = PendingFeedback(self.case.checker_message_id, str(self.severity), str(self.description), str(self.to_do))
                 pending_ping.add_to_database(self.bot.connection)

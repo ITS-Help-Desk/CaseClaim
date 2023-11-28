@@ -12,12 +12,13 @@ from bot.helpers.other import *
 
 
 class LeaderboardResults:
-    def __init__(self, claims: list[CheckedClaim], team_points: list[TeamPoint], date: datetime.datetime, user: Optional[User]):
+    def __init__(self, claims: list[CheckedClaim], team_points: list[TeamPoint], date: datetime.datetime, user: Optional[User], historic=False):
         """Creates a data structure for storing leaderboard data:
         counts (dict[int,int]) --> Used for storing how many cases each tech has
         ping_counts (int) --> The amount of pings a user has
         sorted_keys (list[int]) --> The keys of the counts dict in order from most to least claims
         ordered (OrderedDict) --> The ordered dictionary for the counts dict
+        historic (bool) --> Determines whether or not to count the entire semester (default: false)
 
         Args:
             claims (list[CheckedClaim]): The list of claims to be sifted through
@@ -25,6 +26,8 @@ class LeaderboardResults:
             date (datetime.datetime): The date (used for monthly cases)
             user (Optional[User]): The user (used for pinged counts)
         """
+        self.date = date
+
         self.month_counts: dict[int, int] = {}  # General check counts for the month
         self.semester_counts: dict[int, int] = {}  # General check counts for the semester
 
@@ -36,10 +39,12 @@ class LeaderboardResults:
 
         current_sem = get_semester(date)
         for claim in claims:
-            # Filter out claims from different semesters
-            if get_semester(claim.claim_time) != current_sem:
+            # Filter out claims from different semesters (and resolve any issues with August)
+            if get_semester(claim.claim_time) != current_sem and not (claim.claim_time.month == 8 and claim.claim_time.month == date.month):
                 continue
 
+            if historic and (date.month < claim.claim_time.month or date.year != claim.claim_time.year):
+                continue
             # Add semester claims
             self.semester_counts.setdefault(claim.tech.discord_id, 0)
             self.semester_counts[claim.tech.discord_id] += 1
@@ -89,7 +94,7 @@ class LeaderboardResults:
 
         # Add extra team points
         for tp in team_points:
-            if tp.timestamp.year != date.year or not get_semester(tp.timestamp) == get_semester(date):
+            if tp.timestamp.year != date.year or not get_semester(tp.timestamp) == current_sem:
                 continue
 
             self.semester_team_counts.setdefault(tp.role_id, 0)

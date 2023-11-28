@@ -2,7 +2,7 @@ import discord
 import discord.ui as ui
 
 from bot.models.checked_claim import CheckedClaim
-from bot.models.ping import Ping
+from bot.models.feedback import Feedback
 
 from bot.status import Status
 
@@ -63,7 +63,7 @@ class ResolvePingView(ui.View):
             button (discord.ui.Button): Unused argument that's required to be passed in.
         """
         case = CheckedClaim.from_ping_thread_id(self.bot.connection, interaction.channel_id)
-        ping = Ping.from_thread_id(self.bot.connection, interaction.channel_id)
+        ping = Feedback.from_thread_id(self.bot.connection, interaction.channel_id)
 
         if case is None:
             await interaction.response.send_message(content="Error!", ephemeral=True, delete_after=180)

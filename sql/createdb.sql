@@ -11,7 +11,7 @@ CREATE TABLE `CheckedClaims`(
 );
 ALTER TABLE
     `CheckedClaims` ADD PRIMARY KEY(`checker_message_id`);
-CREATE TABLE `PendingPings`(
+CREATE TABLE `PendingFeedback`(
     `checker_message_id` BIGINT UNSIGNED NOT NULL,
     `severity` VARCHAR(255) NOT NULL,
     `description` MEDIUMTEXT NOT NULL,
@@ -37,16 +37,16 @@ CREATE TABLE `TeamPoints`(
     `description` MEDIUMTEXT NOT NULL,
     `timestamp` TIMESTAMP NOT NULL
 );
-CREATE TABLE `Pings`(
+CREATE TABLE `Feedback`(
     `thread_id` BIGINT UNSIGNED NOT NULL,
     `message_id` BIGINT UNSIGNED NOT NULL,
     `severity` VARCHAR(255) NOT NULL,
     `description` MEDIUMTEXT NOT NULL
 );
 ALTER TABLE
-    `Pings` ADD PRIMARY KEY(`thread_id`);
+    `Feedback` ADD PRIMARY KEY(`thread_id`);
 ALTER TABLE
-    `Pings` ADD UNIQUE `pings_message_id_unique`(`message_id`);
+    `Feedback` ADD UNIQUE `feedback_message_id_unique`(`message_id`);
 CREATE TABLE `Teams`(
     `role_id` BIGINT UNSIGNED NOT NULL,
     `color` VARCHAR(7) NOT NULL,
@@ -97,7 +97,7 @@ ALTER TABLE
 ALTER TABLE
     `ActiveClaims` ADD UNIQUE `activeclaims_case_num_unique`(`case_num`);
 ALTER TABLE
-    `PendingPings` ADD CONSTRAINT `pendingpings_checker_message_id_foreign` FOREIGN KEY(`checker_message_id`) REFERENCES `CheckedClaims`(`checker_message_id`);
+    `PendingFeedback` ADD CONSTRAINT `pendingfeedback_checker_message_id_foreign` FOREIGN KEY(`checker_message_id`) REFERENCES `CheckedClaims`(`checker_message_id`);
 ALTER TABLE
     `Users` ADD CONSTRAINT `users_team_foreign` FOREIGN KEY(`team`) REFERENCES `Teams`(`role_id`);
 ALTER TABLE
@@ -107,7 +107,7 @@ ALTER TABLE
 ALTER TABLE
     `Outages` ADD CONSTRAINT `outages_user_foreign` FOREIGN KEY(`user`) REFERENCES `Users`(`discord_id`);
 ALTER TABLE
-    `CheckedClaims` ADD CONSTRAINT `checkedclaims_ping_thread_id_foreign` FOREIGN KEY(`ping_thread_id`) REFERENCES `Pings`(`thread_id`);
+    `CheckedClaims` ADD CONSTRAINT `checkedclaims_ping_thread_id_foreign` FOREIGN KEY(`ping_thread_id`) REFERENCES `Feedback`(`thread_id`);
 ALTER TABLE
     `CheckedClaims` ADD CONSTRAINT `checkedclaims_lead_id_foreign` FOREIGN KEY(`lead_id`) REFERENCES `Users`(`discord_id`);
 ALTER TABLE

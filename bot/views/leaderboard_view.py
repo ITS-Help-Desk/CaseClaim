@@ -35,7 +35,13 @@ class LeaderboardView(ui.View):
         """
         await interaction.response.defer(thinking=False)  # Acknowledge button press
 
-        new_embed, result = LeaderboardView.create_embed(self.bot, interaction)
+        result = LeaderboardResults(
+            CheckedClaim.get_all_leaderboard(self.bot.connection, interaction.created_at.year),
+            TeamPoint.get_all(self.bot.connection),
+            interaction.created_at,
+            User.from_id(self.bot.connection, interaction.user.id)
+        )
+        new_embed = LeaderboardView.create_embed(self.bot, interaction, result)
 
         message = interaction.message
         if message is not None:
@@ -65,7 +71,12 @@ class LeaderboardView(ui.View):
 
         user = User.from_id(self.bot.connection, interaction.user.id)
 
-        result = LeaderboardResults(CheckedClaim.get_all_leaderboard(self.bot.connection, interaction.created_at.year), TeamPoint.get_all(self.bot.connection), interaction.created_at, user)
+        result = LeaderboardResults(
+            CheckedClaim.get_all_leaderboard(self.bot.connection, interaction.created_at.year),
+            TeamPoint.get_all(self.bot.connection),
+            interaction.created_at,
+            user
+        )
 
         # Organize month data
         try:
@@ -90,7 +101,7 @@ class LeaderboardView(ui.View):
         await interaction.response.send_message(embed=embed, ephemeral=True, delete_after=180)
 
     @staticmethod
-    def create_embed(bot: 'Bot', interaction: discord.Interaction) -> tuple[discord.Embed, LeaderboardResults]:
+    def create_embed(bot: 'Bot', interaction: discord.Interaction, result: LeaderboardResults) -> discord.Embed:
         """Creates the leaderboard embed for the /leaderboard command and for the
         Refresh button.
 
@@ -101,8 +112,6 @@ class LeaderboardView(ui.View):
         Returns:
             discord.Embed: The embed object with everything already completed for month and semester rankings.
         """
-        result = LeaderboardResults(CheckedClaim.get_all_leaderboard(bot.connection, interaction.created_at.year), TeamPoint.get_all(bot.connection), interaction.created_at, None)
-
         month_ranking = ""
         # Create month written ranking
         for i in range(min(4, len(result.ordered_month.keys()))):
@@ -132,7 +141,7 @@ class LeaderboardView(ui.View):
         embed.colour = bot.embed_color
 
         # Add leaderboard fields
-        embed.add_field(name=f"{month_number_to_name(interaction.created_at.month)}", value="", inline=False)
+        embed.add_field(name=f"{month_number_to_name(result.date.month)}", value="", inline=False)
         embed.add_field(name="", value=month_team_ranking, inline=True)
         embed.add_field(name="", value=month_ranking, inline=True)
 
@@ -145,4 +154,4 @@ class LeaderboardView(ui.View):
         embed.set_footer(text="Last Updated")
         embed.timestamp = datetime.datetime.now()
 
-        return embed, result
+        return embed
