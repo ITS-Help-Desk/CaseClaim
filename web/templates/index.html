@@ -4,56 +4,49 @@
         <title>Case Claim Bot</title>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
-        <link href="/static/style.css" rel="stylesheet">
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
     </head>
     <body>
-        <div class="grid">
-            <div class="control">
-                <form action="/start_bot"> 
-                    <button type="submit">Start Bot</button>
-                </form>
-                <form action="/stop_bot">
-                    <button type="submit">Stop Bot</button>
-                </form>
-                <form action="/stats">
-                    <button type="submit">Stats Page</button>
-                </form>
-            </div>
-            <div class="console">
-                <h4>Console</h4>
-                <div class="stdout">
-                    {{ bot_out }}
-                </div>
-                <div class="stderr">
-                    {{ bot_err }}
-                </div>
-            </div>
-            <div class="config">
-                <div class="token_status">
-                    <p>Token Status</p>
-                    {% if token %}
-                    <span id="token_box"></span> Token is detected
-                    {% else %}
-                    <span id="token_box" style=></span> Token is not detected
-                    <form action="/token" method="post" class="token_input">
-                        <div class="token_input">
-                            <label for="token">Enter your discord bot token:</label>
-                            <input type="text" name="token" id="token" required />
-                        </div>
-                        <div class="token_input">
-                            <input type="submit" />
-                        </div>
+        <div class="container text-center">
+            <div class="row">
+                <div class="control" class="col">
+                    <form action="/start_bot"> 
+                        <button type="submit">Start Bot</button>
                     </form>
-                    {% endif %}
+                    <form action="/stop_bot">
+                        <button type="submit">Stop Bot</button>
+                    </form>
+                    <form action="/stats">
+                        <button type="submit">Stats Page</button>
+                    </form>
                 </div>
-                <div class="bot_running">
-                    <p>Bot Status</p>
-                    <p>Bot is {{ bot_running_status }}</p>
+                <div id="graphs" class="col">
+                    <img src="/leadstats.png" alt="">
+                    <img src="/casedist.png" alt="">
                 </div>
-            </div>
-            <div class="graphs">
-                <img src="/leadstats.png" alt="">
-                <img src="/casedist.png" alt="">
+                <div id="config" class="col">
+                    <div id="token_status">
+                        <p>Token Status</p>
+                        {% if token %}
+                        <span id="token_box"></span> Token is detected
+                        {% else %}
+                        <span id="token_box" style=></span> Token is not detected
+                        <form action="/token" method="post" id="token_input">
+                            <div id="token_input">
+                                <label for="token">Enter your discord bot token:</label>
+                                <input type="text" name="token" id="token" required />
+                            </div>
+                            <div id="token_input">
+                                <input type="submit" />
+                            </div>
+                        </form>
+                        {% endif %}
+                    </div>
+                    <div class="bot_running">
+                        <p>Bot Status</p>
+                        <p>Bot is {{ bot_running_status }}</p>
+                    </div>
+                </div>
             </div>
         </div>
     </body>
