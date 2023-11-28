@@ -56,3 +56,4 @@ For information about how to run the bot, troubleshooting, and development guide
 - mysql-connector-python [8.1.0](https://pypi.org/project/mysql-connector-python/)
 - aiohttp [3.8.3](https://pypi.org/project/aiohttp/)
 - pytz [2023.3](https://pypi.org/project/pytz/)
+- Flask [3.0.0](https://pypi.org/project/Flask/)
