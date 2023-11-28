@@ -51,10 +51,10 @@ class EditOutageForm(ui.Modal, title='Outage Update Form'):
 
         # Collect form information
         new_service = str(self.service)
-        new_parent_case = str(self.parent_case)
+        new_parent_case = str(self.parent_case) if len(str(self.parent_case)) != 0 else None
         new_description = str(self.description)
-        new_troubleshoot_steps = str(self.troubleshoot_steps)
-        new_resolution_time = str(self.resolution_time)
+        new_troubleshoot_steps = str(self.troubleshoot_steps) if len(str(self.troubleshoot_steps)) != 0 else None
+        new_resolution_time = str(self.resolution_time) if len(str(self.resolution_time)) != 0 else None
 
         self.outage.remove_from_database(self.bot.connection)
 
@@ -91,6 +91,7 @@ class EditOutageForm(ui.Modal, title='Outage Update Form'):
         # Edit announcement message
         announcement_message: discord.Message = await interaction.channel.fetch_message(self.outage.message_id)
         await announcement_message.edit(embed=announcement_embed)
+
         # Create case embed
         case_embed = discord.Embed(title=f"{new_service} Outage", colour=discord.Color.red())
         case_embed.description = f"{announcement_message.jump_url}"
