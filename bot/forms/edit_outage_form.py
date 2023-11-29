@@ -50,21 +50,25 @@ class EditOutageForm(ui.Modal, title='Outage Update Form'):
         user = User.from_id(self.bot.connection, interaction.user.id)
 
         # Collect form information
-        new_service = str(self.service)
-        new_parent_case = str(self.parent_case) if len(str(self.parent_case)) != 0 else None
-        new_description = str(self.description)
-        new_troubleshoot_steps = str(self.troubleshoot_steps) if len(str(self.troubleshoot_steps)) != 0 else None
-        new_resolution_time = str(self.resolution_time) if len(str(self.resolution_time)) != 0 else None
+        self.new_service = str(self.service)
+        self.new_parent_case = str(self.parent_case) if len(str(self.parent_case)) != 0 else None
+        self.new_description = str(self.description)
+        self.new_troubleshoot_steps = str(self.troubleshoot_steps) if len(str(self.troubleshoot_steps)) != 0 else None
+        self.new_resolution_time = str(self.resolution_time) if len(str(self.resolution_time)) != 0 else None
+
+        if not self.validate_inputs():
+            await interaction.response.send_message(content="Error! Please verify inputs aren't too large", ephemeral=True, delete_after=60)
+            return
 
         self.outage.remove_from_database(self.bot.connection)
 
-        new_outage = Outage(self.outage.message_id, self.outage.case_message_id, new_service, new_parent_case, new_description, new_troubleshoot_steps, new_resolution_time, self.outage.user, True)
+        new_outage = Outage(self.outage.message_id, self.outage.case_message_id, self.new_service, self.new_parent_case, self.new_description, self.new_troubleshoot_steps, self.new_resolution_time, self.outage.user, True)
 
         new_outage.add_to_database(self.bot.connection)
 
         # Create announcement embed
         announcement_embed = discord.Embed(colour=discord.Color.red())
-        announcement_embed.set_author(name=f"{new_service} Outage", icon_url="https://www.route66sodas.com/wp-content/uploads/2019/01/Alert.gif")
+        announcement_embed.set_author(name=f"{self.new_service} Outage", icon_url="https://www.route66sodas.com/wp-content/uploads/2019/01/Alert.gif")
 
         try:
             announcement_embed.set_footer(text=user.full_name, icon_url=interaction.user.avatar.url)
@@ -75,30 +79,30 @@ class EditOutageForm(ui.Modal, title='Outage Update Form'):
         announcement_embed.timestamp = datetime.datetime.now()
 
         # Add parent case
-        if new_parent_case is not None and len(str(new_parent_case)) != 0:
-            announcement_embed.description = f"Parent Case: **{new_parent_case}**"
+        if self.new_parent_case is not None and len(str(self.new_parent_case)) != 0:
+            announcement_embed.description = f"Parent Case: **{self.new_parent_case}**"
 
-        announcement_embed.add_field(name="Description", value=f"{new_description}", inline=False)
+        announcement_embed.add_field(name="Description", value=f"{self.new_description}", inline=False)
 
         # Add troubleshooting steps
-        if new_troubleshoot_steps is not None and len(str(new_troubleshoot_steps)) != 0:
-            announcement_embed.add_field(name="How to Troubleshoot", value=f"{new_troubleshoot_steps}", inline=False)
+        if self.new_troubleshoot_steps is not None and len(str(self.new_troubleshoot_steps)) != 0:
+            announcement_embed.add_field(name="How to Troubleshoot", value=f"{self.new_troubleshoot_steps}", inline=False)
 
         # Add resolution time
-        if new_resolution_time is not None and len(str(new_resolution_time)) != 0:
-            announcement_embed.add_field(name="ETA to Resolution", value=f"{new_resolution_time}", inline=False)
+        if self.new_resolution_time is not None and len(str(self.new_resolution_time)) != 0:
+            announcement_embed.add_field(name="ETA to Resolution", value=f"{self.new_resolution_time}", inline=False)
 
         # Edit announcement message
         announcement_message: discord.Message = await interaction.channel.fetch_message(self.outage.message_id)
         await announcement_message.edit(embed=announcement_embed)
 
         # Create case embed
-        case_embed = discord.Embed(title=f"{new_service} Outage", colour=discord.Color.red())
+        case_embed = discord.Embed(title=f"{self.new_service} Outage", colour=discord.Color.red())
         case_embed.description = f"{announcement_message.jump_url}"
         case_embed.set_footer()
 
-        if new_parent_case is not None and len(str(new_parent_case)) != 0:
-            case_embed.description += f"\nParent Case: **{new_parent_case}**"
+        if self.new_parent_case is not None and len(str(self.new_parent_case)) != 0:
+            case_embed.description += f"\nParent Case: **{self.new_parent_case}**"
 
         # Edit case message
         case_channel = await interaction.guild.fetch_channel(self.bot.cases_channel)
@@ -107,3 +111,15 @@ class EditOutageForm(ui.Modal, title='Outage Update Form'):
 
         # Send confirmation message
         await interaction.response.send_message(content="👍", ephemeral=True, delete_after=0)
+
+    def validate_inputs(self) -> bool:
+        if self.new_service is None or self.new_description is None:
+            return False
+
+        if self.new_parent_case is not None and len(str(self.new_parent_case)) > 255:
+            return False
+
+        if self.new_resolution_time is not None and len(str(self.new_resolution_time)) > 255:
+            return False
+
+        return True
