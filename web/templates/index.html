@@ -10,77 +10,28 @@
     <body>
         <!-- Navbar. [Title] [Controls] [Statistics] [Sign In/Out] -->
         <nav class="navbar navbar-dark sticky-top bg-dark flex-md-nowrap p-0">
-            <p class="navbar-brand col-sm-3 col-md-2 mr-0">ITS Help Desk</p>
+            <a class="navbar-brand col-sm-3 col-md-2 mr-0" href="#">ITS Help Desk</a>
             <ul class="navbar-nav px-3">
                 <li class="nav-item text-nowrap">
                     <a href="#" class="nav-link">Sign In/Out (Not Implemented)</a>
                 </li>
             </ul>
         </nav>
-        
-        <div class="container-fluid">
-            <div class="row">
-                <nav class="col-md-2 d-none d-md-block bg-light sidebar">
-                    <div class="sidebar-sticky">
-                        <ul class="nav flex-column">
-                            <li class="nav-item">
-                                <a href="#" class="nav-link active">
-                                    <span data-feather="server"></span>
-                                    Dashboard <span class="sr-only">(current)</span>
-                                </a>
-                            </li>
-                            <li class="nav-item">
-                                <a href="" class="nav-link">
-                                    <span data-feather="bar-chart"></span>
-                                    Statistics
-                                </a>
-                            </li>
-                        </ul>
-                    </div>
-                </nav>
-            </div>
-        </div>
 
-        <div class="container text-center">
-            <div class="row">
-                <div class="control" class="col">
-                    <form action="/start_bot"> 
-                        <button type="submit">Start Bot</button>
-                    </form>
-                    <form action="/stop_bot">
-                        <button type="submit">Stop Bot</button>
-                    </form>
-                    <form action="/stats">
-                        <button type="submit">Stats Page</button>
-                    </form>
-                </div>
-                <div id="graphs" class="col">
-                    <img src="/leadstats.png" alt="">
-                    <img src="/casedist.png" alt="">
-                </div>
-                <div id="config" class="col">
-                    <div id="token_status">
-                        <p>Token Status</p>
-                        {% if token %}
-                        <span id="token_box"></span> Token is detected
-                        {% else %}
-                        <span id="token_box" style=></span> Token is not detected
-                        <form action="/token" method="post" id="token_input">
-                            <div id="token_input">
-                                <label for="token">Enter your discord bot token:</label>
-                                <input type="text" name="token" id="token" required />
-                            </div>
-                            <div class="token_input">
-                                <input type="submit" />
-                            </div>
-                        </form>
-                        {% endif %}
+        <div class="container-fluid">
+            <div class="row align-items-start">
+                {{nav_col|safe}}
+                <main class="col-md-9 ml-sm-auto col-lg-10 pt-3 px-4" role="main">
+                    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom">
+                        <h1 class="h2">Dashboard</h1>
+                        {{bot_controls|safe}}
                     </div>
+                    <h2>Bot Running</h2>
                     <div class="bot_running">
                         <p>Bot Status</p>
                         <p>Bot is {{ bot_running_status }}</p>
                     </div>
-                </div>
+                </main>
             </div>
         </div>
         <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>

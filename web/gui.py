@@ -9,7 +9,7 @@ import web.controller as controller
 from bot.models.checked_claim import CheckedClaim
 import graphs.leadstats as leadstats_graphs
 import graphs.casedist as casedist_graphs
-
+import web.components as components
 import datetime
 
 token = None
@@ -17,6 +17,7 @@ connection = None
 claims = None
 app = Flask(__name__)
 bot_running_status = "not running"
+
 
 def load_token():
     global token
@@ -31,7 +32,7 @@ def load_db_connector(connector: mysql.connector.MySQLConnection):
 def default_page():
     global claims
     claims = CheckedClaim.search(connection)
-    return render_template("index.html", token=token, bot_running_status=bot_running_status)
+    return render_template("index.html", token=token, bot_running_status=bot_running_status, nav_col=components.nav_column(components.SidebarOptions.DASHBOARD), bot_controls=components.bot_controls(token == None))
 
 @app.route("/stats")
 def stats_page():
