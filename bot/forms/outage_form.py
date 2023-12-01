@@ -48,6 +48,10 @@ class OutageForm(ui.Modal, title='Outage Form'):
         troubleshooting_steps = str(self.troubleshooting_steps) if len(str(self.troubleshooting_steps)) != 0 else None
         resolution_time = str(self.resolution_time) if len(str(self.resolution_time)) != 0 else None
 
+        if not self.validate_inputs():
+            await interaction.response.send_message(content="Error! Please verify inputs aren't too large", ephemeral=True, delete_after=60)
+            return
+
         announcement_embed = discord.Embed(colour=discord.Color.red())
         announcement_embed.set_author(name=f"{service} Outage", icon_url="https://www.route66sodas.com/wp-content/uploads/2019/01/Alert.gif")
 
@@ -70,7 +74,7 @@ class OutageForm(ui.Modal, title='Outage Form'):
             announcement_embed.add_field(name="How to Troubleshoot", value=f"{troubleshooting_steps}", inline=False)
 
         # Add resolution time
-        if troubleshooting_steps is not None and len(str(resolution_time)) != 0:
+        if resolution_time is not None and len(str(resolution_time)) != 0:
             announcement_embed.add_field(name="ETA to Resolution", value=f"{resolution_time}", inline=False)
 
         # Send announcement message
@@ -94,3 +98,15 @@ class OutageForm(ui.Modal, title='Outage Form'):
         await interaction.response.send_message(content="👍", ephemeral=True, delete_after=0)
 
         await announcement_message.edit(content="")
+
+    def validate_inputs(self) -> bool:
+        if self.service is None or self.description is None:
+            return False
+
+        if self.parent_case is not None and len(str(self.parent_case)) > 255:
+            return False
+
+        if self.resolution_time is not None and len(str(self.resolution_time)) > 255:
+            return False
+
+        return True
