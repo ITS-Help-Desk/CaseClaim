@@ -9,23 +9,23 @@
     </head>
     <body>
         <!-- Navbar. [Title] [Controls] [Statistics] [Sign In/Out] -->
-        <nav class="navbar navbar-dark sticky-top bg-dark flex-md-nowrap p-0">
-            <a class="navbar-brand col-sm-3 col-md-2 mr-0" href="#">ITS Help Desk</a>
+        <header class="navbar navbar-dark sticky-top bg-dark flex-md-nowrap p-0 shadow" data-bs-theme="dark">
+            <a class="navbar-brand col-lg-2 col-md-3 me-0 px-3 fs-6 text-white" href="#">ITS Help Desk</a>
             <ul class="navbar-nav px-3">
                 <li class="nav-item text-nowrap">
                     <a href="#" class="nav-link">Sign In/Out (Not Implemented)</a>
                 </li>
             </ul>
-        </nav>
+        </header>
 
         <div class="container-fluid">
-            <div class="row align-items-start">
+            <div class="row">
                 {{nav_col|safe}}
-                <main class="col-md-9 ml-sm-auto col-lg-10 pt-3 px-4" role="main">
-                    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom">
+                <main class="col-md-9 ml-sm-auto col-lg-10 px-md-4">
+                    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
                         <h1 class="h2">Dashboard</h1>
-                        {{bot_controls|safe}}
                     </div>
+                    {{bot_controls|safe}}
                     <h2>Bot Running</h2>
                     <div class="bot_running">
                         <p>Bot Status</p>
