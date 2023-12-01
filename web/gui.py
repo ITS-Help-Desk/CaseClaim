@@ -16,7 +16,7 @@ token = None
 connection = None
 claims = None
 app = Flask(__name__)
-bot_running_status = "not running"
+bot_running_status = "not running" # Migrate to boolean in controller.py at some point so the rendering in nav_col is easier
 
 
 def load_token():
@@ -32,7 +32,11 @@ def load_db_connector(connector: mysql.connector.MySQLConnection):
 def default_page():
     global claims
     claims = CheckedClaim.search(connection)
-    return render_template("index.html", token=token, bot_running_status=bot_running_status, nav_col=components.nav_column(components.SidebarOptions.DASHBOARD), bot_controls=components.bot_controls(token == None))
+    return render_template("index.html", 
+                           token=token, 
+                           bot_running_status=bot_running_status,
+                           nav_col=components.nav_column(components.SidebarOptions.DASHBOARD, bot_running_status != "not running", token != None), 
+                           bot_controls=components.bot_controls(token == None))
 
 @app.route("/stats")
 def stats_page():
