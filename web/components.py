@@ -11,8 +11,15 @@ class SidebarOptions(Enum):
     DASHBOARD  = 1
     STATISTICS = 2
 
+class StatsType(Enum):
+    """
+    Enum to represent what the type of stats object is being requested
+    """
+    IMAGE = 1
+    TEXT = 2 # Not implemented yet
+
 def nav_column(active: SidebarOptions, bot_running: bool, token: bool) -> str:
-    DASHBOARD_REL_PATH = "/index.html"
+    DASHBOARD_REL_PATH = "/"
     STATISTICS_REL_PATH = "/stats"
     CSS_WIKI_LINK = "#" # Idk if this is a public link or not so redacted for now
     GITHUB_LINK = "https://github.com/ajockelle/CaseClaim"
@@ -83,8 +90,9 @@ def nav_column(active: SidebarOptions, bot_running: bool, token: bool) -> str:
     return nav_column
 
 def card(description: str, title: str, additional_elements:str = "") -> str:
+    # h-100 because I want the cards to be equal heights
     return f"""
-    <div class="card">
+    <div class="card h-100">
         <div class="card-body">
             <h5 class="card-title">{title}</h5>
             <p class="card-text">{description}</p>
@@ -92,6 +100,7 @@ def card(description: str, title: str, additional_elements:str = "") -> str:
         </div>
     </div>
     """
+
 def button(style: str, text: str, alt_tag:str | None = None, additional_meta: str = "") -> str:
     if alt_tag == None:
         return f"""<button class="btn {style}" {additional_meta}>{text}</button>"""
@@ -99,6 +108,27 @@ def button(style: str, text: str, alt_tag:str | None = None, additional_meta: st
         return f"""<input class="btn {style}" {additional_meta}>"""
     else:
         return f"""<{alt_tag} class="btn {style}" {additional_meta}>{text}</{alt_tag}>"""
+
+def stats_box(stype: StatsType, path="/leadstats.png", data="") -> str:
+    if stype == StatsType.IMAGE:
+        return f'<img class="img-fluid" alt="{data}" src="{path}">'
+    elif stype == StatsType.TEXT:
+        return "Not Implmented Yet"
+    else:
+        return f'<img class="img-fluid" alt="{data}" src="/leadstats.png">'
+
+def col_wrap(internal_components: str) -> str:
+    return f'<div class="col">{internal_components}</div>'
+
+def stats_controls() -> str:
+    ctrls = '<div class="row row-cols-4 row-cols-md-4 justify-content-start no-gutters">'
+    ctrls += col_wrap(card("Generate lead statistics", "Lead Statistic",
+                           button("btn-primary", "Graph", alt_tag="a", additional_meta='href="/stats/leadstats"')))
+    ctrls += col_wrap(card("Generate case distribtuion for today.", "Case Distribution",
+                           button("btn-primary", "Graph", alt_tag="a", additional_meta='href="/stats/casedist"')))
+    ctrls += '</div>'
+    return ctrls
+    
 
 def bot_controls(need_token: bool) -> str:
     ctrls = '<div class="row row-cols-2 row-cols-md-2 justify-content-start no-gutters">'
@@ -112,18 +142,18 @@ def bot_controls(need_token: bool) -> str:
         """
         token_form += button("btn-primary", "Save", additional_meta='type="submit"') + "</div>"
         token_form += "</form>"
-        ctrls += '<div class="col">' + card("We do not have a bot token saved. Please enter it here and save it.",
+        ctrls += col_wrap(card("We do not have a bot token saved. Please enter it here and save it.",
                       "Save Token",
                       token_form
-                      ) + '</div>'
+                      ))
     else:
-        ctrls += '<div class="col">' + card("Starts the bot.",
+        ctrls += col_wrap(card("Starts the bot.",
                       "Start Bot", 
-                      button("btn-primary", "Start", alt_tag="a", additional_meta='href="/start_bot"')) + "</div>"
-        ctrls += '<div class="col">' + card("Stops the bot.",
+                      button("btn-primary", "Start", alt_tag="a", additional_meta='href="/start_bot"')))
+        ctrls += col_wrap(card("Stops the bot.",
                       "Stop Bot",
                       button("btn-danger", "Stop", alt_tag="a", additional_meta='href="/stop_bot"')
-                      ) + "</div>"
+                      ))
     ctrls += "</div>"
     return ctrls
 

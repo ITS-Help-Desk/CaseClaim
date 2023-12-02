@@ -28,21 +28,39 @@ def load_db_connector(connector: mysql.connector.MySQLConnection):
     global connection
     connection = connector
 
-@app.route("/", methods=['GET'])
+@app.route("/")
 def default_page():
     global claims
     claims = CheckedClaim.search(connection)
     return render_template("index.html", 
-                           token=token, 
-                           bot_running_status=bot_running_status,
-                           nav_col=components.nav_column(components.SidebarOptions.DASHBOARD, bot_running_status != "not running", token != None), 
+                           nav_col=components.nav_column(components.SidebarOptions.DASHBOARD, 
+                                                         bot_running_status != "not running", 
+                                                         token != None), 
                            bot_controls=components.bot_controls(token == None))
 
+@app.route("/stats/<graph>")
 @app.route("/stats")
-def stats_page():
+def stats_page(graph="leadstats"):
     global claims
     claims = CheckedClaim.search(connection)
-    return render_template("stats.html")
+    resource_path = ""
+    match graph:
+        case "leadstats":
+            resource_path = "/leadstats.png"
+        case "casedist":
+            resource_path = "/casedist.png"
+        case other:
+            resource_path = "/leadstats.png"
+    return render_template("stats.html",
+                           nav_col=components.nav_column(components.SidebarOptions.STATISTICS,
+                                                         bot_running_status != "not running",
+                                                         token != None),
+                           stats_box=components.stats_box(components.StatsType.IMAGE,
+                                                          path=resource_path,
+                                                          data="Lead statistics"
+                                                          ),
+                           graph_controls=components.stats_controls()
+                           )
 
 
 @app.route("/login")
@@ -56,7 +74,7 @@ def generate_leadstats_plot():
 
 @app.route("/casedist.png")
 def generate_casedist():
-    cd_png_data = casedist_graphs.generate_casedist_plot(claims, datetime.datetime.now().month, datetime.datetime.now().day-1)
+    cd_png_data = casedist_graphs.generate_casedist_plot(claims, datetime.datetime.now().month, datetime.datetime.now().day)
     return Response(cd_png_data.getvalue(), mimetype="image/png")
 
 

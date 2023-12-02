@@ -4,22 +4,43 @@
         <title>Case Claim Bot</title>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
-        <link href="static/style.css" rel="stylesheet">
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+        <link href="/static/dashboard.css" rel="stylesheet"> 
     </head>
     <body>
-        <div class="buttons">
-            <ul>
-                <li>Leaderboard</li>
-                <li>Lead Stats</li>
-                <img src="" alt="">
-                <li>Case Info</li>
-                <!-- Case num -->
-                <li>Case Dist</li>
-                <!-- Month, day -->
-                <li>Report</li>
-                <!-- User, month, status -->
+        <!-- Navbar. [Title] [Controls] [Statistics] [Sign In/Out] -->
+        <header class="navbar navbar-dark sticky-top bg-dark flex-md-nowrap p-0 shadow" data-bs-theme="dark">
+            <a class="navbar-brand col-lg-2 col-md-3 me-0 px-3 fs-6 text-white" href="#">ITS Help Desk</a>
+            <ul class="navbar-nav px-3">
+                <li class="nav-item text-nowrap">
+                    <a href="#" class="nav-link">Sign In/Out (Not Implemented)</a>
+                </li>
             </ul>
+        </header>
+
+        <div class="container-fluid">
+            <div class="row">
+                {{nav_col|safe}}
+                <main class="col-md-9 ml-sm-auto col-lg-10 px-md-4">
+                    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                        <h1 class="h2">Statistics</h1>
+                    </div>
+                    {{stats_box|safe}}
+                    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                        <h2>Options</h2>
+                    </div>
+                    {{graph_controls|safe}}
+                    <!-- Hack to make spacing nacer -->
+                    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                        <h2></h2>
+                    </div>
+                </main>
+            </div>
         </div>
-    
+        <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
+        <script>
+            feather.replace()
+        </script>
     </body>
 </html>
+
