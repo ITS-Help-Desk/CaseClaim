@@ -77,6 +77,7 @@ def main():
         print(f"Error: '{err}'")
 
     # Create bot and run
+    connection.autocommit = True
     bot = Bot(config_data, connection)
 
     logging.basicConfig(filename='discord.log', filemode='w', level=logging.INFO, format='%(asctime)s:%(levelname)s:%(message)s')

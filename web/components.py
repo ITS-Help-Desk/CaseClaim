@@ -2,6 +2,8 @@ from enum import Enum
 
 """
 NOTE: HEAVILY USES BOOTSTRAP -- Use bootstrap componenets to render pieces of the gui for our bot.
+
+@TODO: Make it classy so that the indentation is nice on client side :skull:
 """
 
 class SidebarOptions(Enum):
@@ -166,7 +168,7 @@ def stats_box(stype: StatsType, path="/leadstats.png", data="") -> str:
     elif stype == StatsType.TEXT:
         return "Not Implmented Yet"
     else:
-        return f'<img class="img-fluid" alt="{data}" src="/leadstats.png">'
+        return f'<img class="img-fluid" alt="{data}" src="/leadstats/month">'
 
 def col_wrap(internal_components: str) -> str:
     """
@@ -185,7 +187,7 @@ def stats_controls() -> str:
     """
     ctrls = '<div class="row row-cols-4 row-cols-md-4 justify-content-start no-gutters">'
 
-    leadstat_buttons = '<div class="row row-cols-2 justify-content-start no-gutters">'
+    leadstat_buttons = '<div class="row row-cols-2 row-cols-sm-1 row-cols-md-2 row-cols-lg-2 justify-content-start no-gutters">'
     leadstat_buttons += col_wrap(button("btn-primary", "Month", alt_tag="a", additional_meta='href="/stats/leadstats/month"'))
     leadstat_buttons += col_wrap(button("btn-primary", "Semester", alt_tag="a", additional_meta='href="/stats/leadstats/semester"'))
     leadstat_buttons += "</div>"
@@ -208,7 +210,7 @@ def bot_controls(need_token: bool) -> str:
     Return:
         A card grid html component for bot controls.
     """
-    ctrls = '<div class="row row-cols-2 row-cols-md-2 justify-content-start no-gutters">'
+    ctrls = '<div class="row row-cols-2 row-cols-md-1 justify-content-start no-gutters">'
     if need_token:
         token_form = """
         <form action="/token" method="post">

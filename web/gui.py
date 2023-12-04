@@ -14,7 +14,6 @@ import datetime
 
 token = None
 connection = None
-claims = None
 app = Flask(__name__)
 bot_running_status = "not running" # Migrate to boolean in controller.py at some point so the rendering in nav_col is easier
 
@@ -39,8 +38,6 @@ def default_page():
     """
     Render index.html based on the current bot state.
     """
-    global claims
-    claims = CheckedClaim.search(connection)
     return render_template("index.html", 
                            nav_col=components.nav_column(components.SidebarOptions.DASHBOARD, 
                                                          bot_running_status != "not running", 
@@ -61,16 +58,14 @@ def stats_page(graph="leadstats", time="month"):
         graph   The graph requested
         time    The time frame to generate the graph on
     """
-    global claims
-    claims = CheckedClaim.search(connection)
     resource_path = ""
     match graph:
         case "leadstats":
-            resource_path = f"/leadstats.png/{time}"
+            resource_path = f"/leadstats/{time}"
         case "casedist":
-            resource_path = "/casedist.png"
+            resource_path = "/casedist"
         case other:
-            resource_path = "/leadstats.png"
+            resource_path = "/leadstats/month"
     return render_template("stats.html",
                            nav_col=components.nav_column(components.SidebarOptions.STATISTICS,
                                                          bot_running_status != "not running",
@@ -92,7 +87,7 @@ def process_login():
     """
     return "gaming"
 
-@app.route("/leadstats.png/<time>")
+@app.route("/leadstats/<time>")
 def generate_leadstats_plot(time):
     """
     Generate the leadstats graph based on the requested time
@@ -100,16 +95,18 @@ def generate_leadstats_plot(time):
     Args:
         time    A string representing a month or a semester.
     """
+    claims = CheckedClaim.search(connection)
     png_data = leadstats_graphs.generate_leadstats_graph(claims,connection, time != "semester", datetime.datetime.now().isoformat())
     return Response(png_data.getvalue(), mimetype="image/png")
 
-@app.route("/casedist.png")
+@app.route("/casedist")
 def generate_casedist():
     """
     Generate a case distribution graph covering the prior 24 hours.
 
     @TODO: Implement form to allow arbitrary timeframes
     """
+    claims = CheckedClaim.search(connection)
     cd_png_data = casedist_graphs.generate_casedist_plot(claims, datetime.datetime.now().month, datetime.datetime.now().day)
     return Response(cd_png_data.getvalue(), mimetype="image/png")
 

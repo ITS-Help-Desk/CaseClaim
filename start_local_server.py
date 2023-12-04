@@ -40,6 +40,7 @@ def main():
         print(f"Error: '{err}'")
         quit(1)
     
+    connection.autocommit = True
     gui.load_db_connector(connection)
     gui.load_token()
     gui.app.run()
