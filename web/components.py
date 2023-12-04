@@ -1,7 +1,7 @@
 from enum import Enum
 
 """
-Use bootstrap componenets to render pieces of the gui for our bot.
+NOTE: HEAVILY USES BOOTSTRAP -- Use bootstrap componenets to render pieces of the gui for our bot.
 """
 
 class SidebarOptions(Enum):
@@ -19,6 +19,18 @@ class StatsType(Enum):
     TEXT = 2 # Not implemented yet
 
 def nav_column(active: SidebarOptions, bot_running: bool, token: bool) -> str:
+    """
+    Generate a reusable sidebar for html templating.
+
+    Args:
+        active          The active page
+        bot_running     True if the bot is running false otherwise
+        token           True of the token is saved false otherwise
+
+    Returns:
+        A sidebar html component as a string
+    """
+
     DASHBOARD_REL_PATH = "/"
     STATISTICS_REL_PATH = "/stats"
     CSS_WIKI_LINK = "#" # Idk if this is a public link or not so redacted for now
@@ -87,11 +99,23 @@ def nav_column(active: SidebarOptions, bot_running: bool, token: bool) -> str:
         </div>
     </div>
     """
+
     return nav_column
 
-def card(description: str, title: str, additional_elements:str = "") -> str:
+def card(description: str, title: str, additional_elements: list[str] | str = "") -> str:
+    """
+    Generate a card component as a string.
+
+    Args:
+        description             The card description
+        title                   The card title
+        additional_elements     Any additional html elements to insert into the card-body
+
+    Returns:
+        card html component as a string`
+    """
     # h-100 because I want the cards to be equal heights
-    return f"""
+    card_str = f"""
     <div class="card h-100">
         <div class="card-body">
             <h5 class="card-title">{title}</h5>
@@ -100,8 +124,21 @@ def card(description: str, title: str, additional_elements:str = "") -> str:
         </div>
     </div>
     """
+    return card_str
 
 def button(style: str, text: str, alt_tag:str | None = None, additional_meta: str = "") -> str:
+    """
+    Return an html component stylized as a button.
+
+    Args:
+        style                   The button class (and any other class names)
+        text                    The text for the button
+        alt_tag                 The specific html tag to use (Do not include angle braces)
+        additional_meta         Any additional meta tags for the button 
+
+    Return:
+        Button stylized component as a string
+    """
     if alt_tag == None:
         return f"""<button class="btn {style}" {additional_meta}>{text}</button>"""
     elif alt_tag == "input":
@@ -110,6 +147,20 @@ def button(style: str, text: str, alt_tag:str | None = None, additional_meta: st
         return f"""<{alt_tag} class="btn {style}" {additional_meta}>{text}</{alt_tag}>"""
 
 def stats_box(stype: StatsType, path="/leadstats.png", data="") -> str:
+    """
+    Generate the requested statistic for display. If the stype is IMAGE, path is the path to the image and data
+    is the alt text. If stype is TEXT, path is unused and data is the html component to use.
+
+    @TODO: Implement text stats such as leaderboards, logs, etc
+
+    Args:
+        stype   The type of statistic: StatsType.IMAGE or StatsType.TEXT
+        path    The path to the image
+        data    The text component to add or alt text for an image.
+
+    Return:
+        An html component for the requested statistic as a str
+    """
     if stype == StatsType.IMAGE:
         return f'<img class="img-fluid" alt="{data}" src="{path}">'
     elif stype == StatsType.TEXT:
@@ -118,12 +169,27 @@ def stats_box(stype: StatsType, path="/leadstats.png", data="") -> str:
         return f'<img class="img-fluid" alt="{data}" src="/leadstats.png">'
 
 def col_wrap(internal_components: str) -> str:
+    """
+    Self explanatory
+    """
     return f'<div class="col">{internal_components}</div>'
 
 def stats_controls() -> str:
+    """
+    Generate a grid of cards that control which statistic is generated.
+
+    @TODO: Allow parameter selection
+
+    Return:
+        A card grid html component for stats buttons
+    """
     ctrls = '<div class="row row-cols-4 row-cols-md-4 justify-content-start no-gutters">'
-    ctrls += col_wrap(card("Generate lead statistics", "Lead Statistic",
-                           button("btn-primary", "Graph", alt_tag="a", additional_meta='href="/stats/leadstats"')))
+
+    leadstat_buttons = '<div class="row row-cols-2 justify-content-start no-gutters">'
+    leadstat_buttons += col_wrap(button("btn-primary", "Month", alt_tag="a", additional_meta='href="/stats/leadstats/month"'))
+    leadstat_buttons += col_wrap(button("btn-primary", "Semester", alt_tag="a", additional_meta='href="/stats/leadstats/semester"'))
+    leadstat_buttons += "</div>"
+    ctrls += col_wrap(card("Generate lead statistics", "Lead Statistics", leadstat_buttons)) 
     ctrls += col_wrap(card("Generate case distribtuion for today.", "Case Distribution",
                            button("btn-primary", "Graph", alt_tag="a", additional_meta='href="/stats/casedist"')))
     ctrls += '</div>'
@@ -131,6 +197,17 @@ def stats_controls() -> str:
     
 
 def bot_controls(need_token: bool) -> str:
+    """
+    Generate cards to control the bot.
+
+    @TODO: Implement IPC with bot to do bot commands
+
+    Args:
+        need_token  True if the token is not saved, false otherwise
+
+    Return:
+        A card grid html component for bot controls.
+    """
     ctrls = '<div class="row row-cols-2 row-cols-md-2 justify-content-start no-gutters">'
     if need_token:
         token_form = """

@@ -20,16 +20,25 @@ bot_running_status = "not running" # Migrate to boolean in controller.py at some
 
 
 def load_token():
+    """
+    Read the bot token from the environment. This method is used by the server startup script.
+    """
     global token
     token = os.environ.get("DISCORD_TOKEN")
     print(f"[FROM GUI]: Token = {token}")
 
 def load_db_connector(connector: mysql.connector.MySQLConnection):
+    """
+    Save a DB connector to the case claim DB.
+    """
     global connection
     connection = connector
 
 @app.route("/")
 def default_page():
+    """
+    Render index.html based on the current bot state.
+    """
     global claims
     claims = CheckedClaim.search(connection)
     return render_template("index.html", 
@@ -38,15 +47,26 @@ def default_page():
                                                          token != None), 
                            bot_controls=components.bot_controls(token == None))
 
+@app.route("/stats/<graph>/<time>")
 @app.route("/stats/<graph>")
 @app.route("/stats")
-def stats_page(graph="leadstats"):
+def stats_page(graph="leadstats", time="month"):
+    """
+    Render the statistics page based on requested stat and current bot state.
+
+    @NOTE: Using claims as a global because performing too many queries with the same connector
+           errors the db connection out.
+
+    Args:
+        graph   The graph requested
+        time    The time frame to generate the graph on
+    """
     global claims
     claims = CheckedClaim.search(connection)
     resource_path = ""
     match graph:
         case "leadstats":
-            resource_path = "/leadstats.png"
+            resource_path = f"/leadstats.png/{time}"
         case "casedist":
             resource_path = "/casedist.png"
         case other:
@@ -65,21 +85,40 @@ def stats_page(graph="leadstats"):
 
 @app.route("/login")
 def process_login():
+    """
+    Not Implemented
+
+    @TODO: Implement login check to block controls for non-authed users
+    """
     return "gaming"
 
-@app.route("/leadstats.png")
-def generate_leadstats_plot():
-    png_data = leadstats_graphs.generate_leadstats_graph(claims, connection, datetime.datetime.now().isoformat())
+@app.route("/leadstats.png/<time>")
+def generate_leadstats_plot(time):
+    """
+    Generate the leadstats graph based on the requested time
+
+    Args:
+        time    A string representing a month or a semester.
+    """
+    png_data = leadstats_graphs.generate_leadstats_graph(claims,connection, time != "semester", datetime.datetime.now().isoformat())
     return Response(png_data.getvalue(), mimetype="image/png")
 
 @app.route("/casedist.png")
 def generate_casedist():
+    """
+    Generate a case distribution graph covering the prior 24 hours.
+
+    @TODO: Implement form to allow arbitrary timeframes
+    """
     cd_png_data = casedist_graphs.generate_casedist_plot(claims, datetime.datetime.now().month, datetime.datetime.now().day)
     return Response(cd_png_data.getvalue(), mimetype="image/png")
 
 
 @app.post("/token")
 def save_token():
+    """
+    Save a token entered by the user on the website.
+    """
     global token
     if token != None:
         abort(403)
@@ -95,6 +134,9 @@ def save_token():
 
 @app.route("/stop_bot")
 def stop_bot():
+    """
+    Use controller to stop bot.
+    """
     print("received stop bot")
     global bot_running_status
     bot_running_status = controller.stop_bot()
@@ -103,6 +145,9 @@ def stop_bot():
 
 @app.route("/start_bot")
 def start_bot():
+    """
+    Use controller to start the bot
+    """
     print("received start bot")
     global bot_running_status
     bot_running_status = controller.start_bot()

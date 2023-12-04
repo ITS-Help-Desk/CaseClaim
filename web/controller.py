@@ -14,6 +14,9 @@ it will mess up the bot because each one will try to use the same token.
 _bot_process: subprocess.Popen | None = None
 
 def start_bot():
+    """
+    Use subprocess to start the bot and save it as a static private global var.
+    """
     global _bot_process
     # Start the bot and capture all input and output
     if _bot_process != None:
@@ -22,6 +25,9 @@ def start_bot():
     return "running"
 
 def stop_bot():
+    """
+    Send the bot an interrupt signal to kill it if it is running.
+    """
     global _bot_process
     if _bot_process != None:
         # Terminate the bot process
@@ -30,6 +36,9 @@ def stop_bot():
     return "not running"
 
 def poll_bot():
+    """
+    Print information about bot exit or death.
+    """
     global _bot_process
     if _bot_process != None:
         if _bot_process.poll():
@@ -38,6 +47,12 @@ def poll_bot():
     return "not running"
 
 def get_buffered_outputs():
+    """
+    Grab the bots STDIN and STDERR and return it.
+
+    @NOTE: Bugged I am not sure why but the communicate function does not work as expected.
+    @TODO: Fix this bug and have it grab output in a reasonable amount of time (<1s) maybe asynchronously
+    """
     global _bot_process
     if _bot_process != None:
         try:
