@@ -5,10 +5,8 @@ import signal
 """
 NOTE: 
 
-Only have one tab open for this at any time. Currently this controller is not multiprocessing safe.
-If multiple people have tabs open in a server that uses multiple threads to serve as client workers
-it will mess up the bot because each one will try to use the same token.
-
+Due to the way the bot currently works, there cannot be multiple bot instances for one token. Consequently,
+do not use a server with multiple workers which could create multiple instances.
 """
 
 _bot_process: subprocess.Popen | None = None
