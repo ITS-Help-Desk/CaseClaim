@@ -148,6 +148,18 @@ class CheckedClaim(DatabaseItem):
             cursor.execute(sql, (ping_thread_id, self.checker_message_id,))
             connection.commit()
 
+    def update_lead(self, connection: MySQLConnection, lead_id: int) -> None:
+        """Updates the database to include a provided lead user ID.
+
+        Args:
+            connection (MySQLConnection): The connection to the MySQL database
+            lead_is (int): The ID of the lead
+        """
+        with connection.cursor() as cursor:
+            sql = "UPDATE CheckedClaims SET `lead_id`=%s WHERE checker_message_id=%s"
+            cursor.execute(sql, (lead_id, self.checker_message_id,))
+            connection.commit()
+
     def change_status(self, connection: MySQLConnection, new_status: Status):
         """Changes the status of a CheckedClaim in the database
         
