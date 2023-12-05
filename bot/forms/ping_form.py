@@ -50,12 +50,15 @@ class PingForm(ui.Modal, title='Feedback Form'):
         # Send message
         await interaction.response.send_message(content="Pinged", ephemeral=True, delete_after=0)  # Acknowledge interaction, immediately delete message
 
-
         try:
             # Delete checker message
             await interaction.message.delete()
         except:
             pass
+
+        # Update the lead if /ping is used (and a different lead is using it)
+        if type(self.case) == CheckedClaim and self.case.lead.discord_id != interaction.user.id:
+            self.case.update_lead(self.bot.connection, interaction.user.id)
 
         if is_working_time(interaction.created_at, self.bot.holidays):
             # During working time, send ping as normal
