@@ -128,6 +128,9 @@ class LeadstatsResults:
         self.month_kudos_counts = {}
         self.semester_kudos_counts = {}
 
+        self.total_month = {}
+        self.total_semester = {}
+
         interaction_semester = get_semester(date)
 
         for claim in claims:
@@ -141,8 +144,12 @@ class LeadstatsResults:
             self.month_kudos_counts.setdefault(claim.lead.discord_id, 0)
             self.semester_kudos_counts.setdefault(claim.lead.discord_id, 0)
 
+            self.total_month.setdefault(claim.lead.discord_id, 0)
+            self.total_semester.setdefault(claim.lead.discord_id, 0)
+
             # Organize data for month
             if claim.claim_time.year == date.year and claim.claim_time.month == date.month:
+                self.total_month[claim.lead.discord_id] += 1
                 if claim.status == Status.CHECKED or claim.status == Status.DONE:
                     # Add checked/done
                     self.month_counts[claim.lead.discord_id] += 1
@@ -157,20 +164,21 @@ class LeadstatsResults:
 
             # Organize data for semester
             if get_semester(claim.claim_time) == interaction_semester:
+                self.total_semester[claim.lead.discord_id] += 1
                 if claim.status == Status.CHECKED or claim.status == Status.DONE:
                     # Add checked/done
                     self.semester_counts[claim.lead.discord_id] += 1
 
-                if claim.status == Status.PINGED or claim.status == Status.RESOLVED:
+                elif claim.status == Status.PINGED or claim.status == Status.RESOLVED:
                     # Add pinged/resolved
                     self.semester_ping_counts[claim.lead.discord_id] += 1
 
-                if claim.status == Status.KUDOS:
+                elif claim.status == Status.KUDOS:
                     # Add kudos
                     self.semester_kudos_counts[claim.lead.discord_id] += 1
 
-        self.semester_counts_sorted_keys = sorted(self.semester_counts, key=self.semester_counts.get, reverse=True)
-        self.month_counts_sorted_keys = sorted(self.month_counts, key=self.month_counts.get, reverse=True)
+        self.semester_counts_sorted_keys = sorted(self.total_semester, key=self.total_semester.get, reverse=True)
+        self.month_counts_sorted_keys = sorted(self.total_month, key=self.total_month.get, reverse=True)
 
     def convert_to_plot(self, bot: 'Bot', month: bool, title: str) -> io.BytesIO:
         """Converts data into a plot that can be sent in a Discord message. It uses three
