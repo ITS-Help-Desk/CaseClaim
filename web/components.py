@@ -35,7 +35,6 @@ def nav_column(active: SidebarOptions, bot_running: bool, token: bool) -> str:
 
     DASHBOARD_REL_PATH = "/"
     STATISTICS_REL_PATH = "/stats"
-    CSS_WIKI_LINK = "#" # Idk if this is a public link or not so redacted for now
     GITHUB_LINK = "https://github.com/ajockelle/CaseClaim"
     dashboard=f"""
     <li class="nav-item">
@@ -57,14 +56,6 @@ def nav_column(active: SidebarOptions, bot_running: bool, token: bool) -> str:
         <a href="{GITHUB_LINK}" class="nav-link d-flex align-items-center gap-2" target="_blank">
             <span data-feather="github"></span>
             Github
-        </a>
-    </li>
-    """
-    css_wiki = f"""
-    <li class="nav-item">
-        <a href="{CSS_WIKI_LINK}" class="nav-link d-flex align-items-center gap-2" target="_blank">
-            <span data-feather="help-circle"></span>
-            CSS Wiki
         </a>
     </li>
     """
@@ -94,7 +85,6 @@ def nav_column(active: SidebarOptions, bot_running: bool, token: bool) -> str:
     nav_column += dashboard
     nav_column += statistics
     nav_column += github
-    nav_column += css_wiki
     nav_column += "</ul>"
     nav_column += status_panel
     nav_column += """
