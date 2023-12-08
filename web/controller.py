@@ -1,5 +1,6 @@
 import subprocess
 import os
+import platform
 import signal
 
 """
@@ -29,7 +30,10 @@ def stop_bot():
     global _bot_process
     if _bot_process != None:
         # Terminate the bot process
-        _bot_process.send_signal(signal.SIGINT)
+        if platform.system() == "Windows":
+            _bot_process.send_signal(signal.CTRL_C_EVENT)
+        else:
+            _bot_process.send_signal(signal.SIGINT)
         _bot_process = None
     return "not running"
 
