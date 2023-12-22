@@ -233,11 +233,14 @@ class LeadstatsResults:
         data_stream = io.BytesIO()
         users = []
 
+        labels_dict = {}
+
         # Each user has to be added as a list of 3 values (checks, pings, kudos)
         for i in range(len(y1)):
             user = []
             try:
                 user.append(y1[i])
+                labels_dict[y1[i]] = y1[i] + y2[i] + y3[i]
             except:
                 pass
             try:
@@ -256,8 +259,27 @@ class LeadstatsResults:
         #ax.legend(["Checks", "Pings", "Kudos"])
         plt.xticks(rotation=45, ha="right")
 
+        i = 0
+        for c in ax.containers:
+            # Optional: if the segment is small or 0, customize the labels
+
+            labels = []
+            for v in c:
+                if v.get_height() > 0 and v.get_height() in list(labels_dict.keys()):
+                    labels.append(labels_dict[v.get_height()])
+                else:
+                    labels.append("")
+
+                i += 1
+
+            # labels = [int(v.get_height()) if v.get_height() > 20 else '' for v in c]
+
+            # remove the labels parameter if it's not needed for customized labels
+            ax.bar_label(c, labels=labels, label_type='center')
+
         plt.savefig(data_stream, format='png', bbox_inches="tight", dpi=400)
         plt.close()
         data_stream.seek(0)
 
         return data_stream
+
