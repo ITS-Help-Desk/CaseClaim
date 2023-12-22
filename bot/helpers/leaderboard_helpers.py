@@ -233,6 +233,8 @@ class LeadstatsResults:
         data_stream = io.BytesIO()
         users = []
 
+        # Create a dictionary to track the total amount of cases
+        # by the number of checked cases (in order to add labels to each bar)
         labels_dict = {}
 
         # Each user has to be added as a list of 3 values (checks, pings, kudos)
@@ -259,20 +261,16 @@ class LeadstatsResults:
         #ax.legend(["Checks", "Pings", "Kudos"])
         plt.xticks(rotation=45, ha="right")
 
+        # Add labels to each bar with the numeric values
         i = 0
         for c in ax.containers:
-            # Optional: if the segment is small or 0, customize the labels
-
             labels = []
             for v in c:
                 if v.get_height() > 0 and v.get_height() in list(labels_dict.keys()):
                     labels.append(labels_dict[v.get_height()])
                 else:
                     labels.append("")
-
                 i += 1
-
-            # labels = [int(v.get_height()) if v.get_height() > 20 else '' for v in c]
 
             # remove the labels parameter if it's not needed for customized labels
             ax.bar_label(c, labels=labels, label_type='center')
