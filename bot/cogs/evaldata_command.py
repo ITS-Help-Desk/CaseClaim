@@ -49,7 +49,7 @@ class EvaldataCommand(commands.Cog):
             await interaction.response.send_message(content=msg, ephemeral=True, delete_after=180)
             return
 
-        await interaction.response.defer()  # Wait in case process takes a long time
+        await interaction.response.defer(ephemeral=True)  # Wait in case process takes a long time
 
         data = self.get_data(year)
 
@@ -137,10 +137,10 @@ class EvaldataCommand(commands.Cog):
 
             # Add complete/check time differences
             complete_diff = case.complete_time - case.claim_time
-            complete_diff_seconds = complete_diff.seconds + complete_diff.days * 86400
+            complete_diff_seconds = complete_diff.seconds + (complete_diff.days * 86400)
 
             check_diff = case.check_time - case.complete_time
-            check_diff_seconds = check_diff.seconds + check_diff.days * 86400
+            check_diff_seconds = check_diff.seconds + (check_diff.days * 86400)
 
             average_completion_time[case.tech.discord_id] += complete_diff_seconds
             average_check_time[case.lead.discord_id] += check_diff_seconds
@@ -163,18 +163,13 @@ class EvaldataCommand(commands.Cog):
             user_id = techs[key]
             row = [key, total_checked_cases[user_id], total_done_cases[user_id], total_pinged_cases[user_id], total_resolved_cases[user_id], total_kudos_cases[user_id], average_completion_time[user_id], hd_case_percent[user_id]]
             tech_rows.append(row)
-            #tech_rows.append(f"{key},{total_checked_cases[user_id]},{total_done_cases[user_id]},{total_pinged_cases[user_id]},{total_resolved_cases[user_id]},{total_kudos_cases[user_id]},{average_completion_time[user_id]}")
 
         # Create lead rows
         lead_rows = [["Lead", "Total Checked Claims", "Total Done Claims", "Total Pinged Claims", "Total Resolved Claims", "Total Kudos Claims", "Average Claim Check Time (Seconds)", "HD Claim Percent"]]
         for key in dict(sorted(leads.items())):
             user_id = leads[key]
-            row = [key, total_checked_claims[user_id], total_done_claims[user_id], total_pinged_claims[user_id],
-                   total_resolved_claims[user_id], total_kudos_claims[user_id], average_check_time[user_id],
-                   hd_claim_percent[user_id]]
+            row = [key, total_checked_claims[user_id], total_done_claims[user_id], total_pinged_claims[user_id], total_resolved_claims[user_id], total_kudos_claims[user_id], average_check_time[user_id],  hd_claim_percent[user_id]]
             lead_rows.append(row)
-
-            #lead_rows.append(f"{key},{total_checked_claims[user_id]},{total_done_claims[user_id]},{total_pinged_claims[user_id]},{total_resolved_claims[user_id]},{total_kudos_claims[user_id]},{average_check_time[user_id]}")
 
         return tech_rows, lead_rows
 
