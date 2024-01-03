@@ -2,12 +2,10 @@ from discord import app_commands
 from discord.ext import commands
 import discord
 import csv
-from bot.helpers.other import month_string_to_number, month_number_to_name
 import traceback
+from typing import Any
 
 from bot.models.checked_claim import CheckedClaim
-from bot.models.feedback import Feedback
-from bot.models.user import User
 from bot.status import Status
 
 # Use TYPE_CHECKING to avoid circular import from bot
@@ -30,6 +28,13 @@ class EvaldataCommand(commands.Cog):
     @app_commands.describe(year="The year of cases.")
     @app_commands.default_permissions(mute_members=True)
     async def evaldata(self, interaction: discord.Interaction, year: int):
+        """Creates two spreadsheets to represent data for all techs and leads
+        collected from the bot over a year
+
+        Args:
+            interaction (discord.Interaction): Interaction that the slash command originated from.
+            year (int): The year for which the data will be representing
+        """
         # Check if user is a lead
         if not self.bot.check_if_lead(interaction.user):
             # Return error message if user is not Lead
@@ -48,11 +53,13 @@ class EvaldataCommand(commands.Cog):
 
         data = self.get_data(year)
 
+        # Create techs csv
         with open('techs.csv', 'w', newline='', encoding='utf-8') as csvfile:
             writer = csv.writer(csvfile)
             for row in data[0]:
                writer.writerow(row)
 
+        # Create leads csv
         with open('leads.csv', 'w', newline='', encoding='utf-8') as csvfile:
             writer = csv.writer(csvfile)
             for row in data[1]:
@@ -63,7 +70,18 @@ class EvaldataCommand(commands.Cog):
 
         await interaction.followup.send(content=f"Success", files=[tech_data, lead_data])
 
-    def get_data(self, year: int):
+    def get_data(self, year: int) -> tuple[list[Any], list[Any]]:
+        """Collects all the data from every tech and every lead
+        and compiles it into data that can easily be written to a
+        spreadsheet.
+
+        Args:
+            year (int): The year for which the data will be collected from
+
+        Returns:
+            tuple[list[Any], list[Any]] - A tuple containing two lists: tech and lead and are ready
+            to be converted to a spreadsheet using writerow
+        """
         all_cases = CheckedClaim.get_all_from_year(self.bot.connection, year)
 
         # Tech data
