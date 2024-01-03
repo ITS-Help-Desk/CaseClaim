@@ -158,17 +158,17 @@ class EvaldataCommand(commands.Cog):
             hd_claim_percent[key] = (total_checked_claims[key] + total_done_claims[key] + total_pinged_claims[key] + total_resolved_claims[key] + total_kudos_claims[key]) / total_hd_cases
 
         # Create tech rows
-        tech_rows = [["Tech", "Total Checked Cases", "Total Done Cases", "Total Pinged Cases", "Total Resolved Cases", "Total Kudos Cases", "Average Case Completion Time (Seconds)", "HD Case Percent"]]
+        tech_rows = [["Tech", "Total Cases", "Total Checked Cases", "Total Done Cases", "Total Pinged Cases", "Total Resolved Cases", "Total Kudos Cases", "Average Case Completion Time (Seconds)", "HD Case Percent"]]
         for key in dict(sorted(techs.items())):
             user_id = techs[key]
-            row = [key, total_checked_cases[user_id], total_done_cases[user_id], total_pinged_cases[user_id], total_resolved_cases[user_id], total_kudos_cases[user_id], average_completion_time[user_id], hd_case_percent[user_id]]
+            row = [key, (total_checked_cases[user_id] + total_done_cases[user_id] + total_pinged_cases[user_id] + total_resolved_cases[user_id] + total_kudos_cases[user_id]),total_checked_cases[user_id], total_done_cases[user_id], total_pinged_cases[user_id], total_resolved_cases[user_id], total_kudos_cases[user_id], average_completion_time[user_id], hd_case_percent[user_id]]
             tech_rows.append(row)
 
         # Create lead rows
-        lead_rows = [["Lead", "Total Checked Claims", "Total Done Claims", "Total Pinged Claims", "Total Resolved Claims", "Total Kudos Claims", "Average Claim Check Time (Seconds)", "HD Claim Percent"]]
+        lead_rows = [["Lead", "Total Cases", "Total Checked Claims", "Total Done Claims", "Total Pinged Claims", "Total Resolved Claims", "Total Kudos Claims", "Average Claim Check Time (Seconds)", "HD Claim Percent"]]
         for key in dict(sorted(leads.items())):
             user_id = leads[key]
-            row = [key, total_checked_claims[user_id], total_done_claims[user_id], total_pinged_claims[user_id], total_resolved_claims[user_id], total_kudos_claims[user_id], average_check_time[user_id],  hd_claim_percent[user_id]]
+            row = [key, (total_checked_claims[user_id] + total_done_claims[user_id] + total_pinged_claims[user_id] + total_resolved_claims[user_id] + total_kudos_claims[user_id]), total_checked_claims[user_id], total_done_claims[user_id], total_pinged_claims[user_id], total_resolved_claims[user_id], total_kudos_claims[user_id], average_check_time[user_id],  hd_claim_percent[user_id]]
             lead_rows.append(row)
 
         return tech_rows, lead_rows
