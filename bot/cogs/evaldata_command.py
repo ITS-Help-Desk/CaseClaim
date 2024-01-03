@@ -1,0 +1,172 @@
+from discord import app_commands
+from discord.ext import commands
+import discord
+import csv
+from bot.helpers.other import month_string_to_number, month_number_to_name
+import traceback
+
+from bot.models.checked_claim import CheckedClaim
+from bot.models.feedback import Feedback
+from bot.models.user import User
+from bot.status import Status
+
+# Use TYPE_CHECKING to avoid circular import from bot
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from ..bot import Bot
+
+
+class EvaldataCommand(commands.Cog):
+    def __init__(self, bot: "Bot") -> None:
+        """Creates the /evaldata command using a cog.
+
+        Args:
+            bot (Bot): A reference to the original Bot instantiation.
+        """
+        self.bot = bot
+
+    @app_commands.command(description="Generate a spreadsheet of cases metrics for everyone.")
+    @app_commands.describe(year="The year of cases.")
+    @app_commands.default_permissions(mute_members=True)
+    async def evaldata(self, interaction: discord.Interaction, year: int):
+        # Check if user is a lead
+        if not self.bot.check_if_lead(interaction.user):
+            # Return error message if user is not Lead
+            msg = f"<@{interaction.user.id}>, you do not have permission to pull this report!"
+            await interaction.response.send_message(content=msg, ephemeral=True, delete_after=180)
+
+            return
+
+        if interaction.channel_id != self.bot.log_channel:
+            # Return an error if used in the wrong channel
+            msg = f"You can only use this command in the <#{self.bot.log_channel}> channel."
+            await interaction.response.send_message(content=msg, ephemeral=True, delete_after=180)
+            return
+
+        await interaction.response.defer()  # Wait in case process takes a long time
+
+        data = self.get_data(year)
+
+        with open('techs.csv', 'w', newline='', encoding='utf-8') as csvfile:
+            writer = csv.writer(csvfile)
+            for row in data[0]:
+               writer.writerow(row)
+
+        with open('leads.csv', 'w', newline='', encoding='utf-8') as csvfile:
+            writer = csv.writer(csvfile)
+            for row in data[1]:
+               writer.writerow(row)
+
+        tech_data = discord.File('techs.csv')
+        lead_data = discord.File('leads.csv')
+
+        await interaction.followup.send(content=f"Success", files=[tech_data, lead_data])
+
+    def get_data(self, year: int):
+        all_cases = CheckedClaim.get_all_from_year(self.bot.connection, year)
+
+        # Tech data
+        total_checked_cases = {}
+        total_done_cases = {}
+        total_pinged_cases = {}
+        total_resolved_cases = {}
+        total_kudos_cases = {}
+
+        average_completion_time = {}
+        average_check_time = {}
+
+        # Lead data
+        total_checked_claims = {}
+        total_done_claims = {}
+        total_pinged_claims = {}
+        total_resolved_claims = {}
+        total_kudos_claims = {}
+
+        total_hd_cases = 0
+        hd_case_percent = {}
+        hd_claim_percent = {}
+
+        techs = {}
+        leads = {}
+        for case in all_cases:
+            total_hd_cases += 1
+            techs[case.tech.full_name] = case.tech.discord_id
+            leads[case.lead.full_name] = case.lead.discord_id
+            # Initialize tech data
+            for category in [total_checked_cases, total_done_cases, total_pinged_cases, total_resolved_cases, total_kudos_cases, hd_case_percent, average_completion_time]:
+                category.setdefault(case.tech.discord_id, 0)
+            # Initialize lead data
+            for category in [total_checked_claims, total_done_claims, total_pinged_claims, total_resolved_claims, total_kudos_claims, hd_claim_percent, average_check_time]:
+                category.setdefault(case.lead.discord_id, 0)
+
+            # Update tech data
+            if case.status == str(Status.CHECKED):
+                total_checked_cases[case.tech.discord_id] += 1
+                total_checked_claims[case.lead.discord_id] += 1
+            elif case.status == str(Status.DONE):
+                total_done_cases[case.tech.discord_id] += 1
+                total_done_claims[case.lead.discord_id] += 1
+            elif case.status == str(Status.PINGED):
+                total_pinged_cases[case.tech.discord_id] += 1
+                total_pinged_claims[case.lead.discord_id] += 1
+            elif case.status == str(Status.RESOLVED):
+                total_resolved_cases[case.tech.discord_id] += 1
+                total_resolved_claims[case.lead.discord_id] += 1
+            elif case.status == str(Status.KUDOS):
+                total_kudos_cases[case.tech.discord_id] += 1
+                total_kudos_claims[case.lead.discord_id] += 1
+
+            # Add complete/check time differences
+            complete_diff = case.complete_time - case.claim_time
+            complete_diff_seconds = complete_diff.seconds + complete_diff.days * 86400
+
+            check_diff = case.check_time - case.complete_time
+            check_diff_seconds = check_diff.seconds + check_diff.days * 86400
+
+            average_completion_time[case.tech.discord_id] += complete_diff_seconds
+            average_check_time[case.lead.discord_id] += check_diff_seconds
+
+        # Calculate averages
+        for key in list(average_completion_time.keys()):
+            average_completion_time[key] /= (total_checked_cases[key] + total_done_cases[key] + total_pinged_cases[key] + total_resolved_cases[key] + total_kudos_cases[key])
+        for key in list(average_check_time.keys()):
+            average_check_time[key] /= (total_checked_claims[key] + total_done_claims[key] + total_pinged_claims[key] + total_resolved_claims[key] + total_kudos_claims[key])
+
+        # Calculate percentages
+        for key in list(hd_case_percent):
+            hd_case_percent[key] = (total_checked_cases[key] + total_done_cases[key] + total_pinged_cases[key] + total_resolved_cases[key] + total_kudos_cases[key]) / total_hd_cases
+        for key in list(hd_claim_percent):
+            hd_claim_percent[key] = (total_checked_claims[key] + total_done_claims[key] + total_pinged_claims[key] + total_resolved_claims[key] + total_kudos_claims[key]) / total_hd_cases
+
+        # Create tech rows
+        tech_rows = [["Tech", "Total Checked Cases", "Total Done Cases", "Total Pinged Cases", "Total Resolved Cases", "Total Kudos Cases", "Average Case Completion Time (Seconds)", "HD Case Percent"]]
+        for key in dict(sorted(techs.items())):
+            user_id = techs[key]
+            row = [key, total_checked_cases[user_id], total_done_cases[user_id], total_pinged_cases[user_id], total_resolved_cases[user_id], total_kudos_cases[user_id], average_completion_time[user_id], hd_case_percent[user_id]]
+            tech_rows.append(row)
+            #tech_rows.append(f"{key},{total_checked_cases[user_id]},{total_done_cases[user_id]},{total_pinged_cases[user_id]},{total_resolved_cases[user_id]},{total_kudos_cases[user_id]},{average_completion_time[user_id]}")
+
+        # Create lead rows
+        lead_rows = [["Lead", "Total Checked Claims", "Total Done Claims", "Total Pinged Claims", "Total Resolved Claims", "Total Kudos Claims", "Average Claim Check Time (Seconds)", "HD Claim Percent"]]
+        for key in dict(sorted(leads.items())):
+            user_id = leads[key]
+            row = [key, total_checked_claims[user_id], total_done_claims[user_id], total_pinged_claims[user_id],
+                   total_resolved_claims[user_id], total_kudos_claims[user_id], average_check_time[user_id],
+                   hd_claim_percent[user_id]]
+            lead_rows.append(row)
+
+            #lead_rows.append(f"{key},{total_checked_claims[user_id]},{total_done_claims[user_id]},{total_pinged_claims[user_id]},{total_resolved_claims[user_id]},{total_kudos_claims[user_id]},{average_check_time[user_id]}")
+
+        return tech_rows, lead_rows
+
+    @evaldata.error
+    async def evaldata_error(self, ctx: discord.Interaction, error):
+        full_error = traceback.format_exc()
+
+        ch = await self.bot.fetch_channel(self.bot.error_channel)
+
+        msg = f"Error with **/evaldata** ran by <@!{ctx.user.id}>.\n```{full_error}```"
+        if len(msg) > 1993:
+            msg = msg[:1993] + "...```"
+        await ch.send(msg)
