@@ -51,7 +51,7 @@ class EvaldataCommand(commands.Cog):
 
         await interaction.response.defer(ephemeral=True)  # Wait in case process takes a long time
 
-        data = self.get_data(year)
+        data = await self.get_data(year)
 
         # Create techs csv
         with open('techs.csv', 'w', newline='', encoding='utf-8') as csvfile:
@@ -70,7 +70,7 @@ class EvaldataCommand(commands.Cog):
 
         await interaction.followup.send(content=f"Success", files=[tech_data, lead_data])
 
-    def get_data(self, year: int) -> tuple[list[Any], list[Any]]:
+    async def get_data(self, year: int) -> tuple[list[Any], list[Any]]:
         """Collects all the data from every tech and every lead
         and compiles it into data that can easily be written to a
         spreadsheet.
@@ -164,6 +164,15 @@ class EvaldataCommand(commands.Cog):
             total = total_checked_cases[user_id] + total_done_cases[user_id] + total_pinged_cases[user_id] + total_resolved_cases[user_id] + total_kudos_cases[user_id]
             if key in list(leads.keys()) and total < 100:
                 continue
+
+            try:
+                c = await self.bot.fetch_channel(self.bot.cases_channel)
+                u = await c.guild.fetch_member(user_id)
+
+                if self.bot.check_if_pa(u):
+                    continue
+            except:
+                pass
 
             row = [key,
                    total,
