@@ -3,7 +3,7 @@ from discord.ext import commands
 import discord
 import csv
 import traceback
-from typing import Any
+from typing import Any, Optional
 
 from bot.models.checked_claim import CheckedClaim
 from bot.status import Status
@@ -26,8 +26,9 @@ class EvaldataCommand(commands.Cog):
 
     @app_commands.command(description="Generate a spreadsheet of cases metrics for everyone.")
     @app_commands.describe(year="The year of cases.")
+    @app_commands.describe(month="(Optional) The month of cases.")
     @app_commands.default_permissions(mute_members=True)
-    async def evaldata(self, interaction: discord.Interaction, year: int):
+    async def evaldata(self, interaction: discord.Interaction, month: Optional[int], year: int):
         """Creates two spreadsheets to represent data for all techs and leads
         collected from the bot over a year
 
@@ -40,18 +41,17 @@ class EvaldataCommand(commands.Cog):
             # Return error message if user is not Lead
             msg = f"<@{interaction.user.id}>, you do not have permission to pull this report!"
             await interaction.response.send_message(content=msg, ephemeral=True, delete_after=180)
-
             return
 
-        if interaction.channel_id != self.bot.log_channel:
+        '''if interaction.channel_id != self.bot.log_channel:
             # Return an error if used in the wrong channel
             msg = f"You can only use this command in the <#{self.bot.log_channel}> channel."
             await interaction.response.send_message(content=msg, ephemeral=True, delete_after=180)
-            return
+            return'''
 
         await interaction.response.defer(ephemeral=True)  # Wait in case process takes a long time
 
-        data = await self.get_data(year)
+        data = await self.get_data(month, year)
 
         # Create techs csv
         with open('techs.csv', 'w', newline='', encoding='utf-8') as csvfile:
@@ -70,7 +70,7 @@ class EvaldataCommand(commands.Cog):
 
         await interaction.followup.send(content=f"Success", files=[tech_data, lead_data])
 
-    async def get_data(self, year: int) -> tuple[list[Any], list[Any]]:
+    async def get_data(self, month: Optional[int], year: int) -> tuple[list[Any], list[Any]]:
         """Collects all the data from every tech and every lead
         and compiles it into data that can easily be written to a
         spreadsheet.
@@ -82,7 +82,10 @@ class EvaldataCommand(commands.Cog):
             tuple[list[Any], list[Any]] - A tuple containing two lists: tech and lead and are ready
             to be converted to a spreadsheet using writerow
         """
-        all_cases = CheckedClaim.get_all_from_year(self.bot.connection, year)
+        if month is None:
+            all_cases = CheckedClaim.get_all_from_year(self.bot.connection, year)
+        else:
+            all_cases = CheckedClaim.get_all_from_month(self.bot.connection, month, year)
 
         # Tech data
         total_checked_cases = {}
@@ -159,6 +162,8 @@ class EvaldataCommand(commands.Cog):
 
         # Create tech rows
         tech_rows = [["Tech", "Total Cases", "Total Checked Cases", "Total Done Cases", "Total Pinged Cases", "Total Resolved Cases", "Total Kudos Cases", "Percent Checked", "Percent Done", "Percent Pinged", "Percent Resolved", "Percent Kudos", "Percent Resolved after Pinged", "Average Case Completion Time (Seconds)", "HD Case Percent"]]
+
+        c = await self.bot.fetch_channel(self.bot.cases_channel)
         for key in dict(sorted(techs.items())):
             user_id = techs[key]
             total = total_checked_cases[user_id] + total_done_cases[user_id] + total_pinged_cases[user_id] + total_resolved_cases[user_id] + total_kudos_cases[user_id]
@@ -166,9 +171,7 @@ class EvaldataCommand(commands.Cog):
                 continue
 
             try:
-                c = await self.bot.fetch_channel(self.bot.cases_channel)
                 u = await c.guild.fetch_member(user_id)
-
                 if self.bot.check_if_pa(u):
                     continue
             except:
