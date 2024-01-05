@@ -144,18 +144,22 @@ class EvaldataCommand(commands.Cog):
 
             average_completion_time[case.tech.discord_id] += complete_diff_seconds
             average_check_time[case.lead.discord_id] += check_diff_seconds
-
+        
         # Calculate averages
         for key in list(average_completion_time.keys()):
             average_completion_time[key] /= (total_checked_cases[key] + total_done_cases[key] + total_pinged_cases[key] + total_resolved_cases[key] + total_kudos_cases[key])
         for key in list(average_check_time.keys()):
             average_check_time[key] /= (total_checked_claims[key] + total_done_claims[key] + total_pinged_claims[key] + total_resolved_claims[key] + total_kudos_claims[key])
 
+        pct = 0
+        pct2 = 0
         # Calculate percentages
         for key in list(hd_case_percent):
-            hd_case_percent[key] = (total_checked_cases[key] + total_done_cases[key] + total_pinged_cases[key] + total_resolved_cases[key] + total_kudos_cases[key]) / total_hd_cases
+            hd_case_percent[key] = round((total_checked_cases[key] + total_done_cases[key] + total_pinged_cases[key] + total_resolved_cases[key] + total_kudos_cases[key]) / total_hd_cases, 4)
+            pct += hd_case_percent[key]
         for key in list(hd_claim_percent):
-            hd_claim_percent[key] = (total_checked_claims[key] + total_done_claims[key] + total_pinged_claims[key] + total_resolved_claims[key] + total_kudos_claims[key]) / total_hd_cases
+            hd_claim_percent[key] = round((total_checked_claims[key] + total_done_claims[key] + total_pinged_claims[key] + total_resolved_claims[key] + total_kudos_claims[key]) / total_hd_cases, 4)
+            pct2 += hd_claim_percent[key]
 
         # Create tech rows
         tech_rows = [["Tech", "Total Cases", "Total Checked Cases", "Total Done Cases", "Total Pinged Cases", "Total Resolved Cases", "Total Kudos Cases", "Average Case Completion Time (Seconds)", "HD Case Percent"]]
