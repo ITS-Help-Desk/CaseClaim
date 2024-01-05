@@ -70,7 +70,7 @@ class EvaldataCommand(commands.Cog):
 
         await interaction.followup.send(content=f"Success", files=[tech_data, lead_data])
 
-    async def get_data(self, month: Optional[int], year: int) -> tuple[list[Any], list[Any]]:
+    def get_data(self, month: Optional[int], year: int) -> tuple[list[Any], list[Any]]:
         """Collects all the data from every tech and every lead
         and compiles it into data that can easily be written to a
         spreadsheet.
@@ -163,19 +163,11 @@ class EvaldataCommand(commands.Cog):
         # Create tech rows
         tech_rows = [["Tech", "Total Cases", "Total Checked Cases", "Total Done Cases", "Total Pinged Cases", "Total Resolved Cases", "Total Kudos Cases", "Percent Checked", "Percent Done", "Percent Pinged", "Percent Resolved", "Percent Kudos", "Percent Resolved after Pinged", "Average Case Completion Time (Seconds)", "HD Case Percent"]]
 
-        c = await self.bot.fetch_channel(self.bot.cases_channel)
         for key in dict(sorted(techs.items())):
             user_id = techs[key]
             total = total_checked_cases[user_id] + total_done_cases[user_id] + total_pinged_cases[user_id] + total_resolved_cases[user_id] + total_kudos_cases[user_id]
             if key in list(leads.keys()) and total < 100:
                 continue
-
-            try:
-                u = await c.guild.fetch_member(user_id)
-                if self.bot.check_if_pa(u):
-                    continue
-            except:
-                pass
 
             row = [key,
                    total,
