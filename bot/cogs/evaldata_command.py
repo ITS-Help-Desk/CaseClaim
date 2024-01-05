@@ -51,7 +51,7 @@ class EvaldataCommand(commands.Cog):
 
         await interaction.response.defer(ephemeral=True)  # Wait in case process takes a long time
 
-        data = await self.get_data(month, year)
+        data = self.get_data(month, year)
 
         # Create techs csv
         with open('techs.csv', 'w', newline='', encoding='utf-8') as csvfile:
