@@ -174,7 +174,7 @@ class EvaldataCommand(commands.Cog):
                    round(total_pinged_cases[user_id] / total, 4),
                    round(total_resolved_cases[user_id] / total, 4),
                    round(total_kudos_cases[user_id] / total, 4),
-                   round(total_resolved_cases[user_id] / (total_checked_cases[user_id] + total_pinged_cases[user_id]), 4),
+                   round(total_resolved_cases[user_id] / (total_resolved_cases[user_id] + total_pinged_cases[user_id]), 4) if total_resolved_cases[user_id] + total_pinged_cases[user_id] > 0 else 0,
                    average_completion_time[user_id],
                    hd_case_percent[user_id]]
             tech_rows.append(row)
@@ -196,7 +196,7 @@ class EvaldataCommand(commands.Cog):
                    round(total_pinged_claims[user_id] / total, 4),
                    round(total_resolved_claims[user_id] / total, 4),
                    round(total_kudos_claims[user_id] / total, 4),
-                   round(total_resolved_claims[user_id] / (total_checked_claims[user_id] + total_pinged_claims[user_id]), 4),
+                   round(total_resolved_claims[user_id] / (total_resolved_claims[user_id] + total_pinged_claims[user_id]), 4) if total_resolved_claims[user_id] + total_pinged_claims[user_id] > 0 else 0,
                    average_check_time[user_id],
                    hd_claim_percent[user_id]]
             lead_rows.append(row)
