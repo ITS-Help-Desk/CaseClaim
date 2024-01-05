@@ -1,7 +1,5 @@
 token.txt
-temp.csv
-techs.csv
-leads.csv
+*.csv
 config.json
 backups/
 

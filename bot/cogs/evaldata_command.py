@@ -53,22 +53,29 @@ class EvaldataCommand(commands.Cog):
 
         data = self.get_data(month, year)
 
+        if month is not None:
+            tech_filename = f"techs{month}-{year}.csv"
+            lead_filename = f"leads{month}-{year}.csv"
+        else:
+            tech_filename = f"techs{year}.csv"
+            lead_filename = f"leads{year}.csv"
+
         # Create techs csv
-        with open('techs.csv', 'w', newline='', encoding='utf-8') as csvfile:
+        with open(tech_filename, 'w', newline='', encoding='utf-8') as csvfile:
             writer = csv.writer(csvfile)
             for row in data[0]:
                writer.writerow(row)
 
         # Create leads csv
-        with open('leads.csv', 'w', newline='', encoding='utf-8') as csvfile:
+        with open(lead_filename, 'w', newline='', encoding='utf-8') as csvfile:
             writer = csv.writer(csvfile)
             for row in data[1]:
                writer.writerow(row)
 
-        tech_data = discord.File('techs.csv')
-        lead_data = discord.File('leads.csv')
+        tech_data = discord.File(tech_filename)
+        lead_data = discord.File(lead_filename)
 
-        await interaction.followup.send(content=f"Success", files=[tech_data, lead_data])
+        await interaction.followup.send(content=f"", files=[tech_data, lead_data])
 
     def get_data(self, month: Optional[int], year: int) -> tuple[list[Any], list[Any]]:
         """Collects all the data from every tech and every lead
