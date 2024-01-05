@@ -166,7 +166,7 @@ class EvaldataCommand(commands.Cog):
         for key in dict(sorted(techs.items())):
             user_id = techs[key]
             total = total_checked_cases[user_id] + total_done_cases[user_id] + total_pinged_cases[user_id] + total_resolved_cases[user_id] + total_kudos_cases[user_id]
-            if key in list(leads.keys()) and total < 100:
+            if (total < 3) or (key in list(leads.keys()) and total < 100):
                 continue
 
             row = [key,
@@ -191,6 +191,9 @@ class EvaldataCommand(commands.Cog):
         for key in dict(sorted(leads.items())):
             user_id = leads[key]
             total = total_checked_claims[user_id] + total_done_claims[user_id] + total_pinged_claims[user_id] + total_resolved_claims[user_id] + total_kudos_claims[user_id]
+            if total < 3:
+                continue
+
             row = [key,
                    total,
                    total_checked_claims[user_id],
