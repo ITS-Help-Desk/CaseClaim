@@ -144,35 +144,61 @@ class EvaldataCommand(commands.Cog):
 
             average_completion_time[case.tech.discord_id] += complete_diff_seconds
             average_check_time[case.lead.discord_id] += check_diff_seconds
-        
+
         # Calculate averages
         for key in list(average_completion_time.keys()):
             average_completion_time[key] /= (total_checked_cases[key] + total_done_cases[key] + total_pinged_cases[key] + total_resolved_cases[key] + total_kudos_cases[key])
         for key in list(average_check_time.keys()):
             average_check_time[key] /= (total_checked_claims[key] + total_done_claims[key] + total_pinged_claims[key] + total_resolved_claims[key] + total_kudos_claims[key])
 
-        pct = 0
-        pct2 = 0
         # Calculate percentages
         for key in list(hd_case_percent):
-            hd_case_percent[key] = round((total_checked_cases[key] + total_done_cases[key] + total_pinged_cases[key] + total_resolved_cases[key] + total_kudos_cases[key]) / total_hd_cases, 4)
-            pct += hd_case_percent[key]
+            hd_case_percent[key] = (total_checked_cases[key] + total_done_cases[key] + total_pinged_cases[key] + total_resolved_cases[key] + total_kudos_cases[key]) / total_hd_cases
         for key in list(hd_claim_percent):
-            hd_claim_percent[key] = round((total_checked_claims[key] + total_done_claims[key] + total_pinged_claims[key] + total_resolved_claims[key] + total_kudos_claims[key]) / total_hd_cases, 4)
-            pct2 += hd_claim_percent[key]
+            hd_claim_percent[key] = (total_checked_claims[key] + total_done_claims[key] + total_pinged_claims[key] + total_resolved_claims[key] + total_kudos_claims[key]) / total_hd_cases
 
         # Create tech rows
-        tech_rows = [["Tech", "Total Cases", "Total Checked Cases", "Total Done Cases", "Total Pinged Cases", "Total Resolved Cases", "Total Kudos Cases", "Average Case Completion Time (Seconds)", "HD Case Percent"]]
+        tech_rows = [["Tech", "Total Cases", "Total Checked Cases", "Total Done Cases", "Total Pinged Cases", "Total Resolved Cases", "Total Kudos Cases", "Percent Checked", "Percent Done", "Percent Pinged", "Percent Resolved", "Percent Kudos", "Percent Resolved after Pinged", "Average Case Completion Time (Seconds)", "HD Case Percent"]]
         for key in dict(sorted(techs.items())):
             user_id = techs[key]
-            row = [key, (total_checked_cases[user_id] + total_done_cases[user_id] + total_pinged_cases[user_id] + total_resolved_cases[user_id] + total_kudos_cases[user_id]),total_checked_cases[user_id], total_done_cases[user_id], total_pinged_cases[user_id], total_resolved_cases[user_id], total_kudos_cases[user_id], average_completion_time[user_id], hd_case_percent[user_id]]
+            total = total_checked_cases[user_id] + total_done_cases[user_id] + total_pinged_cases[user_id] + total_resolved_cases[user_id] + total_kudos_cases[user_id]
+            row = [key,
+                   total,
+                   total_checked_cases[user_id],
+                   total_done_cases[user_id],
+                   total_pinged_cases[user_id],
+                   total_resolved_cases[user_id],
+                   total_kudos_cases[user_id],
+                   round(total_checked_cases[user_id] / total, 4),
+                   round(total_done_cases[user_id] / total, 4),
+                   round(total_pinged_cases[user_id] / total, 4),
+                   round(total_resolved_cases[user_id] / total, 4),
+                   round(total_kudos_cases[user_id] / total, 4),
+                   round(total_resolved_cases[user_id] / (total_checked_cases[user_id] + total_pinged_cases[user_id]), 4),
+                   average_completion_time[user_id],
+                   hd_case_percent[user_id]]
             tech_rows.append(row)
 
         # Create lead rows
-        lead_rows = [["Lead", "Total Cases", "Total Checked Claims", "Total Done Claims", "Total Pinged Claims", "Total Resolved Claims", "Total Kudos Claims", "Average Claim Check Time (Seconds)", "HD Claim Percent"]]
+        lead_rows = [["Lead", "Total Cases", "Total Checked Claims", "Total Done Claims", "Total Pinged Claims", "Total Resolved Claims", "Total Kudos Claims", "Percent Checked", "Percent Done", "Percent Pinged", "Percent Resolved", "Percent Kudos", "Percent Resolved after Pinged", "Average Claim Check Time (Seconds)", "HD Claim Percent"]]
         for key in dict(sorted(leads.items())):
             user_id = leads[key]
-            row = [key, (total_checked_claims[user_id] + total_done_claims[user_id] + total_pinged_claims[user_id] + total_resolved_claims[user_id] + total_kudos_claims[user_id]), total_checked_claims[user_id], total_done_claims[user_id], total_pinged_claims[user_id], total_resolved_claims[user_id], total_kudos_claims[user_id], average_check_time[user_id],  hd_claim_percent[user_id]]
+            total = total_checked_claims[user_id] + total_done_claims[user_id] + total_pinged_claims[user_id] + total_resolved_claims[user_id] + total_kudos_claims[user_id]
+            row = [key,
+                   total,
+                   total_checked_claims[user_id],
+                   total_done_claims[user_id],
+                   total_pinged_claims[user_id],
+                   total_resolved_claims[user_id],
+                   total_kudos_claims[user_id],
+                   round(total_checked_claims[user_id] / total, 4),
+                   round(total_done_claims[user_id] / total, 4),
+                   round(total_pinged_claims[user_id] / total, 4),
+                   round(total_resolved_claims[user_id] / total, 4),
+                   round(total_kudos_claims[user_id] / total, 4),
+                   round(total_resolved_claims[user_id] / (total_checked_claims[user_id] + total_pinged_claims[user_id]), 4),
+                   average_check_time[user_id],
+                   hd_claim_percent[user_id]]
             lead_rows.append(row)
 
         return tech_rows, lead_rows
