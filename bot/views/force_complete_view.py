@@ -51,6 +51,8 @@ class ForceCompleteView(ui.View):
             msg = await channel.fetch_message(case.claim_message_id)
             await msg.delete()
 
+            user = await channel.guild.fetch_member(case.tech.discord_id)
+
             # Complete the claim as normal
             case.remove_from_database(self.bot.connection)
 
@@ -59,7 +61,7 @@ class ForceCompleteView(ui.View):
             lead_embed = discord.Embed(description=f"Has been marked as complete by <@{case.tech.discord_id}>",
                                        colour=self.bot.embed_color,
                                        timestamp=datetime.now())
-            lead_embed.set_author(name=f"{case.case_num}", icon_url=f'{interaction.user.display_avatar}')
+            lead_embed.set_author(name=f"{case.case_num}", icon_url=f'{user.display_avatar}')
             lead_embed.set_footer(text="Completed")
             msg = await channel.send(embed=lead_embed, view=CheckView(self.bot))
 

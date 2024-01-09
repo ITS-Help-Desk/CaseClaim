@@ -130,6 +130,9 @@ class LeadstatsResults:
         self.month_kudos_counts = {}
         self.semester_kudos_counts = {}
 
+        self.total_month = {}
+        self.total_semester = {}
+
         interaction_semester = get_semester(date)
 
         for claim in claims:
@@ -143,8 +146,12 @@ class LeadstatsResults:
             self.month_kudos_counts.setdefault(claim.lead.discord_id, 0)
             self.semester_kudos_counts.setdefault(claim.lead.discord_id, 0)
 
+            self.total_month.setdefault(claim.lead.discord_id, 0)
+            self.total_semester.setdefault(claim.lead.discord_id, 0)
+
             # Organize data for month
             if claim.claim_time.year == date.year and claim.claim_time.month == date.month:
+                self.total_month[claim.lead.discord_id] += 1
                 if claim.status == Status.CHECKED or claim.status == Status.DONE:
                     # Add checked/done
                     self.month_counts[claim.lead.discord_id] += 1
@@ -159,20 +166,21 @@ class LeadstatsResults:
 
             # Organize data for semester
             if get_semester(claim.claim_time) == interaction_semester:
+                self.total_semester[claim.lead.discord_id] += 1
                 if claim.status == Status.CHECKED or claim.status == Status.DONE:
                     # Add checked/done
                     self.semester_counts[claim.lead.discord_id] += 1
 
-                if claim.status == Status.PINGED or claim.status == Status.RESOLVED:
+                elif claim.status == Status.PINGED or claim.status == Status.RESOLVED:
                     # Add pinged/resolved
                     self.semester_ping_counts[claim.lead.discord_id] += 1
 
-                if claim.status == Status.KUDOS:
+                elif claim.status == Status.KUDOS:
                     # Add kudos
                     self.semester_kudos_counts[claim.lead.discord_id] += 1
 
-        self.semester_counts_sorted_keys = sorted(self.semester_counts, key=self.semester_counts.get, reverse=True)
-        self.month_counts_sorted_keys = sorted(self.month_counts, key=self.month_counts.get, reverse=True)
+        self.semester_counts_sorted_keys = sorted(self.total_semester, key=self.total_semester.get, reverse=True)
+        self.month_counts_sorted_keys = sorted(self.total_month, key=self.total_month.get, reverse=True)
 
     def convert_to_plot(self, connection: MySQLConnection, month: bool, title: str) -> io.BytesIO:
         """Converts data into a plot that can be sent in a Discord message. It uses three
@@ -227,11 +235,16 @@ class LeadstatsResults:
         data_stream = io.BytesIO()
         users = []
 
+        # Create a dictionary to track the total amount of cases
+        # by the number of checked cases (in order to add labels to each bar)
+        labels_dict = {}
+
         # Each user has to be added as a list of 3 values (checks, pings, kudos)
         for i in range(len(y1)):
             user = []
             try:
                 user.append(y1[i])
+                labels_dict[y1[i]] = y1[i] + y2[i] + y3[i]
             except:
                 pass
             try:
@@ -254,8 +267,23 @@ class LeadstatsResults:
         #ax.legend(["Checks", "Pings", "Kudos"])
         plt.xticks(rotation=45, ha="right")
 
+        # Add labels to each bar with the numeric values
+        i = 0
+        for c in ax.containers:
+            labels = []
+            for v in c:
+                if v.get_height() > 0 and v.get_height() in list(labels_dict.keys()):
+                    labels.append(labels_dict[v.get_height()])
+                else:
+                    labels.append("")
+                i += 1
+
+            # remove the labels parameter if it's not needed for customized labels
+            ax.bar_label(c, labels=labels, label_type='center')
+
         plt.savefig(data_stream, format='png', bbox_inches="tight", dpi=400)
         plt.close()
         data_stream.seek(0)
 
         return data_stream
+
