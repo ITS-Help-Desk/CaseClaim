@@ -57,4 +57,3 @@ For information about how to run the bot, troubleshooting, and development guide
 - aiohttp [3.8.3](https://pypi.org/project/aiohttp/)
 - pytz [2023.3](https://pypi.org/project/pytz/)
 - Flask [3.0.0](https://pypi.org/project/Flask/)
-- pyjwt [2.8.0](https://pypi.org/project/PyJWT/)

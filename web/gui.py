@@ -1,6 +1,6 @@
-from flask import Flask, Response, abort, request, render_template, redirect
+from flask import Flask, Response, abort, request, render_template, redirect, session
 
-
+import secrets
 import os
 import mysql.connector
 import base64
@@ -12,10 +12,13 @@ import graphs.casedist as casedist_graphs
 import web.components as components
 import datetime
 
+
 token = None
 connection = None
 app = Flask(__name__)
 bot_running_status = "not running" # Migrate to boolean in controller.py at some point so the rendering in nav_col is easier
+app.secret_key = secrets.token_hex(32)
+password = "CHANGE_ME_IN_PROD"
 
 
 def load_token():
@@ -33,16 +36,22 @@ def load_db_connector(connector: mysql.connector.MySQLConnection):
     global connection
     connection = connector
 
+
+
 @app.route("/")
 def default_page():
     """
     Render index.html based on the current bot state.
     """
+    if "username" not in session:
+        return redirect("/login")
     return render_template("index.html", 
                            nav_col=components.nav_column(components.SidebarOptions.DASHBOARD, 
                                                          bot_running_status != "not running", 
                                                          token != None), 
-                           bot_controls=components.bot_controls(token == None))
+                           bot_controls=components.bot_controls(token == None),
+                           login_controls=components.login_controls(True)
+                           )
 
 @app.route("/stats/<graph>/<time>")
 @app.route("/stats/<graph>")
@@ -66,26 +75,44 @@ def stats_page(graph="leadstats", time="month"):
             resource_path = "/casedist"
         case other:
             resource_path = "/leadstats/month"
-    return render_template("stats.html",
-                           nav_col=components.nav_column(components.SidebarOptions.STATISTICS,
-                                                         bot_running_status != "not running",
-                                                         token != None),
-                           stats_box=components.stats_box(components.StatsType.IMAGE,
-                                                          path=resource_path,
-                                                          data="Lead statistics"
-                                                          ),
-                           graph_controls=components.stats_controls()
-                           )
+    if "username" in session:
+        return render_template("stats.html",
+                               nav_col=components.nav_column(components.SidebarOptions.STATISTICS,
+                                                             bot_running_status != "not running",
+                                                             token != None),
+                               stats_box=components.stats_box(components.StatsType.IMAGE,
+                                                              path=resource_path,
+                                                              data="Lead statistics"),
+                               graph_controls=components.stats_controls(),
+                               login_controls=components.login_controls(True))
+    else:
+        return redirect("/login")
 
 
-@app.route("/login")
+@app.route("/login", methods=['GET', 'POST'])
 def process_login():
     """
-    Not Implemented
-
-    @TODO: Implement login check to block controls for non-authed users
+    Use flask session to auth users
     """
-    return "gaming"
+    if request.method == 'POST':
+        print("Made it here?")
+        print(list(request.form.items()))
+        if "password" in request.form and request.form["password"] == password:
+            session['username'] = "auth"
+            return redirect("/")
+        else:
+            return render_template("login.html", 
+                            incorrect_flag=components.alert("Incorrect Password", "danger"))
+    return render_template("login.html")
+    
+@app.route("/logout")
+def process_logout():
+    """
+    Sign the current user out if they are logged in
+    """
+    if "username" in session:
+        session.pop('username', None)
+    return redirect("/")
 
 @app.route("/leadstats/<time>")
 def generate_leadstats_plot(time):
@@ -95,6 +122,8 @@ def generate_leadstats_plot(time):
     Args:
         time    A string representing a month or a semester.
     """
+    if "username" not in session:
+        abort(401)
     claims = CheckedClaim.search(connection)
     png_data = leadstats_graphs.generate_leadstats_graph(claims,connection, time != "semester", datetime.datetime.now().isoformat())
     return Response(png_data.getvalue(), mimetype="image/png")
@@ -106,6 +135,8 @@ def generate_casedist():
 
     @TODO: Implement form to allow arbitrary timeframes
     """
+    if "username" not in session:
+        abort(401)
     claims = CheckedClaim.search(connection)
     cd_png_data = casedist_graphs.generate_casedist_plot(claims, datetime.datetime.now().month, datetime.datetime.now().day)
     return Response(cd_png_data.getvalue(), mimetype="image/png")
@@ -122,6 +153,8 @@ def save_token():
     data = request.form
     if "token" not in data:
         abort(400)
+    if "username" not in session:
+        abort(401)
     else: 
         with open("token.txt", "w") as token_file:
             token = data.getlist('token')[0]
@@ -134,6 +167,8 @@ def stop_bot():
     """
     Use controller to stop bot.
     """
+    if "username" not in session:
+        abort(401)
     print("received stop bot")
     global bot_running_status
     bot_running_status = controller.stop_bot()
@@ -145,6 +180,8 @@ def start_bot():
     """
     Use controller to start the bot
     """
+    if "username" not in session:
+        abort(401)
     print("received start bot")
     global bot_running_status
     bot_running_status = controller.start_bot()

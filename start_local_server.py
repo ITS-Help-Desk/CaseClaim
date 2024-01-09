@@ -29,6 +29,10 @@ def main():
         'database': config_data["db_name"],
         'raise_on_warnings': True
     }
+
+    if gui.password == "CHANGE_ME_IN_PROD":
+        print("Please change the password in web/gui.py before running this app")
+        quit(1)
     
     connection = None
     try:
@@ -37,7 +41,7 @@ def main():
     except Error as err:
         print(f"Error: '{err}'")
         quit(1)
-    
+
     connection.autocommit = True
     gui.load_db_connector(connection)
     gui.load_token()

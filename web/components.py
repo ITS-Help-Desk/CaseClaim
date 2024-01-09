@@ -226,3 +226,11 @@ def bot_controls(need_token: bool) -> str:
     ctrls += "</div>"
     return ctrls
 
+def login_controls(signed_in: bool) -> str:
+    if signed_in:
+        return '<a href="/logout" class="nav-link">Sign Out</a>'
+    else:
+        return '<a href="/login" class="nav-link">Sign In </a>'
+
+def alert(message: str, level: str) -> str:
+    return f'<div class="alert alert-{level}" role="alert">{message}</div>'
