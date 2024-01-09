@@ -5,4 +5,4 @@ mysql-connector-python==8.1.0
 aiohttp==3.8.3
 Flask==3.0.0
 pytz==2023.3
-
+pwjwt==2.8.0
