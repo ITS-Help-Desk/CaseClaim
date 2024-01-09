@@ -1,0 +1,97 @@
+from discord import app_commands
+from discord.ext import commands
+import discord
+import csv
+import numpy as np
+import matplotlib.pyplot as plt
+
+from bot.helpers.other import month_string_to_number, month_number_to_name
+import traceback
+
+from bot.models.checked_claim import CheckedClaim
+from bot.models.feedback import Feedback
+from bot.models.user import User
+from bot.status import Status
+
+# Use TYPE_CHECKING to avoid circular import from bot
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from ..bot import Bot
+
+
+class HeatmapCommand(commands.Cog):
+    def __init__(self, bot: "Bot") -> None:
+        """Creates the /heatmap command using a cog.
+
+        Args:
+            bot (Bot): A reference to the original Bot instantiation.
+        """
+        self.bot = bot
+
+    @app_commands.command(description="Generate a heatmap of cases logged.")
+    @app_commands.default_permissions(mute_members=True)
+    async def heatmap(self, interaction: discord.Interaction):
+        # Check if user is a lead
+        if not self.bot.check_if_lead(interaction.user):
+            # Return error message if user is not Lead
+            msg = f"<@{interaction.user.id}>, you do not have permission!"
+            await interaction.response.send_message(content=msg, ephemeral=True, delete_after=180)
+            return
+
+        await interaction.response.defer()  # Wait in case process takes a long time
+        self.generate()
+
+        await interaction.followup.send(content="test")
+
+    def generate(self):
+        techs = [
+            "Elsa P.",
+            "Matthew L.",
+            "Nikki M.",
+            "Aditya P."
+        ]
+
+        leads = [
+            "Andrew A.",
+            "Charlie F.",
+            "Andrew J.",
+            "Ethan C."
+        ]
+
+        matrix = [
+            [8, 0, 10, 4],
+            [2, 5, 2, 3],
+            [5, 6, 7, 3],
+            [12, 4, 5, 6]
+        ]
+
+        # Labels
+        xlabs = techs
+        ylabs = leads
+
+        # Heat map
+        fig, ax = plt.subplots()
+        ax.imshow(matrix)
+
+        plt.colorbar(ax.get_children()[0])
+
+        # Add the labels
+        ax.set_title('Simple plot')
+        ax.set_xticks(np.arange(len(xlabs)), labels=xlabs)
+        ax.set_yticks(np.arange(len(ylabs)), labels=ylabs)
+        plt.xlabel("Techs")
+        plt.ylabel("Leads")
+
+        plt.show()
+
+    @heatmap.error
+    async def heatmap_error(self, ctx: discord.Interaction, error):
+        full_error = traceback.format_exc()
+
+        ch = await self.bot.fetch_channel(self.bot.error_channel)
+
+        msg = f"Error with **/heatmap** ran by <@!{ctx.user.id}>.\n```{full_error}```"
+        if len(msg) > 1993:
+            msg = msg[:1993] + "...```"
+        await ch.send(msg)

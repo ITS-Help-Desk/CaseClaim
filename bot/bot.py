@@ -19,6 +19,7 @@ from bot.cogs.ping_command import PingCommand
 from bot.cogs.award_command import AwardCommand
 from bot.cogs.hleaderboard_command import HLeaderboardCommand
 from bot.cogs.evaldata_command import EvaldataCommand
+from bot.cogs.heatmap_command import HeatmapCommand
 
 from bot.views.claim_view import ClaimView
 from bot.views.check_view import CheckView
@@ -236,6 +237,7 @@ class Bot(commands.Bot):
         await self.add_cog(GetLogCommand(self))
         await self.add_cog(ReportCommand(self))
         await self.add_cog(EvaldataCommand(self))
+        await self.add_cog(HeatmapCommand(self))
 
         await self.add_cog(LeaderboardCommand(self))
         await self.add_cog(HLeaderboardCommand(self))
