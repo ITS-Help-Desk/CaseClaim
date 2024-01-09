@@ -95,8 +95,6 @@ def process_login():
     Use flask session to auth users
     """
     if request.method == 'POST':
-        print("Made it here?")
-        print(list(request.form.items()))
         if "password" in request.form and request.form["password"] == password:
             session['username'] = "auth"
             return redirect("/")

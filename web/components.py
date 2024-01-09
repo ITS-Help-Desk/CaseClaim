@@ -164,7 +164,7 @@ def col_wrap(internal_components: str) -> str:
     """
     Self explanatory
     """
-    return f'<div class="col">{internal_components}</div>'
+    return f'<div class="col pb-1">{internal_components}</div>'
 
 def stats_controls() -> str:
     """
