@@ -114,6 +114,86 @@ class CheckedClaim(DatabaseItem):
             return data
 
     @staticmethod
+    def get_all_from_year(connection: MySQLConnection, year: int) -> list['CheckedClaim']:
+        """Returns a list of CheckedClaim in a year.
+
+        Args:
+            connection (MySQLConnection): The connection to the MySQL database
+            year (int): The year (e.g. 2023)
+
+        Returns:
+            list[CheckedClaim] - A list of checked cases
+        """
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT * FROM CheckedClaims WHERE YEAR(claim_time) = %s", (year,))
+            results = cursor.fetchall()
+
+            data = []
+            users = {}
+            for result in results:
+                if result[1] == '12341234':
+                    continue
+
+                # Find tech
+                if result[2] in users:
+                    tech = users[result[2]]
+                else:
+                    tech = User.from_id(connection, result[2])
+                    users[result[2]] = tech
+
+                # Find lead
+                if result[3] in users:
+                    lead = users[result[3]]
+                else:
+                    lead = User.from_id(connection, result[3])
+                    users[result[3]] = lead
+
+                data.append(CheckedClaim(result[0], result[1], tech, lead, result[4], result[5], result[6],
+                                         Status.from_str(result[7]), result[8]))
+
+            return data
+
+    @staticmethod
+    def get_all_from_month(connection: MySQLConnection, month: int, year: int) -> list['CheckedClaim']:
+        """Returns a list of CheckedClaim in a month.
+
+        Args:
+            connection (MySQLConnection): The connection to the MySQL database
+            month (int): The month (e.g. 10 for October)
+            year (int): The year (e.g. 2023)
+        Returns:
+            list[CheckedClaim] - A list of checked cases
+        """
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT * FROM CheckedClaims WHERE YEAR(claim_time) = %s AND MONTH(claim_time) = %s", (year, month,))
+            results = cursor.fetchall()
+
+            data = []
+            users = {}
+            for result in results:
+                if result[1] == '12341234':
+                    continue
+
+                # Find tech
+                if result[2] in users:
+                    tech = users[result[2]]
+                else:
+                    tech = User.from_id(connection, result[2])
+                    users[result[2]] = tech
+
+                # Find lead
+                if result[3] in users:
+                    lead = users[result[3]]
+                else:
+                    lead = User.from_id(connection, result[3])
+                    users[result[3]] = lead
+
+                data.append(CheckedClaim(result[0], result[1], tech, lead, result[4], result[5], result[6],
+                                         Status.from_str(result[7]), result[8]))
+
+            return data
+
+    @staticmethod
     def get_all_with_case_num(connection: MySQLConnection, case_num: str) -> list['CheckedClaim']:
         """Returns a list of CheckedClaim based on a case number.
         
@@ -177,7 +257,7 @@ class CheckedClaim(DatabaseItem):
             connection.commit()
 
     @staticmethod
-    def search(connection: MySQLConnection, user: Optional[User] = None, month: Optional[int] = None, status: Status = None) -> list['CheckedClaim']:
+    def search(connection: MySQLConnection, user: Optional[User] = None, year: Optional[int] = None, month: Optional[int] = None, status: Status = None) -> list['CheckedClaim']:
         """Searches the list of CheckedClaims based on the specified parameters.
         
         Args:
@@ -195,8 +275,10 @@ class CheckedClaim(DatabaseItem):
             sql += f" AND tech_id = {user.discord_id}"
 
         if month is not None:
-            now = datetime.now()
-            beginning = f"'{now.year}-{month}-1 00:00:00'"
+            if year is None:
+                year = datetime.now().year
+
+            beginning = f"'{year}-{month}-1 00:00:00'"
 
             match month:
                 case 1 | 3 | 5 | 7 | 8 | 10 | 12:
@@ -205,7 +287,7 @@ class CheckedClaim(DatabaseItem):
                     end = 30
                 case 2:
                     end = 28
-            ending = f"'{now.year}-{month}-{end} 23:59:59'"
+            ending = f"'{year}-{month}-{end} 23:59:59'"
             sql += f" AND claim_time BETWEEN {beginning} AND {ending}"
 
         if status is not None:

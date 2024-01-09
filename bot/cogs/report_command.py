@@ -29,12 +29,13 @@ class ReportCommand(commands.Cog):
     @app_commands.command(description="Generate a report of cases logged.")
     @app_commands.describe(user="The user the report will be generated for.")
     @app_commands.describe(month="The month for the report (e.g. \"march\").")
+    @app_commands.describe(year="The year for the report (e.g. 2023).")
     @app_commands.choices(status=[
         app_commands.Choice(name="Kudos", value="kudos"),
         app_commands.Choice(name="Pinged", value="pinged")
     ])
     @app_commands.default_permissions(mute_members=True)
-    async def report(self, interaction: discord.Interaction, user: discord.Member = None, month: str = None, status: app_commands.Choice[str] = None):
+    async def report(self, interaction: discord.Interaction, user: discord.Member = None, month: str = None, year: int = None, status: app_commands.Choice[str] = None):
         """Creates a report of all cases, optionally within a certain month and optionally
         for one specific user.
 
@@ -72,7 +73,10 @@ class ReportCommand(commands.Cog):
 
         if month is not None:
             month = int(month_string_to_number(month))
-            description += f" in **{month_number_to_name(month)}**"
+            description += f" in **{month_number_to_name(month)}"
+            if year is not None:
+                description += f"/{year}"
+            description += "**"
         if user is not None:
             user = User.from_id(self.bot.connection, user.id)
             description += f" from user **{user.full_name}**"
@@ -81,7 +85,7 @@ class ReportCommand(commands.Cog):
             status = Status.from_str(status.value)
             description += f" with status **{status}**"
 
-        results = CheckedClaim.search(self.bot.connection, user, month, status)
+        results = CheckedClaim.search(self.bot.connection, user, year, month, status)
         row_str = self.data_to_rowstr(results)
 
         with open('temp.csv', 'w', newline='', encoding='utf-8') as csvfile:
