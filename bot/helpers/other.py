@@ -141,6 +141,9 @@ def get_semester(t: datetime.datetime) -> str:
     Returns:
         str - The name of the semester
     """
+    if t.month == 1 and t.day < 29:
+        return "Winter"
+    
     if 1 <= t.month <= 5:
         return "Spring"
 
