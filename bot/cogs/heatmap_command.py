@@ -1,3 +1,5 @@
+import io
+
 from discord import app_commands
 from discord.ext import commands
 import discord
@@ -40,12 +42,35 @@ class HeatmapCommand(commands.Cog):
             return
 
         await interaction.response.defer()  # Wait in case process takes a long time
-        self.generate()
+        data = self.generate(CheckedClaim.get_all_from_year(self.bot.connection, 2023))
+        chart = discord.File(data, filename="chart.png")
 
-        await interaction.followup.send(content="test")
+        await interaction.followup.send(content="test", file=chart)
 
-    def generate(self):
-        techs = [
+    def generate(self, cases: list[CheckedClaim]) -> io.BytesIO:
+        data_stream = io.BytesIO()
+
+        all_data: dict[int, dict[int, int]] = {}  # dict of dicts (parentkey = lead, childkey = tech)
+        leads: dict[int, str] = {}
+        techs: dict[int, str] = {}
+        for case in cases:
+            lead = case.lead.discord_id
+            tech = case.tech.discord_id
+
+            leads[lead] = case.lead.abb_name
+            techs[tech] = case.tech.abb_name
+
+            all_data.setdefault(lead, {})
+            all_data[lead].setdefault(tech, 0)
+
+            all_data[lead][tech] += 1
+
+        # Initialize all data
+        for key in list(all_data.keys()):
+            for tech in list(techs.keys()):
+                all_data[key].setdefault(tech, 0)
+
+        '''techs = [
             "Elsa P.",
             "Matthew L.",
             "Nikki M.",
@@ -57,18 +82,24 @@ class HeatmapCommand(commands.Cog):
             "Charlie F.",
             "Andrew J.",
             "Ethan C."
-        ]
+        ]'''
+        matrix = []
+        for lead_key in list(all_data.keys()):
+            temp = []
+            for tech_key in list(all_data[lead_key].keys()):
+                temp.append(all_data[lead_key][tech_key])
+            matrix.append(temp)
 
-        matrix = [
+        '''matrix = [
             [8, 0, 10, 4],
             [2, 5, 2, 3],
             [5, 6, 7, 3],
             [12, 4, 5, 6]
-        ]
+        ]'''
 
         # Labels
-        xlabs = techs
-        ylabs = leads
+        xlabs = list(techs.values())
+        ylabs = list(leads.values())
 
         # Heat map
         fig, ax = plt.subplots()
@@ -83,7 +114,11 @@ class HeatmapCommand(commands.Cog):
         plt.xlabel("Techs")
         plt.ylabel("Leads")
 
-        plt.show()
+        plt.savefig(data_stream, format='png', bbox_inches="tight", dpi=400)
+        plt.close()
+        data_stream.seek(0)
+
+        return data_stream
 
     @heatmap.error
     async def heatmap_error(self, ctx: discord.Interaction, error):
