@@ -57,8 +57,8 @@ class HeatmapCommand(commands.Cog):
             lead = case.lead.discord_id
             tech = case.tech.discord_id
 
-            leads[lead] = case.lead.abb_name
-            techs[tech] = case.tech.abb_name
+            leads[lead] = case.lead.first_name[0].upper() + case.lead.last_name[0].upper()
+            techs[tech] = case.tech.first_name[0].upper() + case.tech.last_name[0].upper()
 
             all_data.setdefault(lead, {})
             all_data[lead].setdefault(tech, 0)
