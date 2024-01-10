@@ -33,7 +33,7 @@ class HeatmapCommand(commands.Cog):
 
     @app_commands.command(description="Generate a heatmap of cases logged.")
     @app_commands.default_permissions(mute_members=True)
-    async def heatmap(self, interaction: discord.Interaction):
+    async def heatmap(self, interaction: discord.Interaction, year: int):
         # Check if user is a lead
         if not self.bot.check_if_lead(interaction.user):
             # Return error message if user is not Lead
@@ -41,8 +41,8 @@ class HeatmapCommand(commands.Cog):
             await interaction.response.send_message(content=msg, ephemeral=True, delete_after=180)
             return
 
-        await interaction.response.defer()  # Wait in case process takes a long time
-        data = self.generate(CheckedClaim.get_all_from_year(self.bot.connection, 2023))
+        await interaction.response.defer(ephemeral=True)  # Wait in case process takes a long time
+        data = self.generate(CheckedClaim.get_all_from_year(self.bot.connection, year))
         chart = discord.File(data, filename="chart.png")
 
         await interaction.followup.send(content="test", file=chart)
@@ -70,32 +70,12 @@ class HeatmapCommand(commands.Cog):
             for tech in list(techs.keys()):
                 all_data[key].setdefault(tech, 0)
 
-        '''techs = [
-            "Elsa P.",
-            "Matthew L.",
-            "Nikki M.",
-            "Aditya P."
-        ]
-
-        leads = [
-            "Andrew A.",
-            "Charlie F.",
-            "Andrew J.",
-            "Ethan C."
-        ]'''
         matrix = []
         for lead_key in list(all_data.keys()):
             temp = []
             for tech_key in list(all_data[lead_key].keys()):
                 temp.append(all_data[lead_key][tech_key])
             matrix.append(temp)
-
-        '''matrix = [
-            [8, 0, 10, 4],
-            [2, 5, 2, 3],
-            [5, 6, 7, 3],
-            [12, 4, 5, 6]
-        ]'''
 
         # Labels
         xlabs = list(techs.values())
@@ -109,7 +89,7 @@ class HeatmapCommand(commands.Cog):
 
         # Add the labels
         ax.set_title('Simple plot')
-        ax.set_xticks(np.arange(len(xlabs)), labels=xlabs)
+        ax.set_xticks(np.arange(len(xlabs)), labels=xlabs, rotation=90)
         ax.set_yticks(np.arange(len(ylabs)), labels=ylabs)
         plt.xlabel("Techs")
         plt.ylabel("Leads")
@@ -125,7 +105,6 @@ class HeatmapCommand(commands.Cog):
         full_error = traceback.format_exc()
 
         ch = await self.bot.fetch_channel(self.bot.error_channel)
-
         msg = f"Error with **/heatmap** ran by <@!{ctx.user.id}>.\n```{full_error}```"
         if len(msg) > 1993:
             msg = msg[:1993] + "...```"
