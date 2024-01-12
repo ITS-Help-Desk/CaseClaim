@@ -1,20 +1,14 @@
-import io
-
 from discord import app_commands
 from discord.ext import commands
 import discord
-import csv
+import io
 import numpy as np
 import matplotlib.pyplot as plt
+from typing import Optional
 
-from bot.helpers.other import month_string_to_number, month_number_to_name
 import traceback
 
 from bot.models.checked_claim import CheckedClaim
-from bot.models.feedback import Feedback
-from bot.models.user import User
-from bot.status import Status
-
 # Use TYPE_CHECKING to avoid circular import from bot
 from typing import TYPE_CHECKING
 
@@ -32,8 +26,10 @@ class HeatmapCommand(commands.Cog):
         self.bot = bot
 
     @app_commands.command(description="Generate a heatmap of cases logged.")
+    @app_commands.describe(year="The year of cases.")
+    @app_commands.describe(month="(Optional) The month of cases.")
     @app_commands.default_permissions(mute_members=True)
-    async def heatmap(self, interaction: discord.Interaction, year: int):
+    async def heatmap(self, interaction: discord.Interaction, year: int, month: Optional[int]):
         # Check if user is a lead
         if not self.bot.check_if_lead(interaction.user):
             # Return error message if user is not Lead
@@ -42,12 +38,20 @@ class HeatmapCommand(commands.Cog):
             return
 
         await interaction.response.defer(ephemeral=True)  # Wait in case process takes a long time
-        data = self.generate(CheckedClaim.get_all_from_year(self.bot.connection, year))
+        if month is None:
+            cases = CheckedClaim.get_all_from_year(self.bot.connection, year)
+            title = f"HD Heatmap ({year})"
+        else:
+            cases = CheckedClaim.get_all_from_month(self.bot.connection, month, year)
+            title = f"HD Heatmap ({month}/{year})"
+
+        data = self.generate(cases, title)
+
         chart = discord.File(data, filename="chart.png")
 
-        await interaction.followup.send(content="test", file=chart)
+        await interaction.followup.send(content="Heatmap created successfully", file=chart)
 
-    def generate(self, cases: list[CheckedClaim]) -> io.BytesIO:
+    def generate(self, cases: list[CheckedClaim], title: str) -> io.BytesIO:
         data_stream = io.BytesIO()
 
         plt.rcParams.update({'font.size': 7})
@@ -95,7 +99,6 @@ class HeatmapCommand(commands.Cog):
 
         # Labels
         xlabs = [techs[key] for key in sorted_keys]
-        #xlabs = list(techs.values())
         ylabs = list(leads.values())
 
         # Heat map
@@ -105,7 +108,7 @@ class HeatmapCommand(commands.Cog):
         plt.colorbar(ax.get_children()[0])
 
         # Add the labels
-        ax.set_title('Simple plot')
+        ax.set_title(title)
         ax.set_xticks(np.arange(len(xlabs)), labels=xlabs, rotation=90)
         ax.set_yticks(np.arange(len(ylabs)), labels=ylabs)
         plt.xlabel("Techs")
