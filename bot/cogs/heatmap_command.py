@@ -96,7 +96,7 @@ class HeatmapCommand(commands.Cog):
         plt.xlabel("Techs")
         plt.ylabel("Leads")
 
-        plt.savefig(data_stream, format='png', bbox_inches="tight", dpi=400)
+        plt.savefig(data_stream, format='png', bbox_inches="tight", dpi=800)
         plt.close()
         data_stream.seek(0)
 
