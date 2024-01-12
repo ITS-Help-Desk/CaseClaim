@@ -79,20 +79,23 @@ class HeatmapCommand(commands.Cog):
 
         # Remove techs with less than 20 cases
         for tech in list(total_cases.keys()):
-            if total_cases[tech] < 20:
+            if total_cases[tech] < 40:
                 for key in list(all_data.keys()):
                     all_data[key].pop(tech)
                 techs.pop(tech)
 
+        # Create 2D matrix of values
+        sorted_keys = sorted(techs, key=techs.get)
         matrix = []
         for lead_key in list(all_data.keys()):
             temp = []
-            for tech_key in list(all_data[lead_key].keys()):
+            for tech_key in sorted_keys:
                 temp.append(all_data[lead_key][tech_key])
             matrix.append(temp)
 
         # Labels
-        xlabs = list(techs.values())
+        xlabs = [techs[key] for key in sorted_keys]
+        #xlabs = list(techs.values())
         ylabs = list(leads.values())
 
         # Heat map
