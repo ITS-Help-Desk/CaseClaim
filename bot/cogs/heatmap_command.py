@@ -52,6 +52,16 @@ class HeatmapCommand(commands.Cog):
         await interaction.followup.send(content="Heatmap created successfully", file=chart)
 
     def generate(self, cases: list[CheckedClaim], title: str) -> io.BytesIO:
+        """Converts a list of cases into a heatmap to show which leads have
+        checked cases from which techs.
+
+        Args:
+            cases (list[CheckedClaim]): The list of CheckedClaims that will be combed through
+            title (str): The title of the matplotlib graph
+
+        Returns:
+            BytesIO - A byte stream that can be attached as a Discord file that will show the heatmap
+        """
         data_stream = io.BytesIO()
 
         plt.rcParams.update({'font.size': 7})
@@ -61,6 +71,7 @@ class HeatmapCommand(commands.Cog):
         techs: dict[int, str] = {}
 
         total_cases: dict[int, int] = {}
+        # Collect data
         for case in cases:
             lead = case.lead.discord_id
             tech = case.tech.discord_id
