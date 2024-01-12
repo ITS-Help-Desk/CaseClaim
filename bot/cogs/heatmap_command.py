@@ -55,12 +55,14 @@ class HeatmapCommand(commands.Cog):
         all_data: dict[int, dict[int, int]] = {}  # dict of dicts (parentkey = lead, childkey = tech)
         leads: dict[int, str] = {}
         techs: dict[int, str] = {}
+
+        total_cases: dict[int, int] = {}
         for case in cases:
             lead = case.lead.discord_id
             tech = case.tech.discord_id
 
-            #leads[lead] = case.lead.first_name[0].upper() + case.lead.last_name[0].upper()
-            #techs[tech] = case.tech.first_name[0].upper() + case.tech.last_name[0].upper()
+            total_cases.setdefault(tech, 0)
+            total_cases[tech] += 1
 
             leads[lead] = case.lead.abb_name
             techs[tech] = case.tech.abb_name
@@ -74,6 +76,13 @@ class HeatmapCommand(commands.Cog):
         for key in list(all_data.keys()):
             for tech in list(techs.keys()):
                 all_data[key].setdefault(tech, 0)
+
+        # Remove techs with less than 20 cases
+        for tech in list(total_cases.keys()):
+            if total_cases[tech] < 20:
+                for key in list(all_data.keys()):
+                    all_data[key].pop(tech)
+                techs.pop(tech)
 
         matrix = []
         for lead_key in list(all_data.keys()):
