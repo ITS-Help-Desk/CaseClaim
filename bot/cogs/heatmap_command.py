@@ -50,6 +50,8 @@ class HeatmapCommand(commands.Cog):
     def generate(self, cases: list[CheckedClaim]) -> io.BytesIO:
         data_stream = io.BytesIO()
 
+        plt.rcParams.update({'font.size': 7})
+
         all_data: dict[int, dict[int, int]] = {}  # dict of dicts (parentkey = lead, childkey = tech)
         leads: dict[int, str] = {}
         techs: dict[int, str] = {}
@@ -97,6 +99,8 @@ class HeatmapCommand(commands.Cog):
         plt.savefig(data_stream, format='png', bbox_inches="tight", dpi=400)
         plt.close()
         data_stream.seek(0)
+
+        plt.rcParams.update({'font.size': 11})
 
         return data_stream
 
