@@ -47,7 +47,7 @@ class LeaderboardCommand(commands.Cog):
             CheckedClaim.get_all_leaderboard(self.bot.connection, interaction.created_at.year),
             TeamPoint.get_all(self.bot.connection), interaction.created_at, None)
 
-        embed = LeaderboardView.create_embed(self.bot, interaction, result)
+        embed = result.create_embed(self.bot, interaction)
         await interaction.followup.send(embed=embed, view=LeaderboardView(self.bot))
 
     @leaderboard.error

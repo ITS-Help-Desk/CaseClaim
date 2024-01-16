@@ -1,14 +1,13 @@
-import datetime
 import discord
 import discord.ui as ui
 
 from bot.helpers.leaderboard_helpers import LeadstatsResults
-from bot.helpers.other import month_number_to_name
-
 from bot.models.checked_claim import CheckedClaim
 
 # Use TYPE_CHECKING to avoid circular import from bot
 from typing import TYPE_CHECKING
+
+from ..forms.leadstats_form import LeadstatsForm
 
 if TYPE_CHECKING:
     from ..bot import Bot
@@ -16,7 +15,7 @@ if TYPE_CHECKING:
 
 class LeadStatsView(ui.View):
     def __init__(self, bot: "Bot"):
-        """Creates a leaderboard view for the /leaderboard command
+        """Creates a leaderboard view for the /leadstats command
         to allow users to refresh it.
 
         Args:
@@ -35,7 +34,8 @@ class LeadStatsView(ui.View):
         """
         await interaction.response.defer(thinking=False)  # Acknowledge button press
 
-        new_embed, file = await LeadStatsView.create_embed(self.bot, interaction)
+        result = LeadstatsResults(CheckedClaim.search(self.bot.connection), interaction.created_at)
+        new_embed, file = result.create_embed(self.bot, interaction, True)
 
         message = interaction.message
         if message is not None:
@@ -51,35 +51,20 @@ class LeadStatsView(ui.View):
         """
         await interaction.response.defer(thinking=False)  # Acknowledge button press
 
-        new_embed, file = await LeadStatsView.create_embed(self.bot, interaction, month=False)
+        result = LeadstatsResults(CheckedClaim.search(self.bot.connection), interaction.created_at)
+        new_embed, file = result.create_embed(self.bot, interaction, month=False)
 
         message = interaction.message
         if message is not None:
             await message.edit(embed=new_embed, attachments=[file])
 
-    @staticmethod
-    async def create_embed(bot: 'Bot', interaction: discord.Interaction, month=True) -> tuple[discord.Embed, discord.File]:
-        """Creates the leaderboard embed for the /leaderboard command and for the
-        Refresh button.
+    @ui.button(label="See past", style=discord.ButtonStyle.secondary, custom_id="seepast")
+    async def see_past(self, interaction: discord.Interaction, button: discord.ui.Button):
+        """Shows past leadstats leaderboards. This command will open a modal prompting the user to input a date.
 
         Args:
-            bot (Bot): An instance of the Bot class.
-            interaction (discord.Interaction): The interaction that generated this request
-            month (bool): Whether or not the data will be sampled for the month or whole semester
-        Returns:
-            discord.Embed: The embed object with everything already completed for month and semester rankings.
+            interaction (discord.Interaction): The interaction this button press originated from.
+            button (discord.ui.Button): Unused argument that's required to be passed in.
         """
-        claims = CheckedClaim.search(bot.connection)
-        results = LeadstatsResults(claims, interaction.created_at)
-        data_stream = results.convert_to_plot(bot, month, f"ITS Lead CC Statistics ({f'{month_number_to_name(interaction.created_at.month)}' if month else 'Semester'})")
-        chart = discord.File(data_stream, filename="chart.png")
-
-        embed = discord.Embed(title="ITS Case Check Leaderboard")
-        embed.colour = bot.embed_color
-
-        embed.set_image(url="attachment://chart.png")
-
-        embed.set_footer(text="Last Updated")
-        embed.timestamp = datetime.datetime.now()
-
-        return embed, chart
+        form = LeadstatsForm(self.bot)
+        await interaction.response.send_modal(form)

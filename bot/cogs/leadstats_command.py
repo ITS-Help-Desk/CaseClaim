@@ -4,9 +4,12 @@ import discord
 import traceback
 
 from bot.views.leadstats_view import LeadStatsView
+from bot.helpers.leaderboard_helpers import LeadstatsResults
 
 # Use TYPE_CHECKING to avoid circular import from bot
 from typing import TYPE_CHECKING
+
+from ..models.checked_claim import CheckedClaim
 
 if TYPE_CHECKING:
     from ..bot import Bot
@@ -42,9 +45,9 @@ class LeadStatsCommand(commands.Cog):
 
         # Generate and send leadstats
         await interaction.response.defer()  # Wait in case process takes a long time
-        embed, file = await LeadStatsView.create_embed(self.bot, interaction)
+        result = LeadstatsResults(CheckedClaim.search(self.bot.connection), interaction.created_at)
+        embed, file = result.create_embed(self.bot, interaction)
         await interaction.followup.send(embed=embed, view=LeadStatsView(self.bot), file=file)
-
 
     @leadstats.error
     async def check_leaderboard_error(self, ctx: discord.Interaction, error):
