@@ -1,10 +1,7 @@
-import datetime
 import discord
 import discord.ui as ui
 
 from bot.helpers.leaderboard_helpers import LeadstatsResults
-from bot.helpers.other import month_number_to_name
-
 from bot.models.checked_claim import CheckedClaim
 
 # Use TYPE_CHECKING to avoid circular import from bot
@@ -71,4 +68,3 @@ class LeadStatsView(ui.View):
         """
         form = LeadstatsForm(self.bot)
         await interaction.response.send_modal(form)
-
