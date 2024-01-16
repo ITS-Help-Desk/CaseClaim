@@ -20,7 +20,10 @@ def start_bot():
     # Start the bot and capture all input and output
     if _bot_process != None:
         return "already running"
-    _bot_process = subprocess.Popen(["python3", "main.py"], bufsize=8000,env=os.environ, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    if platform.system() == "Windows":
+        _bot_process = subprocess.Popen(["py", "main.py"], bufsize=8000,env=os.environ, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    else:
+        _bot_process = subprocess.Popen(["python3", "main.py"], bufsize=8000,env=os.environ, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     return "running"
 
 def stop_bot():
