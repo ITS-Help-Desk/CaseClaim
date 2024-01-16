@@ -10,6 +10,8 @@ from bot.models.checked_claim import CheckedClaim
 # Use TYPE_CHECKING to avoid circular import from bot
 from typing import TYPE_CHECKING
 
+from ..forms.leadstats_form import LeadstatsForm
+
 if TYPE_CHECKING:
     from ..bot import Bot
 
@@ -56,6 +58,17 @@ class LeadStatsView(ui.View):
         message = interaction.message
         if message is not None:
             await message.edit(embed=new_embed, attachments=[file])
+
+    @ui.button(label="See past", style=discord.ButtonStyle.secondary, custom_id="seepast")
+    async def see_past(self, interaction: discord.Interaction, button: discord.ui.Button):
+        """Shows past leadstats leaderboards. This command will open a modal prompting the user to input a date.
+
+        Args:
+            interaction (discord.Interaction): The interaction this button press originated from.
+            button (discord.ui.Button): Unused argument that's required to be passed in.
+        """
+        form = LeadstatsForm(self.bot)
+        await interaction.response.send_modal(form)
 
     @staticmethod
     async def create_embed(bot: 'Bot', interaction: discord.Interaction, month=True) -> tuple[discord.Embed, discord.File]:

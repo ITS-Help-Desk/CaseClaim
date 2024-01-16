@@ -134,6 +134,10 @@ class LeadstatsResults:
         interaction_semester = get_semester(date)
 
         for claim in claims:
+            # Ignore cases claimed after the provided date
+            if date.month < claim.claim_time.month:
+                continue
+
             # Initialize information as zero
             self.month_counts.setdefault(claim.lead.discord_id, 0)
             self.semester_counts.setdefault(claim.lead.discord_id, 0)
