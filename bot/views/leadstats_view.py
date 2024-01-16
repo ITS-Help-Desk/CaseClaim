@@ -58,7 +58,7 @@ class LeadStatsView(ui.View):
         if message is not None:
             await message.edit(embed=new_embed, attachments=[file])
 
-    @ui.button(label="See past", style=discord.ButtonStyle.secondary, custom_id="seepast")
+    @ui.button(label="See Past", style=discord.ButtonStyle.secondary, custom_id="seepast")
     async def see_past(self, interaction: discord.Interaction, button: discord.ui.Button):
         """Shows past leadstats leaderboards. This command will open a modal prompting the user to input a date.
 
