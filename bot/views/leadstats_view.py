@@ -18,7 +18,7 @@ if TYPE_CHECKING:
 
 class LeadStatsView(ui.View):
     def __init__(self, bot: "Bot"):
-        """Creates a leaderboard view for the /leaderboard command
+        """Creates a leaderboard view for the /leadstats command
         to allow users to refresh it.
 
         Args:
