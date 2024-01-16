@@ -116,6 +116,61 @@ class LeaderboardResults:
         for key in self.semester_team_sorted_keys:
             self.ordered_team_semester[key] = self.semester_team_counts[key]
 
+    def create_embed(self, bot: 'Bot', interaction: discord.Interaction) -> discord.Embed:
+        """Creates the leaderboard embed for the /leaderboard command and for the
+        Refresh button.
+
+        Args:
+            bot (Bot): A reference to the bot class
+            interaction (discord.Interaction): The interaction requesting the leaderboard.
+
+        Returns:
+            discord.Embed: The embed object with everything already completed for month and semester rankings.
+        """
+        month_ranking = ""
+        # Create month written ranking
+        for i in range(min(4, len(self.ordered_month.keys()))):
+            user_id = list(self.ordered_month.keys())[i]
+            month_ranking += f"**{i + 1}.** <@!{user_id}> | {self.ordered_month[user_id]}\n"
+
+        semester_ranking = ""
+        # Create semester written ranking
+        for i in range(min(4, len(self.ordered_semester.keys()))):
+            user_id = list(self.ordered_semester.keys())[i]
+            semester_ranking += f"**{i + 1}.** <@!{user_id}> | {self.ordered_semester[user_id]}\n"
+
+        month_team_ranking = ""
+        # Create team written ranking
+        for i in range(min(4, len(self.ordered_team_month.keys()))):
+            team_id = list(self.ordered_team_month.keys())[i]
+            month_team_ranking += f"**{i + 1}.** <@&{team_id}> | {self.ordered_team_month[team_id]}\n"
+
+        semester_team_ranking = ""
+        # Create team written ranking
+        for i in range(min(4, len(self.ordered_team_semester.keys()))):
+            team_id = list(self.ordered_team_semester.keys())[i]
+            semester_team_ranking += f"**{i + 1}.** <@&{team_id}> | {self.ordered_team_semester[team_id]}\n"
+
+        # Create embed
+        embed = discord.Embed()
+        embed.colour = bot.embed_color
+
+        # Add leaderboard fields
+        embed.add_field(name=f"{month_number_to_name(self.date.month)}", value="", inline=False)
+        embed.add_field(name="", value=month_team_ranking, inline=True)
+        embed.add_field(name="", value=month_ranking, inline=True)
+
+        embed.add_field(name="Semester", value="", inline=False)
+
+        embed.add_field(name="", value=semester_team_ranking, inline=True)
+        embed.add_field(name="", value=semester_ranking, inline=True)
+
+        embed.set_author(name="Leaderboard", icon_url=interaction.guild.icon.url)
+        embed.set_footer(text="Last Updated")
+        embed.timestamp = datetime.datetime.now()
+
+        return embed
+
 
 class LeadstatsResults:
     def __init__(self, claims: list[CheckedClaim], date: datetime.datetime):
@@ -284,4 +339,28 @@ class LeadstatsResults:
         data_stream.seek(0)
 
         return data_stream
+
+    def create_embed(self, bot: 'Bot', interaction: discord.Interaction, month=True) -> tuple[discord.Embed, discord.File]:
+        """Creates the leaderboard embed for the /leaderboard command and for the
+        Refresh button.
+
+        Args:
+            bot (Bot): An instance of the Bot class.
+            interaction (discord.Interaction): The interaction that generated this request
+            month (bool): Whether or not the data will be sampled for the month or whole semester
+        Returns:
+            discord.Embed: The embed object with everything already completed for month and semester rankings.
+        """
+        data_stream = self.convert_to_plot(bot, month, f"ITS Lead CC Statistics ({f'{month_number_to_name(interaction.created_at.month)}' if month else 'Semester'})")
+        chart = discord.File(data_stream, filename="chart.png")
+
+        embed = discord.Embed(title="ITS Case Check Leaderboard")
+        embed.colour = bot.embed_color
+
+        embed.set_image(url="attachment://chart.png")
+
+        embed.set_footer(text="Last Updated")
+        embed.timestamp = datetime.datetime.now()
+
+        return embed, chart
 
