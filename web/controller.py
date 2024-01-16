@@ -34,7 +34,9 @@ def stop_bot():
     if _bot_process != None:
         # Terminate the bot process
         if platform.system() == "Windows":
-            _bot_process.send_signal(signal.CTRL_C_EVENT)
+            # Apparently signals in python for windows are extremely janky
+            # See here: https://stackoverflow.com/questions/28551180/how-to-kill-subprocess-python-in-windows
+            subprocess.call(['taskkill', '/F', '/T', '/PID', str(_bot_process.pid)])
         else:
             _bot_process.send_signal(signal.SIGINT)
         _bot_process = None
