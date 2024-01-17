@@ -27,16 +27,14 @@ class HelpCommand(commands.Cog):
             interaction (discord.Interaction): Interaction that the slash command originated from
         """
         embed = discord.Embed(title='ITS Help Desk Case Claim Bot')
-        embed.description = 'For more information, go [here](https://github.com/ajockelle/CaseClaim).'
+        embed.description = 'For more information, go to the bot\'s [GitHub page](https://github.com/ajockelle/CaseClaim).'
         embed.set_thumbnail(url=interaction.guild.icon.url)
         embed.colour = self.bot.embed_color
 
         # Add standard commands
-        embed.add_field(name='/help', value='Shows all the commands for the bot.')
-        embed.add_field(name='/join', value='Records your first and last name for analytic purposes')
-        embed.add_field(name='/claim <case_num>', value=f'Claims a case in the <#{self.bot.cases_channel}> channel')
-        embed.add_field(name='/caseinfo <case_num>', value='See the history of who\'s worked on a case.')
-        embed.add_field(name='/mycases', value='Shows all the cases that a user has worked on.')
+        embed.add_field(name='/claim <case_num>', value=f'Claims a case in the <#{self.bot.cases_channel}> channel.')
+        embed.add_field(name='/mycases', value='Shows a list of all the cases that you\'ve worked on.')
+        embed.add_field(name='/caseinfo <case_num>', value=' Shows who\'s worked on a case in the past.')
 
         # Check if user is not a lead
         if not self.bot.check_if_lead(interaction.user):
@@ -45,13 +43,13 @@ class HelpCommand(commands.Cog):
             return
 
         # Add lead commands
-        embed.add_field(name='/report', value=f'Shows a report for an optionally given user and month, or if it\'s pinged.')
-        embed.add_field(name='/casedist', value='Returns a graph of the case claim time distribution.')
-        embed.add_field(name='/leaderboard', value='Shows a leaderboard of all users by case claim amount.')
-        embed.add_field(name='/leadstats', value='Shows a leaderboard of all leads by case check amount.')
-        embed.add_field(name='/ping', value='Manually ping a case')
-        embed.add_field(name='/award', value='Award points to a team')
-        embed.add_field(name='/announcement <type>', value='Sends an announcement/outage to the announcements channel.')
+        embed.add_field(name='/report', value=f'Get a list of cases in a spreadsheet')
+        embed.add_field(name='/announcement', value='Make a global announcement or outage in Discord.')
+        embed.add_field(name='/ping', value='Manually ping a case after it\'s been checked.')
+        embed.add_field(name='/heatmap', value='Show a heatmap of what leads are checking certain tech\'s claims.')
+        embed.add_field(name='/evaldata', value='Shows statistics that can be used for monthly evals.')
+        embed.add_field(name='/casedist', value='Shows the distribution of cases claimed throughout the day.')
+        embed.add_field(name='/award', value='Award a team points as a prize.')
 
         await interaction.response.send_message(embed=embed, ephemeral=True, delete_after=300)
 

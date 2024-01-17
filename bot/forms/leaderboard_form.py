@@ -39,6 +39,10 @@ class LeaderboardForm(ui.Modal, title='Past Leaderboard Form'):
 
         d = self.validate_input(str(self.date))
 
+        if d is None:
+            await interaction.response.send_message(content="Please provide a valid date in MM/YYYY format.", ephemeral=True, delete_after=30)
+            return
+
         result = LeaderboardResults(
             CheckedClaim.get_all_leaderboard(self.bot.connection, d.year),
             TeamPoint.get_all(self.bot.connection), d, None, True)

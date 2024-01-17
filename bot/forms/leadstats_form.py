@@ -36,7 +36,19 @@ class LeadstatsForm(ui.Modal, title='Past Leadstats Form'):
         """
 
         d = self.validate_input(str(self.date))
-        m_or_s = str(self.month_or_semester).lower() == 'm'
+
+        if d is None:
+            await interaction.response.send_message(content="Please provide a valid date in MM/YYYY format.", ephemeral=True, delete_after=30)
+            return
+
+        if str(self.month_or_semester).lower().startswith("m"):
+            m_or_s = True
+        elif str(self.month_or_semester).lower().startswith("s"):
+            m_or_s = False
+        else:
+            await interaction.response.send_message(content="Please specify if you would like the whole semester or only the month by typing **m** or **s**.",
+                                                    ephemeral=True, delete_after=30)
+            return
 
         results = LeadstatsResults(CheckedClaim.search(self.bot.connection), d)
 
