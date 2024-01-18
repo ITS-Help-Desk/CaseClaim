@@ -69,7 +69,7 @@ async def send_pending_kudos(bot: 'Bot', pp: PendingFeedback, case_channel: disc
     tech = await bot.fetch_user(claim.tech.discord_id)
 
     fb_embed = discord.Embed(
-        description=f"<@{tech.id}>, this case has been complimented by <@{tech.id}>.",
+        description=f"<@{tech.id}>, this case has been complimented by <@{claim.lead.discord_id}>.",
         colour=discord.Color.green(),
         timestamp=now
     )
