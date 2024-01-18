@@ -43,7 +43,7 @@ class HelpCommand(commands.Cog):
             return
 
         # Add lead commands
-        embed.add_field(name='/report', value=f'Get a list of cases in a spreadsheet')
+        embed.add_field(name='/report', value=f'Get a list of cases in a spreadsheet.')
         embed.add_field(name='/announcement', value='Make a global announcement or outage in Discord.')
         embed.add_field(name='/ping', value='Manually ping a case after it\'s been checked.')
         embed.add_field(name='/heatmap', value='Show a heatmap of what leads are checking certain tech\'s claims.')
