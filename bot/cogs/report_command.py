@@ -1,3 +1,5 @@
+import datetime
+
 from discord import app_commands
 from discord.ext import commands
 import discord
@@ -67,6 +69,11 @@ class ReportCommand(commands.Cog):
                 await interaction.response.send_message(content="Invalid month! Please use 3 letter abbreviations (e.g. \"jan\", \"feb\",...)", ephemeral=True, delete_after=180)
                 return
 
+        # Automatically setup the year for previous months
+        now = datetime.datetime.now()
+        if year is None and int(month_string_to_number(month)) <= now.month:
+            year = datetime.datetime.now().year
+
         await interaction.response.defer()  # Wait in case process takes a long time
 
         description = "Here's your report of cases"
@@ -128,6 +135,8 @@ class ReportCommand(commands.Cog):
         full_error = traceback.format_exc()
 
         ch = await self.bot.fetch_channel(self.bot.error_channel)
+
+        print(full_error)
 
         msg = f"Error with **/report** ran by <@!{ctx.user.id}>.\n```{full_error}```"
         if len(msg) > 1993:
