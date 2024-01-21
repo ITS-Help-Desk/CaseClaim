@@ -2,7 +2,7 @@ from aiohttp import ClientSession
 import asyncio
 from discord.ext import commands, tasks
 from mysql.connector import MySQLConnection
-from typing import Any
+from typing import Any, OrderedDict
 
 from bot.cogs.claim_command import ClaimCommand
 from bot.cogs.mycases_command import MyCasesCommand
