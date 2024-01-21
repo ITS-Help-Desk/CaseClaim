@@ -325,7 +325,7 @@ class LeadstatsResults:
         for c in ax.containers:
             labels = []
             for v in c:
-                if v.get_height() > 0 and v.get_height() in list(labels_dict.keys()):
+                if v.get_height() > 20 and v.get_height() in list(labels_dict.keys()):
                     labels.append(labels_dict[v.get_height()])
                 else:
                     labels.append("")
@@ -363,4 +363,3 @@ class LeadstatsResults:
         embed.timestamp = datetime.datetime.now()
 
         return embed, chart
-

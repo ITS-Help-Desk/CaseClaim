@@ -21,38 +21,38 @@ For information about how to run the bot, troubleshooting, and development guide
 - /mycases
     - Allows a user to see a list of cases they've worked on.
     - Shows a paginated list containing the time and case numbers.
-- /hleaderboard
-  - Allows a user to see a leaderboard from any month and year.
-  - Shows an ephemeral message in the same format as the normal leaderboard.
+    - 
 ## Commands (for Leads)
 - /report **\[user]** **\[month]** **\[pinged]**
     - Allows a lead to instantly create a report on filtered cases.
     - Leads can filter depending on a user, month, or whether or not the case was pinged.
     - These parameters are optional and can be used in conjunction with one another.
-- /leaderboard
-    - Allows a user to see a leaderboard of all other users by case claim amount.
-    - Shows a paginated view of each user and how many cases they've claimed.
-- /leadstats
-    - Allows a user to see a leaderboard of all leads by cases they've checked and how many have been pinged
-    - Uses matplotlib and pandas to create a stacked bar chart displaying the information
-- /getlog
-    - Allows a lead to get a copy of the log file so that they can view all messages
+- /announcement **<Outage/Announcement>**
+  - Allows a PA/lead to make an announcement or an outage.
+  - Prompts the PA/lead with a modal where they can input information
+  - A message will appear in the announcements channel and a sticky message will appear in the cases channel
+- /ping **<user>** **<case_num>**
+  - Allows a lead to manually ping a case after it has been checked
+  - Prompts a lead with a modal to input standard pinging information
+- /heatmap **<year>** **\[month]**
+  - Shows a heatmap of what lead are checking certain tech's claims
+  - Can be used for one month or an entire year
+- /evaldata **<year>** **\[month]**
+  - Returns two spreadsheets with data that can be used for monthly evaluations
+  - One spreadsheet is for data relating to techs, the other spreadsheet has data relating to leads
 - /casedist **\<days>**
     - Allows a lead to see the distribution of case claim time throughout the day.
     - Uses matplotlib to create a histogram displaying the information.
 - /award
     - Allows a lead to reward a team points that will be logged in the MySQL database.
     - Sends a message to the #bot channel informing everyone of the award and the reason why it was given.
-## Commands (for PAs)
-- /announcement **<Outage/Announcement>**
-  - Allows a PA to make an announcement or an outage.
-  - Prompts the PA with a modal where they can input information
-  - A message will appear in the announcements channel and a sticky message will appear in the cases channel
+
 
 ## Dependencies
 - discord.py [2.2.2](https://pypi.org/project/discord.py/)
 - matplotlib [3.7.2](https://pypi.org/project/matplotlib/)
 - pandas [2.1.0](https://pypi.org/project/pandas/)
 - mysql-connector-python [8.1.0](https://pypi.org/project/mysql-connector-python/)
-- aiohttp [3.8.3](https://pypi.org/project/aiohttp/)
+- aiohttp [3.9.1](https://pypi.org/project/aiohttp/)
 - pytz [2023.3](https://pypi.org/project/pytz/)
+- numpy [1.26.3](https://pypi.org/project/numpy/)
