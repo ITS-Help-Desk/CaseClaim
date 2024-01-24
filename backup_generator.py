@@ -4,10 +4,11 @@ import subprocess
 
 
 class SQLBackupCreator:
-    def __init__(self, username: str, password: str, database: str):
+    def __init__(self, username: str, password: str, database: str, backup_drive_path: str):
         self.username = username
         self.password = password
         self.database = database
+        self.backup_drive_path = backup_drive_path
 
     def create_backup(self) -> str:
         """Creates a local backup of the database using the MySQLDump command in the terminal.
@@ -15,10 +16,16 @@ class SQLBackupCreator:
         Returns:
             str - The location of the backup that was generated
         """
-        mac_cmd = "/usr/local/mysql-8.0.31-macos12-arm64/bin/mysqldump"
+        # Create backup
         output = f"backups/{int(time.time())}.sql"
         cmd = f"mysqldump -u {self.username} -p\"{self.password}\" {self.database} > {output}"
-        subprocess.Popen(cmd, shell=True)
+        s = subprocess.Popen(cmd, shell=True)
+        s.wait()
+
+        # Copy backup to drive
+        new_output = output.replace("/", "\\")
+        cmd1 = f"copy {new_output} {self.backup_drive_path}"
+        subprocess.Popen(cmd1, shell=True)
 
         return output
 
@@ -29,8 +36,9 @@ if __name__ == "__main__":
         user = data["db_user"]
         passwrd = data["db_password"]
         name = data["db_name"]
+        drive_backup_path = data["drive_backup_path"]
 
-    b = SQLBackupCreator(user, passwrd, name)
+    b = SQLBackupCreator(user, passwrd, name, drive_backup_path)
     while True:
         try:
             f = b.create_backup()
