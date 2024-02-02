@@ -1,4 +1,5 @@
 from flask import Flask, Response, abort, request, render_template, redirect, session
+from dotenv import load_dotenv
 
 import secrets
 import os
@@ -13,30 +14,28 @@ import web.components as components
 import datetime
 
 
-token = None
+token = os.getenv("DISCORD_TOKEN")
 connection = None
 app = Flask(__name__)
 bot_running_status = "not running" # Migrate to boolean in controller.py at some point so the rendering in nav_col is easier
 app.secret_key = secrets.token_hex(32)
-password = "CHANGE_ME_IN_PROD"
+password = os.getenv("PASSWORD")
 
 
-def load_token():
+def load_secrets(connector: mysql.connector.MySQLConnection):
     """
-    Read the bot token from the environment. This method is used by the server startup script.
+    Read the bot token and password from the environment. Save the given DB connector.
     """
+    # Grab .env stuff
+    load_dotenv()
+
     global token
-    token = os.environ.get("DISCORD_TOKEN")
-    print(f"[FROM GUI]: Token = {token}")
-
-def load_db_connector(connector: mysql.connector.MySQLConnection):
-    """
-    Save a DB connector to the case claim DB.
-    """
+    global password
     global connection
     connection = connector
-
-
+    token = os.getenv("DISCORD_TOKEN")
+    password = os.getenv("PASSWORD")
+    print(f"[FROM GUI]: Token = {token}, Password = {password}")
 
 @app.route("/")
 def default_page():

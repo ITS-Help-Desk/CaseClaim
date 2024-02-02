@@ -2,6 +2,8 @@ import json
 import logging
 import mysql.connector
 from mysql.connector import Error
+from dotenv import load_dotenv
+import os
 
 from bot.bot import Bot
 
@@ -25,6 +27,11 @@ def main():
     # Read token, if not found take user input
     with open('token.txt', 'r') as f:
         token = f.readline().strip()
+    
+    load_dotenv()
+    # Try finding token in env variable if not in file
+    if not token and "DISCORD_TOKEN" in os.environ:
+        token = os.getenv("DISCORD_TOKEN")
     
     if not token:
         token = input("Paste token here: ")

@@ -9,12 +9,13 @@ class ConfigMissingError(Exception): pass
 
 def main():
     # Export discord token to environment variable. If we go to docker remove this and do it in docker.
-
+    """ 
     if os.path.exists('token.txt'):
         with open('token.txt', 'r') as f:
             token = f.readline().strip()
         if token:
             os.environ["DISCORD_TOKEN"] = token
+    """
 
     try:
         with open('config.json', 'r') as config_file:
@@ -30,9 +31,6 @@ def main():
         'raise_on_warnings': True
     }
 
-    if gui.password == "CHANGE_ME_IN_PROD":
-        print("Please change the password in web/gui.py before running this app")
-        quit(1)
     
     connection = None
     try:
@@ -43,8 +41,8 @@ def main():
         quit(1)
 
     connection.autocommit = True
-    gui.load_db_connector(connection)
-    gui.load_token()
+    gui.load_secrets(connection)
+    # gui.load_token()
     gui.app.run()
 
 

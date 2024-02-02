@@ -57,3 +57,4 @@ For information about how to run the bot, troubleshooting, and development guide
 - aiohttp [3.9.1](https://pypi.org/project/aiohttp/)
 - pytz [2023.3](https://pypi.org/project/pytz/)
 - numpy [1.26.3](https://pypi.org/project/numpy/)
+- python-dotenv [1.0.1](https://pypi.org/project/python-dotenv/)
