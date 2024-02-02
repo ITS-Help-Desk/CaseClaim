@@ -22,6 +22,7 @@ from bot.cogs.heatmap_command import HeatmapCommand
 from bot.views.claim_view import ClaimView
 from bot.views.check_view import CheckView
 from bot.views.check_view_red import CheckViewRed
+from bot.views.resolve_ping_await_lead_view import ResolvePingAwaitLeadView
 from bot.views.resolve_ping_view import ResolvePingView
 from bot.views.outage_view import OutageView
 from bot.views.leaderboard_view import LeaderboardView
@@ -218,6 +219,7 @@ class Bot(commands.Bot):
         self.add_view(LeadStatsView(self))
         self.add_view(OutageView(self))
         self.add_view(ResolvePingView(self))
+        self.add_view(ResolvePingAwaitLeadView(self))
 
     async def on_ready(self):
         """Loads all commands stored in the cogs folder and starts the bot.

@@ -4,7 +4,8 @@ import discord.ui as ui
 from bot.models.checked_claim import CheckedClaim
 from bot.models.feedback import Feedback
 
-from bot.views.resolve_ping_view import ResolvePingView
+from bot.views.resolve_ping_await_lead_view import ResolvePingAwaitLeadView
+# from bot.views.resolve_ping_view import ResolvePingView
 
 # Use TYPE_CHECKING to avoid circular import from bot
 from typing import TYPE_CHECKING
@@ -47,4 +48,4 @@ class AffirmForm(ui.Modal, title='Tech Assessment'):
         except Exception as e:
             print(e)
 
-        await interaction.channel.send(content=f"<@!{self.case.lead.discord_id}> {self.assessment}", view=ResolvePingView(self.bot))
+        await interaction.channel.send(content=f"<@!{self.case.lead.discord_id}> {self.assessment}", view=ResolvePingAwaitLeadView(self.bot))
