@@ -189,6 +189,9 @@ class LeadstatsResults:
         self.month_kudos_counts = {}
         self.semester_kudos_counts = {}
 
+        self.month_done_counts = {}
+        self.semester_done_counts = {}
+
         self.total_month = {}
         self.total_semester = {}
 
@@ -209,15 +212,22 @@ class LeadstatsResults:
             self.month_kudos_counts.setdefault(claim.lead.discord_id, 0)
             self.semester_kudos_counts.setdefault(claim.lead.discord_id, 0)
 
+            self.month_done_counts.setdefault(claim.lead.discord_id, 0)
+            self.semester_done_counts.setdefault(claim.lead.discord_id, 0)
+
             self.total_month.setdefault(claim.lead.discord_id, 0)
             self.total_semester.setdefault(claim.lead.discord_id, 0)
 
             # Organize data for month
             if claim.claim_time.year == date.year and claim.claim_time.month == date.month:
                 self.total_month[claim.lead.discord_id] += 1
-                if claim.status == Status.CHECKED or claim.status == Status.DONE:
+                if claim.status == Status.CHECKED:
                     # Add checked/done
                     self.month_counts[claim.lead.discord_id] += 1
+
+                elif claim.status == Status.DONE:
+                    # Add done
+                    self.month_done_counts[claim.lead.discord_id] += 1
 
                 elif claim.status == Status.PINGED or claim.status == Status.RESOLVED:
                     # Add pinged/resolved
@@ -230,9 +240,13 @@ class LeadstatsResults:
             # Organize data for semester
             if get_semester(claim.claim_time) == interaction_semester:
                 self.total_semester[claim.lead.discord_id] += 1
-                if claim.status == Status.CHECKED or claim.status == Status.DONE:
-                    # Add checked/done
+                if claim.status == Status.CHECKED:
+                    # Add checked
                     self.semester_counts[claim.lead.discord_id] += 1
+
+                elif claim.status == Status.DONE:
+                    # Add done
+                    self.month_done_counts[claim.lead.discord_id] += 1
 
                 elif claim.status == Status.PINGED or claim.status == Status.RESOLVED:
                     # Add pinged/resolved
@@ -262,24 +276,28 @@ class LeadstatsResults:
             counts = self.month_counts
             pings = self.month_ping_counts
             kudos = self.month_kudos_counts
+            done = self.month_done_counts
             keys = self.month_counts_sorted_keys
         else:
             counts = self.semester_counts
             pings = self.semester_ping_counts
             kudos = self.semester_kudos_counts
+            done = self.semester_done_counts
             keys = self.semester_counts_sorted_keys
 
         labels = []
+        y0 = []
         y1 = []
         y2 = []
         y3 = []
 
         # Create labels and datapoints from the raw data
         for key in keys:
-            total = counts[key] + pings[key] + kudos[key]
+            total = counts[key] + done[key] + pings[key] + kudos[key]
             if total == 0:
                 continue
 
+            y0.append(done[key])
             y1.append(counts[key])
             y2.append(pings[key])
             y3.append(kudos[key])
@@ -289,7 +307,8 @@ class LeadstatsResults:
 
         # If there's no data, create fake data to display the "No data" message
         # pandas cannot create a plot without data
-        if len(y1) + len(y2) + len(y3) == 0:
+        if len(y0) + len(y1) + len(y2) + len(y3) == 0:
+            y0 = [0]
             y1 = [1]
             y2 = [0]
             y3 = [0]
@@ -302,12 +321,16 @@ class LeadstatsResults:
         # by the number of checked cases (in order to add labels to each bar)
         labels_dict = {}
 
-        # Each user has to be added as a list of 3 values (checks, pings, kudos)
+        # Each user has to be added as a list of 4 values (done, checks, pings, kudos)
         for i in range(len(y1)):
             user = []
             try:
                 user.append(y1[i])
-                labels_dict[y1[i]] = y1[i] + y2[i] + y3[i]
+                labels_dict[y1[i]] = y0[i] + y1[i] + y2[i] + y3[i]
+            except:
+                pass
+            try:
+                user.append(y0[i])
             except:
                 pass
             try:
