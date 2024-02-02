@@ -10,6 +10,8 @@ from bot.models.team_point import TeamPoint
 # Use TYPE_CHECKING to avoid circular import from bot
 from typing import TYPE_CHECKING
 
+from bot.forms.leaderboard_form import LeaderboardForm
+
 if TYPE_CHECKING:
     from ..bot import Bot
 
@@ -41,14 +43,14 @@ class LeaderboardView(ui.View):
             interaction.created_at,
             User.from_id(self.bot.connection, interaction.user.id)
         )
-        new_embed = LeaderboardView.create_embed(self.bot, interaction, result)
+        new_embed = result.create_embed(self.bot, interaction)
 
         message = interaction.message
         if message is not None:
             await message.edit(embed=new_embed)
         await self.bot.update_icon(result.ordered_team_month)
 
-    @ui.button(label="My Rank", style=discord.ButtonStyle.secondary, custom_id="myrank")
+    @ui.button(label="My Rank", style=discord.ButtonStyle.success, custom_id="myrank")
     async def button_myrank(self, interaction: discord.Interaction, button: discord.ui.Button):
         """When pressed by a user it shows their personal
         rank and statistics.
@@ -100,58 +102,8 @@ class LeaderboardView(ui.View):
 
         await interaction.response.send_message(embed=embed, ephemeral=True, delete_after=180)
 
-    @staticmethod
-    def create_embed(bot: 'Bot', interaction: discord.Interaction, result: LeaderboardResults) -> discord.Embed:
-        """Creates the leaderboard embed for the /leaderboard command and for the
-        Refresh button.
+    @ui.button(label="See Past", style=discord.ButtonStyle.secondary, custom_id="pastleaderboard")
+    async def button_seepast(self, interaction: discord.Interaction, button: discord.ui.Button):
+        form = LeaderboardForm(self.bot)
+        await interaction.response.send_modal(form)
 
-        Args:
-            bot (Bot): A reference to the bot class
-            interaction (discord.Interaction): The interaction requesting the leaderboard.
-
-        Returns:
-            discord.Embed: The embed object with everything already completed for month and semester rankings.
-        """
-        month_ranking = ""
-        # Create month written ranking
-        for i in range(min(4, len(result.ordered_month.keys()))):
-            user_id = list(result.ordered_month.keys())[i]
-            month_ranking += f"**{i + 1}.** <@!{user_id}> | {result.ordered_month[user_id]}\n"
-
-        semester_ranking = ""
-        # Create semester written ranking
-        for i in range(min(4, len(result.ordered_semester.keys()))):
-            user_id = list(result.ordered_semester.keys())[i]
-            semester_ranking += f"**{i + 1}.** <@!{user_id}> | {result.ordered_semester[user_id]}\n"
-
-        month_team_ranking = ""
-        # Create team written ranking
-        for i in range(min(4, len(result.ordered_team_month.keys()))):
-            team_id = list(result.ordered_team_month.keys())[i]
-            month_team_ranking += f"**{i + 1}.** <@&{team_id}> | {result.ordered_team_month[team_id]}\n"
-
-        semester_team_ranking = ""
-        # Create team written ranking
-        for i in range(min(4, len(result.ordered_team_semester.keys()))):
-            team_id = list(result.ordered_team_semester.keys())[i]
-            semester_team_ranking += f"**{i + 1}.** <@&{team_id}> | {result.ordered_team_semester[team_id]}\n"
-
-        # Create embed
-        embed = discord.Embed()
-        embed.colour = bot.embed_color
-
-        # Add leaderboard fields
-        embed.add_field(name=f"{month_number_to_name(result.date.month)}", value="", inline=False)
-        embed.add_field(name="", value=month_team_ranking, inline=True)
-        embed.add_field(name="", value=month_ranking, inline=True)
-
-        embed.add_field(name="Semester", value="", inline=False)
-
-        embed.add_field(name="", value=semester_team_ranking, inline=True)
-        embed.add_field(name="", value=semester_ranking, inline=True)
-
-        embed.set_author(name="Leaderboard", icon_url=interaction.guild.icon.url)
-        embed.set_footer(text="Last Updated")
-        embed.timestamp = datetime.datetime.now()
-
-        return embed

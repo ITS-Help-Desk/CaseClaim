@@ -3,26 +3,9 @@ all throughout this bot.
 """
 import time
 from pytz import timezone
-from collections import OrderedDict
-from typing import Optional
 
 import discord
 import datetime
-import io
-
-import matplotlib.pyplot as plt
-import pandas
-
-from bot.models.checked_claim import CheckedClaim
-from bot.models.user import User
-from bot.models.team_point import TeamPoint
-from bot.models.pending_feedback import PendingFeedback
-from bot.models.feedback import Feedback
-
-from bot.views.affirm_view import AffirmView
-
-from bot.status import Status
-
 
 def month_number_to_name(month_number: int) -> str:
     """Converts a month number to the actual name.

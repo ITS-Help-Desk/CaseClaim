@@ -2,10 +2,9 @@ from aiohttp import ClientSession
 import asyncio
 from discord.ext import commands, tasks
 from mysql.connector import MySQLConnection
-from typing import Any
+from typing import Any, OrderedDict
 
 from bot.cogs.claim_command import ClaimCommand
-from bot.cogs.getlog_command import GetLogCommand
 from bot.cogs.mycases_command import MyCasesCommand
 from bot.cogs.caseinfo_command import CaseInfoCommand
 from bot.cogs.report_command import ReportCommand
@@ -17,7 +16,6 @@ from bot.cogs.casedist_command import CaseDistCommand
 from bot.cogs.leadstats_command import LeadStatsCommand
 from bot.cogs.ping_command import PingCommand
 from bot.cogs.award_command import AwardCommand
-from bot.cogs.hleaderboard_command import HLeaderboardCommand
 from bot.cogs.evaldata_command import EvaldataCommand
 from bot.cogs.heatmap_command import HeatmapCommand
 
@@ -234,13 +232,11 @@ class Bot(commands.Bot):
         await self.add_cog(CaseInfoCommand(self))
         await self.add_cog(JoinCommand(self))
 
-        await self.add_cog(GetLogCommand(self))
         await self.add_cog(ReportCommand(self))
         await self.add_cog(EvaldataCommand(self))
         await self.add_cog(HeatmapCommand(self))
 
         await self.add_cog(LeaderboardCommand(self))
-        await self.add_cog(HLeaderboardCommand(self))
 
         await self.add_cog(CaseDistCommand(self))
         await self.add_cog(LeadStatsCommand(self))
