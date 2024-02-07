@@ -1,6 +1,7 @@
 import discord
 import discord.ui as ui
 from datetime import datetime
+import asyncio
 
 from bot.models.checked_claim import CheckedClaim
 from bot.models.feedback import Feedback
@@ -41,7 +42,6 @@ class AffirmForm(ui.Modal, title='Tech Assessment'):
         """
 
         # Remove tech after they submit an acknowledgement
-        await interaction.channel.remove_user(interaction.user)
         
         # Try to remove the Affirm button and update it to be the lead resolve view
         try:
@@ -53,5 +53,7 @@ class AffirmForm(ui.Modal, title='Tech Assessment'):
             await msg.edit(view=ResolvePingView(self.bot), embed=original_embed)
         except Exception as e:
             print(e)
-
+        
+        await interaction.response.defer(ephemeral=True);
+        await interaction.channel.remove_user(interaction.user)
         await interaction.channel.send(content=f"<@!{self.case.lead.discord_id}> Tech has responded.", delete_after=10)
