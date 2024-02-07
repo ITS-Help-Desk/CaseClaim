@@ -1,11 +1,12 @@
 import discord
 import discord.ui as ui
+from datetime import datetime
 
 from bot.models.checked_claim import CheckedClaim
 from bot.models.feedback import Feedback
 
-from bot.views.resolve_ping_await_lead_view import ResolvePingAwaitLeadView
-# from bot.views.resolve_ping_view import ResolvePingView
+# from bot.views.resolve_ping_await_lead_view import ResolvePingAwaitLeadView
+from bot.views.resolve_ping_view import ResolvePingView
 
 # Use TYPE_CHECKING to avoid circular import from bot
 from typing import TYPE_CHECKING
@@ -28,7 +29,8 @@ class AffirmForm(ui.Modal, title='Tech Assessment'):
         self.bot = bot
         self.case = case
 
-    assessment = ui.TextInput(label='Assessment (Optional)', style=discord.TextStyle.paragraph, required=False)
+    # Change max length to 1024 to align with embed char limit.
+    assessment = ui.TextInput(label='Assessment (Optional)', style=discord.TextStyle.paragraph, required=False, max_length=1024)
 
     async def on_submit(self, interaction: discord.Interaction):
         """Creates a private thread with the tech and sends a message
@@ -37,15 +39,19 @@ class AffirmForm(ui.Modal, title='Tech Assessment'):
         Args:
             interaction (discord.Interaction): Interaction that the slash command originated from.
         """
-        await interaction.response.send_message(f"<@{self.case.lead.discord_id}> has been pinged.", ephemeral=True, delete_after=10)
 
-        # Try to remove the Affirm button
+        # Remove tech after they submit an acknowledgement
+        await interaction.channel.remove_user(interaction.user)
+        
+        # Try to remove the Affirm button and update it to be the lead resolve view
         try:
             ping = Feedback.from_thread_id(self.bot.connection, interaction.channel_id)
             ch = await self.bot.fetch_channel(interaction.channel_id)
             msg = await ch.fetch_message(ping.message_id)
-            await msg.edit(view=None)
+            original_embed = msg.embeds[0]
+            original_embed.insert_field_at(index=2,name="Feedback", value=str(self.assessment), inline=False)
+            await msg.edit(view=ResolvePingView(self.bot), embed=original_embed)
         except Exception as e:
             print(e)
 
-        await interaction.channel.send(content=f"<@!{self.case.lead.discord_id}> {self.assessment}", view=ResolvePingAwaitLeadView(self.bot))
+        await interaction.channel.send(content=f"<@!{self.case.lead.discord_id}> Tech has responded.", delete_after=10)
