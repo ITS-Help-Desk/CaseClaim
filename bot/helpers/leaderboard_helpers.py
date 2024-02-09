@@ -324,12 +324,12 @@ class LeadstatsResults:
         for i in range(len(y1)):
             user = []
             try:
-                user.append(y1[i])
+                user.append(y0[i])
                 labels_dict[y1[i]] = y0[i] + y1[i] + y2[i] + y3[i]
             except:
                 pass
             try:
-                user.append(y0[i])
+                user.append(y1[i])
             except:
                 pass
             try:
@@ -343,9 +343,14 @@ class LeadstatsResults:
 
             users.append(user)
 
+        gray = (76/255, 80/255, 87/255)
+        green = (44/255, 160/255, 44/255)
+        blue = (31/255, 119/255, 180/255)
+        orange = (255/255, 127/255, 14/255)
+
         df = pandas.DataFrame(users, index=labels)
-        ax = df.plot.bar(stacked=True, title=title, legend=False)
-        #ax.legend(["Checks", "Pings", "Kudos"])
+        ax = df.plot.bar(stacked=True, title=title, legend=False, color=[gray, blue, orange, green])
+        ax.legend(["Done", "Checks", "Pings", "Kudos"])
         plt.xticks(rotation=45, ha="right")
 
         # Add labels to each bar with the numeric values
