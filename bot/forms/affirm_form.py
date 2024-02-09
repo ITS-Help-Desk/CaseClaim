@@ -41,7 +41,6 @@ class AffirmForm(ui.Modal, title='Tech Assessment'):
             interaction (discord.Interaction): Interaction that the slash command originated from.
         """
 
-        # Remove tech after they submit an acknowledgement
         
         # Try to remove the Affirm button and update it to be the lead resolve view
         try:
@@ -54,6 +53,5 @@ class AffirmForm(ui.Modal, title='Tech Assessment'):
         except Exception as e:
             print(e)
         
-        await interaction.response.defer(ephemeral=True);
-        await interaction.channel.remove_user(interaction.user)
+        await interaction.response.defer(ephemeral=True, thinking=False);
         await interaction.channel.send(content=f"<@!{self.case.lead.discord_id}> Tech has responded.", delete_after=10)
