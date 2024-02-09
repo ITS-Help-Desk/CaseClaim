@@ -284,7 +284,6 @@ class LeadstatsResults:
             done = self.semester_done_counts
             keys = self.semester_counts_sorted_keys
 
-        print(done)
         labels = []
         y0 = []
         y1 = []
