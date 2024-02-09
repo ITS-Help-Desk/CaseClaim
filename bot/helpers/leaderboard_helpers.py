@@ -245,7 +245,7 @@ class LeadstatsResults:
 
                 elif claim.status == Status.DONE:
                     # Add done
-                    self.month_done_counts[claim.lead.discord_id] += 1
+                    self.semester_done_counts[claim.lead.discord_id] += 1
 
                 elif claim.status == Status.PINGED or claim.status == Status.RESOLVED:
                     # Add pinged/resolved
@@ -284,6 +284,7 @@ class LeadstatsResults:
             done = self.semester_done_counts
             keys = self.semester_counts_sorted_keys
 
+        print(done)
         labels = []
         y0 = []
         y1 = []
