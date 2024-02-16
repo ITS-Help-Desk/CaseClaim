@@ -3,6 +3,7 @@ import datetime
 from collections import OrderedDict
 from typing import Optional
 
+from mysql.connector import MySQLConnection
 import pandas
 from matplotlib import pyplot as plt
 
@@ -258,7 +259,7 @@ class LeadstatsResults:
         self.semester_counts_sorted_keys = sorted(self.total_semester, key=self.total_semester.get, reverse=True)
         self.month_counts_sorted_keys = sorted(self.total_month, key=self.total_month.get, reverse=True)
 
-    def convert_to_plot(self, bot: 'Bot', month: bool, title: str) -> io.BytesIO:
+    def convert_to_plot(self, connection: MySQLConnection, month: bool, title: str) -> io.BytesIO:
         """Converts data into a plot that can be sent in a Discord message. It uses three
         parallel lists in order to generate the plot using matplotlib
 
@@ -301,7 +302,7 @@ class LeadstatsResults:
             y2.append(pings[key])
             y3.append(kudos[key])
 
-            user = User.from_id(bot.connection, key)
+            user = User.from_id(connection, key)
             labels.append(f"{user.abb_name}\nP-{int((pings[key] / total) * 100)}%-K-{int((kudos[key] / total) * 100)}%")
 
         # If there's no data, create fake data to display the "No data" message
@@ -342,6 +343,10 @@ class LeadstatsResults:
                 pass
 
             users.append(user)
+        
+        # Change matlib pyplot backend to prevent gui's from being spawned. It is causing issues with the flask webserver/
+        # See https://github.com/matplotlib/matplotlib/issues/14304/
+        plt.switch_backend('Agg')
 
         gray = (76/255, 80/255, 87/255)
         green = (44/255, 160/255, 44/255)

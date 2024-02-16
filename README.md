@@ -53,6 +53,8 @@ For information about how to run the bot, troubleshooting, and development guide
 - matplotlib [3.7.2](https://pypi.org/project/matplotlib/)
 - pandas [2.1.0](https://pypi.org/project/pandas/)
 - mysql-connector-python [8.1.0](https://pypi.org/project/mysql-connector-python/)
+- Flask [3.0.0](https://pypi.org/project/Flask/)
 - aiohttp [3.9.1](https://pypi.org/project/aiohttp/)
 - pytz [2023.3](https://pypi.org/project/pytz/)
 - numpy [1.26.3](https://pypi.org/project/numpy/)
+- python-dotenv [1.0.1](https://pypi.org/project/python-dotenv/)

@@ -1,13 +1,16 @@
+import asyncio
 from discord import app_commands
 from discord.ext import commands
 import discord
-import time
-import datetime
-import io
-import matplotlib.pyplot as plt
-from matplotlib import ticker
-
 from bot.models.checked_claim import CheckedClaim
+#import time
+#import datetime
+#import io
+#import matplotlib.pyplot as plt
+#from matplotlib import ticker
+
+# from bot.models.checked_claim import CheckedClaim
+import graphs.casedist as cd
 
 # Use TYPE_CHECKING to avoid circular import from bot
 from typing import TYPE_CHECKING
@@ -37,42 +40,8 @@ class CaseDistCommand(commands.Cog):
             month (int): The month of when cases will start being counted
             day (int): The day that cases will start being counted
         """
-        current = datetime.datetime.now()
-        start = datetime.datetime(year=current.year, month=month, day=day, hour=7, minute=0, second=0)
-
-        days = []  # 44 segments
-        for i in range(44):
-            days.append(0)
-
-        # Generate data
-        claims = CheckedClaim.search(self.bot.connection)
-        for claim in claims:
-            if claim.claim_time > start:
-                start_time = claim.claim_time.replace(hour=7, minute=0, second=0)
-                fixed_date = int(time.mktime(claim.claim_time.timetuple())) - int(time.mktime(start_time.timetuple()))
-
-                index = (fixed_date // 60) // 15
-
-                days[min(index, len(days) - 1)] += 1
-
-        # Create graph
-        data_stream = io.BytesIO()
-        fig, ax = plt.subplots()
-
-        labels = self.create_labels()
-
-        # Create plot
-        ax.set_title(f"Total Case Claim-Time Histogram (Starting {start.strftime('%b %d, %Y')})")
-        plt.xticks(rotation=90, ha="right")
-
-        ax.bar(labels, days, color="b", zorder=3)
-
-        plt.gca().xaxis.set_major_locator(ticker.MaxNLocator(nbins=13))
-
-        # Save as stream
-        fig.savefig(data_stream, format='png', bbox_inches="tight", dpi=80)
-        plt.close()
-        data_stream.seek(0)
+        claims = CheckedClaim.search(self.bot.connection) 
+        data_stream = await asyncio.to_thread(cd.generate_casedist_plot, claims,month,day)
 
         # Create embed with chart
         chart = discord.File(data_stream, filename="chart.png")
@@ -81,31 +50,4 @@ class CaseDistCommand(commands.Cog):
         embed.colour = self.bot.embed_color
 
         await interaction.response.send_message(embed=embed, file=chart, ephemeral=True)
-
-    def create_labels(self) -> list[str]:
-        """Creates a list of labels for the graph broken up by 15 minute increments
-        7:00, 7:15, 7:30, 7:45, 8:00...
-
-        Returns:
-            list[str]: A list with all labels
-        """
-        labels = []
-
-        hour = 7
-        minute = 0
-        for i in range(44):
-            next_minute = minute + 15
-            next_hour = hour
-            if next_minute >= 60:
-                next_minute = 0
-                next_hour += 1
-                if next_hour > 12:
-                    next_hour %= 12
-
-            fminute = f"0{minute}" if minute < 10 else str(minute)
-            labels.append(f"{hour}:{fminute}")
-
-            minute = next_minute
-            hour = next_hour
-
-        return labels
+        
