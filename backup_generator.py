@@ -22,10 +22,12 @@ class SQLBackupCreator:
         s = subprocess.Popen(cmd, shell=True)
         s.wait()
 
-        # Copy backup to drive
-        new_output = output.replace("/", "\\")
-        cmd1 = f"copy {new_output} {self.backup_drive_path}"
-        subprocess.Popen(cmd1, shell=True)
+        # Copy backup to drive (currently disabled)
+        '''new_output = output.replace("/", "\\")
+        new_output = output
+        cmd1 = f"cp {new_output} {self.backup_drive_path}"
+        print(cmd1)
+        subprocess.Popen(cmd1, shell=True)'''
 
         return output
 
