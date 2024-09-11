@@ -51,7 +51,7 @@ class CaseInfoCommand(commands.Cog):
 
         # Sort data, create written descriptions
         rows.sort(key=lambda x: x.claim_time, reverse=True)
-        row_str = self.data_to_rowstr(rows)
+        row_str = self.data_to_rowstr(rows, interaction.user)
 
         # Create paginator embed
         title = f'Cases History of {case_num} ({len(rows)})'
@@ -65,7 +65,7 @@ class CaseInfoCommand(commands.Cog):
             embeds = create_paginator_embeds(row_str, title, self.bot.embed_color)
             await paginator.Simple(ephemeral=True).start(interaction, embeds)
 
-    def data_to_rowstr(self, rows: list[ActiveClaim | CompletedClaim | CheckedClaim]) -> list[str]:
+    def data_to_rowstr(self, rows: list[ActiveClaim | CompletedClaim | CheckedClaim], user: discord.Member) -> list[str]:
         """Converts the raw data into a list of strings
         that can be used in the embed description.
 
@@ -84,6 +84,10 @@ class CaseInfoCommand(commands.Cog):
             # Convert timestamp to UNIX
             t = int(time.mktime(row.claim_time.timetuple()))
             s += f'<t:{t}:f> - <@!{row.tech.discord_id}>'
+
+            if self.bot.check_if_lead(user):
+                s += f' {row.status}'
+                s += f' by <@!{row.lead.discord_id}>'
 
             row_str.append(s)
 
