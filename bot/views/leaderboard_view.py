@@ -116,7 +116,7 @@ class LeaderboardView(ui.View):
             if semester_rank == 1:
                 semester_next_rank_name = "Congrats you are in first place!!"
             else:
-                semester_next_rank_id = list(result.ordered_semester.keys())[semester_rank]
+                semester_next_rank_id = list(result.ordered_semester.keys())[semester_rank-2]
                 semester_next_rank_user = User.from_id(self.bot.connection, semester_next_rank_id)
                 semester_next_rank_name = semester_next_rank_user.full_name
                 semester_next_rank_cases = int(result.semester_counts[semester_next_rank_user.discord_id])
