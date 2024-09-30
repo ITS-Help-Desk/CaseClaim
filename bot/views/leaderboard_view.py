@@ -88,6 +88,7 @@ class LeaderboardView(ui.View):
             
             month_next_rank_name = ""
             month_next_rank_cases = "N/A"
+            month_next_rank_case_gap = 0
             
             if month_rank == 1:
                 month_next_rank_name = "Congrats you are in first place!!"
@@ -110,6 +111,7 @@ class LeaderboardView(ui.View):
 
             semester_next_rank_name = ""
             semester_next_rank_cases = "N/A"
+            semester_next_rank_case_gap = 0
             
             if semester_rank == 1:
                 semester_next_rank_name = "Congrats you are in first place!!"
