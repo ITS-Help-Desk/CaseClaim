@@ -87,16 +87,17 @@ class LeaderboardView(ui.View):
             month_rank = list(result.ordered_month.keys()).index(interaction.user.id) + 1
             
             month_next_rank_name = ""
-            month_next_rank_cases = "N/A"
             month_next_rank_case_gap = 0
             
             if month_rank == 1:
-                month_next_rank_name = "Congrats you are in first place!!"
+                month_next_rank_name = "1st Place!!"
+                month_next_rank_case_gap = "N/A"
             else:
                 month_next_rank_id = list(result.ordered_month.keys())[month_rank-2]
                 month_next_rank_user = User.from_id(self.bot.connection, month_next_rank_id)
                 month_next_rank_name = month_next_rank_user.full_name
                 month_next_rank_cases = int(result.month_counts[month_next_rank_user.discord_id])
+                print("Month: ", month_next_rank_cases, month_count)
                 month_next_rank_case_gap = month_next_rank_cases-month_count
 
             embed.add_field(name="Month Rank", value=f"Rank: **{month_rank}**\nClaims: **{month_count}**\nCheck Percent: **{month_checked_rate}%**\nNext Rank: **{month_next_rank_name}**\nCase Gap: **{month_next_rank_case_gap}**\n")
@@ -110,16 +111,17 @@ class LeaderboardView(ui.View):
             semester_rank = list(result.ordered_semester.keys()).index(interaction.user.id) + 1
 
             semester_next_rank_name = ""
-            semester_next_rank_cases = "N/A"
             semester_next_rank_case_gap = 0
             
             if semester_rank == 1:
-                semester_next_rank_name = "Congrats you are in first place!!"
+                semester_next_rank_name = "1st Place!!"
+                semester_next_rank_case_gap = "N/A"
             else:
                 semester_next_rank_id = list(result.ordered_semester.keys())[semester_rank-2]
                 semester_next_rank_user = User.from_id(self.bot.connection, semester_next_rank_id)
                 semester_next_rank_name = semester_next_rank_user.full_name
                 semester_next_rank_cases = int(result.semester_counts[semester_next_rank_user.discord_id])
+                print("Sem: ", semester_next_rank_cases, semester_count)
                 semester_next_rank_case_gap = semester_next_rank_cases - semester_count
 
             embed.add_field(name="Semester Rank", value=f"Rank: **{semester_rank}**\nClaims: **{semester_count}**\nCheck Percent: **{semester_checked_rate}%**\nNext Rank: **{semester_next_rank_name}**\nCase Gap: **{semester_next_rank_case_gap}**")
