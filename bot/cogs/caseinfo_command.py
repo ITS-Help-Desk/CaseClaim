@@ -85,7 +85,7 @@ class CaseInfoCommand(commands.Cog):
             t = int(time.mktime(row.claim_time.timetuple()))
             s += f'<t:{t}:f> - <@!{row.tech.discord_id}>'
 
-            if self.bot.check_if_lead(user):
+            if self.bot.check_if_lead(user) and isinstance(row, CheckedClaim):
                 s += f' {row.status}'
                 s += f' by <@!{row.lead.discord_id}>'
 
