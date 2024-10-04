@@ -97,7 +97,6 @@ class LeaderboardView(ui.View):
                 month_next_rank_user = User.from_id(self.bot.connection, month_next_rank_id)
                 month_next_rank_name = month_next_rank_user.full_name
                 month_next_rank_cases = int(result.month_counts[month_next_rank_user.discord_id])
-                print("Month: ", month_next_rank_cases, month_count)
                 month_next_rank_case_gap = month_next_rank_cases-month_count
 
             embed.add_field(name="Month Rank", value=f"Rank: **{month_rank}**\nClaims: **{month_count}**\nCheck Percent: **{month_checked_rate}%**\nNext Rank: **{month_next_rank_name}**\nCase Gap: **{month_next_rank_case_gap}**\n")
@@ -121,7 +120,6 @@ class LeaderboardView(ui.View):
                 semester_next_rank_user = User.from_id(self.bot.connection, semester_next_rank_id)
                 semester_next_rank_name = semester_next_rank_user.full_name
                 semester_next_rank_cases = int(result.semester_counts[semester_next_rank_user.discord_id])
-                print("Sem: ", semester_next_rank_cases, semester_count)
                 semester_next_rank_case_gap = semester_next_rank_cases - semester_count
 
             embed.add_field(name="Semester Rank", value=f"Rank: **{semester_rank}**\nClaims: **{semester_count}**\nCheck Percent: **{semester_checked_rate}%**\nNext Rank: **{semester_next_rank_name}**\nCase Gap: **{semester_next_rank_case_gap}**")
