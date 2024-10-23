@@ -19,7 +19,7 @@ from bot.cogs.award_command import AwardCommand
 from bot.cogs.evaldata_command import EvaldataCommand
 from bot.cogs.heatmap_command import HeatmapCommand
 
-from bot.views.affirm_view import AffirmForm
+from bot.views.affirm_view import AffirmView
 from bot.views.claim_view import ClaimView
 from bot.views.check_view import CheckView
 from bot.views.check_view_red import CheckViewRed
