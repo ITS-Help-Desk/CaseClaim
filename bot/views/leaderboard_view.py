@@ -85,8 +85,21 @@ class LeaderboardView(ui.View):
             month_count = int(result.month_counts[user.discord_id])
             month_checked_rate = int(((month_count - result.month_ping_count) / month_count) * 100)
             month_rank = list(result.ordered_month.keys()).index(interaction.user.id) + 1
+            
+            month_next_rank_name = ""
+            month_next_rank_case_gap = 0
+            
+            if month_rank == 1:
+                month_next_rank_name = "1st Place!!"
+                month_next_rank_case_gap = "N/A"
+            else:
+                month_next_rank_id = list(result.ordered_month.keys())[month_rank-2]
+                month_next_rank_user = User.from_id(self.bot.connection, month_next_rank_id)
+                month_next_rank_name = month_next_rank_user.full_name
+                month_next_rank_cases = int(result.month_counts[month_next_rank_user.discord_id])
+                month_next_rank_case_gap = month_next_rank_cases-month_count
 
-            embed.add_field(name="Month Rank", value=f"Rank: **{month_rank}**\nClaims: **{month_count}**\nCheck Percent: **{month_checked_rate}%**\n")
+            embed.add_field(name="Month Rank", value=f"Rank: **{month_rank}**\nClaims: **{month_count}**\nCheck Percent: **{month_checked_rate}%**\nNext Rank: **{month_next_rank_name}**\nCase Gap: **{month_next_rank_case_gap}**\n")
         except (KeyError, ValueError):
             pass
 
@@ -96,7 +109,20 @@ class LeaderboardView(ui.View):
             semester_checked_rate = int(((semester_count - result.semester_ping_count) / semester_count) * 100)
             semester_rank = list(result.ordered_semester.keys()).index(interaction.user.id) + 1
 
-            embed.add_field(name="Semester Rank", value=f"Rank: **{semester_rank}**\nClaims: **{semester_count}**\nCheck Percent: **{semester_checked_rate}%**\n")
+            semester_next_rank_name = ""
+            semester_next_rank_case_gap = 0
+            
+            if semester_rank == 1:
+                semester_next_rank_name = "1st Place!!"
+                semester_next_rank_case_gap = "N/A"
+            else:
+                semester_next_rank_id = list(result.ordered_semester.keys())[semester_rank-2]
+                semester_next_rank_user = User.from_id(self.bot.connection, semester_next_rank_id)
+                semester_next_rank_name = semester_next_rank_user.full_name
+                semester_next_rank_cases = int(result.semester_counts[semester_next_rank_user.discord_id])
+                semester_next_rank_case_gap = semester_next_rank_cases - semester_count
+
+            embed.add_field(name="Semester Rank", value=f"Rank: **{semester_rank}**\nClaims: **{semester_count}**\nCheck Percent: **{semester_checked_rate}%**\nNext Rank: **{semester_next_rank_name}**\nCase Gap: **{semester_next_rank_case_gap}**")
         except (KeyError, ValueError):
             pass
 
