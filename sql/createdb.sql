@@ -11,12 +11,6 @@ CREATE TABLE `CheckedClaims`(
 );
 ALTER TABLE
     `CheckedClaims` ADD PRIMARY KEY(`checker_message_id`);
-CREATE TABLE `PendingFeedback`(
-    `checker_message_id` BIGINT UNSIGNED NOT NULL,
-    `severity` VARCHAR(255) NOT NULL,
-    `description` MEDIUMTEXT NOT NULL,
-    `to_do` MEDIUMTEXT NOT NULL
-);
 CREATE TABLE `Announcements`(
     `message_id` BIGINT UNSIGNED NOT NULL,
     `case_message_id` BIGINT UNSIGNED NOT NULL,
@@ -96,8 +90,6 @@ ALTER TABLE
     `ActiveClaims` ADD PRIMARY KEY(`claim_message_id`);
 ALTER TABLE
     `ActiveClaims` ADD UNIQUE `activeclaims_case_num_unique`(`case_num`);
-ALTER TABLE
-    `PendingFeedback` ADD CONSTRAINT `pendingfeedback_checker_message_id_foreign` FOREIGN KEY(`checker_message_id`) REFERENCES `CheckedClaims`(`checker_message_id`);
 ALTER TABLE
     `Users` ADD CONSTRAINT `users_team_foreign` FOREIGN KEY(`team`) REFERENCES `Teams`(`role_id`);
 ALTER TABLE

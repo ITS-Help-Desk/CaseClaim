@@ -1,4 +1,4 @@
-discord==2.2.2
+discord==2.3.2
 matplotlib==3.7.2
 pandas==2.1.0
 mysql-connector-python==8.1.0
