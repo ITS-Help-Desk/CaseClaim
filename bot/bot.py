@@ -45,7 +45,6 @@ class Bot(commands.Bot):
     announcement_channel: int
     bot_channel: int
     connection: MySQLConnection
-    holidays: list[str]
 
     def __init__(self, config: dict[str, Any], connection: MySQLConnection):
         """Initializes the bot (doesn't start it), and initializes some
@@ -61,7 +60,6 @@ class Bot(commands.Bot):
         self.connection = connection
 
         self.embed_color = discord.Color.from_rgb(30, 31, 34)
-        self.holidays = config["holidays"]
 
         self.resend_outages = False
 
@@ -167,24 +165,6 @@ class Bot(commands.Bot):
         # Update the guild icon with the data stored in img_data
         await ch.guild.edit(icon=img_data)
 
-    @tasks.loop(seconds=120)  # repeat every two minutes
-    async def ping_loop(self):
-        """Iterate through all the pending pings and send them out
-        during working hours
-        """
-        now = datetime.datetime.now()
-        pending_pings = PendingFeedback.get_all(self.connection)
-        if is_working_time(now, self.holidays) and len(pending_pings) != 0:
-            # Only send pings during working time
-            case_channel = await self.fetch_channel(self.cases_channel)
-            for pp in pending_pings:
-                if pp.severity.lower() != "kudos":
-                    await send_pending_ping(self, pp, case_channel)
-                else:
-                    await send_pending_kudos(self, pp, case_channel)
-
-                await asyncio.sleep(5)  # prevent rate limiting
-
     @tasks.loop(seconds=5)  # repeat after every 5 seconds
     async def resend_outages_loop(self):
         """Resends all the outages to the #cases channel.
@@ -248,7 +228,6 @@ class Bot(commands.Bot):
         self.check_teams_loop.start()
         self.resend_outages_loop.start()
         self.reset_connection_loop.start()
-        self.ping_loop.start()
-
+    
         synced = await self.tree.sync()
         print("{} commands synced".format(len(synced)))
