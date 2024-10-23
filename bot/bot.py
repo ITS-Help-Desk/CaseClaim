@@ -35,7 +35,6 @@ from bot.models.team import Team
 
 from bot.helpers.other import *
 from bot.helpers.leaderboard_helpers import *
-from bot.helpers.pings_and_kudos import *
 
 
 class Bot(commands.Bot):
