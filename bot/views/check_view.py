@@ -1,3 +1,4 @@
+from bot.forms.comment_form import CommentForm
 import discord
 import discord.ui as ui
 from bot.views.check_view_red import CheckViewRed
@@ -73,14 +74,9 @@ class CheckView(ui.View):
             return
 
         case = CompletedClaim.from_id(self.bot.connection, interaction.message.id)
-        case.remove_from_database(self.bot.connection)
-
-        new_case = CheckedClaim(case.checker_message_id, case.case_num, case.tech,
-                                User.from_id(self.bot.connection, interaction.user.id), case.claim_time,
-                                case.complete_time, datetime.now(), Status.CHECKED, None)
-        new_case.add_to_database(self.bot.connection)
-
-        await interaction.message.delete()
+        
+        form = CommentForm(self.bot, case)
+        await interaction.response.send_modal(form)
 
     @ui.button(label="Done", style=discord.ButtonStyle.secondary, custom_id="done")
     async def button_done(self, interaction: discord.Interaction, button: discord.ui.Button):
