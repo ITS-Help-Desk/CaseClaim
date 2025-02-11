@@ -21,13 +21,12 @@ class SQLBackupCreator:
         cmd = f"mysqldump -u {self.username} -p\"{self.password}\" {self.database} > {output}"
         s = subprocess.Popen(cmd, shell=True)
         s.wait()
+        print("Local backup saved")
 
-        # Copy backup to drive (currently disabled)
-        '''new_output = output.replace("/", "\\")
-        new_output = output
-        cmd1 = f"cp {new_output} {self.backup_drive_path}"
-        print(cmd1)
-        subprocess.Popen(cmd1, shell=True)'''
+        # Copy backup to drive
+        cmd1 = f"cp {output} {self.backup_drive_path}/{output}"
+        subprocess.Popen(cmd1, shell=True)
+        print("Drive backup saved")
 
         return output
 

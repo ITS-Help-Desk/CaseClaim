@@ -198,7 +198,7 @@ class LeadstatsResults:
 
         for claim in claims:
             # Ignore cases claimed after the provided date
-            if date.month < claim.claim_time.month:
+            if get_semester(claim.claim_time) != interaction_semester:
                 continue
 
             # Initialize information as zero
@@ -237,7 +237,7 @@ class LeadstatsResults:
                     self.month_kudos_counts[claim.lead.discord_id] += 1
 
             # Organize data for semester
-            if get_semester(claim.claim_time) == interaction_semester:
+            if get_semester(claim.claim_time) == interaction_semester and claim.claim_time.year == date.year:
                 self.total_semester[claim.lead.discord_id] += 1
                 if claim.status == Status.CHECKED:
                     # Add checked
