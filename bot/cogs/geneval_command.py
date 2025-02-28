@@ -34,6 +34,8 @@ class GenEvalCommand(commands.Cog):
         Args:
             interaction (discord.Interaction): Interaction that the slash command originated from
         """
+        await interaction.response.defer(ephemeral=True)  # Wait in case process takes a long time
+    
         total_hd_cases, total_checked_cases, total_pinged_cases, total_kudos_cases = self.get_data(month,year)
 
         hd_total_claims, median_claim, median_ping_percent, top_claim_percent, data = self.organize_data_for_word(total_hd_cases, total_checked_cases, total_pinged_cases, total_kudos_cases)
@@ -66,7 +68,7 @@ class GenEvalCommand(commands.Cog):
         zipname = f"evals/eval{month}{year}.zip"
         self.create_zip(filenames, zipname)
 
-        await interaction.response.send_message(content="hello", file=discord.File(zipname), ephemeral=True, delete_after=300)
+        await interaction.followup.send(content="hello", file=discord.File(zipname), ephemeral=True)
 
     def create_zip(self, filenames: list[str], zipname: str):
         with zipfile.ZipFile(zipname, 'w') as zipf:
