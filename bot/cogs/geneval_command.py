@@ -2,12 +2,14 @@ from discord import app_commands
 from discord.ext import commands
 import discord
 import traceback
-from typing import Any, Optional
 from bot.models.checked_claim import CheckedClaim
 from bot.models.user import User
 from bot.status import Status
 import statistics
 import datetime
+from docx import Document
+from docx.shared import Pt
+import zipfile
 
 # Use TYPE_CHECKING to avoid circular import from bot
 from typing import TYPE_CHECKING
@@ -26,26 +28,30 @@ class GenEvalCommand(commands.Cog):
         self.bot = bot
 
     @app_commands.command(description="Automatically generates monthly evals")
-    async def geneval(self, interaction: discord.Interaction) -> None:
+    async def geneval(self, interaction: discord.Interaction,  month: int, year: int) -> None:
         """
 
         Args:
             interaction (discord.Interaction): Interaction that the slash command originated from
         """
-        
-        month = 2
-        year = 2025
-
         total_hd_cases, total_checked_cases, total_pinged_cases, total_kudos_cases = self.get_data(month,year)
 
         hd_total_claims, median_claim, median_ping_percent, top_claim_percent, data = self.organize_data_for_word(total_hd_cases, total_checked_cases, total_pinged_cases, total_kudos_cases)
 
+        now = datetime.datetime.now()
+        filenames = []
+
         for user_id in list(data.keys()):
             user = User.from_id(self.bot.connection, user_id)
 
+            discord_user = await interaction.guild.fetch_member(user_id)
+
+            if self.bot.check_if_lead(discord_user):
+                continue
+
             fields, template_name = self.create_word_fields(
                 user.full_name, 
-                datetime.datetime.now(),
+                now,
                 hd_total_claims,
                 median_claim,
                 median_ping_percent,
@@ -53,10 +59,39 @@ class GenEvalCommand(commands.Cog):
                 data[user_id]
             )
 
-            print(fields)
+            title = f"evals/{user.full_name.split(' ')[-1]} {now.strftime('%B').upper()} {now.strftime('%Y')}.docx"
+            filenames.append(title)
+            self.create_document(template_name, title, fields)
+        
+        zipname = f"evals/eval{month}{year}.zip"
+        self.create_zip(filenames, zipname)
 
+        await interaction.response.send_message(content="hello", file=discord.File(zipname), ephemeral=True, delete_after=300)
 
-        await interaction.response.send_message(content="hello", ephemeral=True, delete_after=300)
+    def create_zip(self, filenames: list[str], zipname: str):
+        with zipfile.ZipFile(zipname, 'w') as zipf:
+            for file in filenames:
+                zipf.write(file)
+
+    def create_document(self, template: str, save_title: str, fields: dict[int, str]):
+        document = Document(template)
+        style = document.styles['Normal']
+        font = style.font
+        font.name = 'Times New Roman'
+        font.size = Pt(11)
+
+        i = 1
+        for table in document.tables:
+            for row in table.rows:
+                for cell in row.cells:
+                    for paragraph in cell.paragraphs:
+                        #print(i, paragraph.text)
+                        if i in list(fields.keys()):
+                            paragraph.text = fields[i]
+                            paragraph.style = document.styles['Normal']
+                        i += 1
+
+        document.save(save_title)
     
     def create_word_fields(self, username, date, hd_total_claims, median_claim, median_ping_percent, top_claim_percent, data):
         kudos = data["kudos"]
@@ -82,7 +117,7 @@ class GenEvalCommand(commands.Cog):
         }
         
         if len(pings) < 6:
-            template_name = "template1row.docx"
+            template_name = "templates/template1row.docx"
             offset = 0
         
         if len(pings) > 5:
@@ -124,18 +159,15 @@ class GenEvalCommand(commands.Cog):
         fields[62 + offset] = f"{data['user_pinged_count']} / {data['user_total_count']} / {hd_total_claims}"
 
         # User case stats
-        fields[65 + offset] = f"Individual: {data['claim_percent']:.2%}%"
-        fields[66 + offset] = f"Team Median: {median_claim:.2%}%"
-        fields[67 + offset] = f"Team Top: {top_claim_percent:.2%}%"
+        fields[65 + offset] = f"Individual: {data['claim_percent']:.2%}"
+        fields[66 + offset] = f"Team Median: {median_claim:.2%}"
+        fields[67 + offset] = f"Team Top: {top_claim_percent:.2%}"
 
         # Ping stats
-        fields[70 + offset] = f"Individual: {data['ping_percent']:.2%}%"
-        fields[71 + offset] = f"Team Median: {median_ping_percent:.2%}%"
+        fields[70 + offset] = f"Individual: {data['ping_percent']:.2%}"
+        fields[71 + offset] = f"Team Median: {median_ping_percent:.2%}"
 
         return fields, template_name
-
-
-
 
     def organize_data_for_word(self, total_case_count: int, checked: dict[int, int], pinged: dict[int, list[str]], kudos: dict[int, list[str]]):
         organized_data = {}

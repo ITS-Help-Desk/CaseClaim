@@ -2,6 +2,7 @@ token.txt
 *.csv
 config.json
 backups/
+evals/
 
 .vscode
 .DS_Store
