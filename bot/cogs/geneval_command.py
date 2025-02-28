@@ -36,7 +36,7 @@ class GenEvalCommand(commands.Cog):
         """
         await interaction.response.defer(ephemeral=True)  # Wait in case process takes a long time
     
-        total_hd_cases, total_checked_cases, total_pinged_cases, total_kudos_cases = self.get_data(month,year)
+        total_hd_cases, total_checked_cases, total_pinged_cases, total_kudos_cases = await self.get_data(interaction.guild, month,year)
 
         hd_total_claims, median_claim, median_ping_percent, top_claim_percent, data = self.organize_data_for_word(total_hd_cases, total_checked_cases, total_pinged_cases, total_kudos_cases)
 
@@ -45,11 +45,6 @@ class GenEvalCommand(commands.Cog):
 
         for user_id in list(data.keys()):
             user = User.from_id(self.bot.connection, user_id)
-
-            discord_user = await interaction.guild.fetch_member(user_id)
-
-            if self.bot.check_if_lead(discord_user):
-                continue
 
             fields, template_name = self.create_word_fields(
                 user.full_name, 
@@ -168,7 +163,7 @@ class GenEvalCommand(commands.Cog):
         # Ping stats
         fields[70 + offset] = f"Individual: {data['ping_percent']:.2%}"
         fields[71 + offset] = f"Team Median: {median_ping_percent:.2%}"
-
+        
         return fields, template_name
 
     def organize_data_for_word(self, total_case_count: int, checked: dict[int, int], pinged: dict[int, list[str]], kudos: dict[int, list[str]]):
@@ -198,11 +193,11 @@ class GenEvalCommand(commands.Cog):
             }
 
         median_claim = int(statistics.median(claim_median_list))
-        median_ping = statistics.mean(ping_median_list)
+        median_ping = statistics.median(ping_median_list)
 
         return total_case_count, median_claim, median_ping, top_claim / total_case_count, organized_data
 
-    def get_data(self, month: int, year: int) -> tuple[int, dict[int, int], dict[int, list[str]], dict[int, list[str]]]:
+    async def get_data(self, guild, month: int, year: int) -> tuple[int, dict[int, int], dict[int, list[str]], dict[int, list[str]]]:
         all_cases = CheckedClaim.get_all_from_month(self.bot.connection, month, year)
 
         # Tech data
@@ -216,6 +211,14 @@ class GenEvalCommand(commands.Cog):
                 continue
 
             total_hd_cases += 1
+
+            try:
+                discord_user = await guild.fetch_member(case.tech.discord_id)
+            except:
+                pass # user is not in server
+
+            if self.bot.check_if_lead(discord_user):
+                continue
             
             # Initialize tech data
             total_checked_cases.setdefault(case.tech.discord_id, 0)
