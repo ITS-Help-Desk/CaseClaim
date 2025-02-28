@@ -18,6 +18,7 @@ from bot.cogs.ping_command import PingCommand
 from bot.cogs.award_command import AwardCommand
 from bot.cogs.evaldata_command import EvaldataCommand
 from bot.cogs.heatmap_command import HeatmapCommand
+from bot.cogs.geneval_command import GenEvalCommand
 
 from bot.views.affirm_view import AffirmView
 from bot.views.claim_view import ClaimView
@@ -213,6 +214,7 @@ class Bot(commands.Bot):
         await self.add_cog(JoinCommand(self))
 
         await self.add_cog(ReportCommand(self))
+        await self.add_cog(GenEvalCommand(self))
         await self.add_cog(EvaldataCommand(self))
         await self.add_cog(HeatmapCommand(self))
 
