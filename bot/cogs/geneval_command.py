@@ -121,7 +121,7 @@ class GenEvalCommand(commands.Cog):
             offset = 0
         
         if len(pings) > 5:
-            template_name = "template2row.docx"
+            template_name = "templates/template2row.docx"
             offset = 5
             fields[57] = pings[5] if len(pings) > 5 else ""
             fields[58] = pings[6] if len(pings) > 6 else ""
@@ -130,7 +130,7 @@ class GenEvalCommand(commands.Cog):
             fields[61] = pings[9] if len(pings) > 9 else ""
         
         if len(pings) > 10:
-            template_name = "template3row.docx"
+            template_name = "templates/template3row.docx"
             offset = 10
             fields[62] = pings[10] if len(pings) > 10 else ""
             fields[63] = pings[11] if len(pings) > 11 else ""
@@ -138,7 +138,7 @@ class GenEvalCommand(commands.Cog):
             fields[65] = pings[13] if len(pings) > 13 else ""
             fields[66] = pings[14] if len(pings) > 14 else ""
         if len(pings) > 15:
-            template_name = "template4row.docx"
+            template_name = "templates/template4row.docx"
             offset = 15
             fields[67] = pings[15] if len(pings) > 15 else ""
             fields[68] = pings[16] if len(pings) > 16 else ""
@@ -147,7 +147,7 @@ class GenEvalCommand(commands.Cog):
             fields[71] = pings[19] if len(pings) > 19 else ""
         
         if len(pings) > 20:
-            template_name = "template5row.docx"
+            template_name = "templates/template5row.docx"
             offset = 20
             fields[72] = pings[20] if len(pings) > 20 else ""
             fields[73] = pings[21] if len(pings) > 21 else ""
