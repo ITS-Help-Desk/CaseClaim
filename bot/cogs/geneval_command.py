@@ -5,6 +5,7 @@ import traceback
 from bot.models.checked_claim import CheckedClaim
 from bot.models.user import User
 from bot.status import Status
+from bot.helpers.other import month_number_to_name
 import statistics
 import datetime
 from docx import Document
@@ -28,12 +29,21 @@ class GenEvalCommand(commands.Cog):
         self.bot = bot
 
     @app_commands.command(description="Automatically generates monthly evals")
+    @app_commands.default_permissions(mute_members=True)
     async def geneval(self, interaction: discord.Interaction,  month: int, year: int) -> None:
         """
 
         Args:
             interaction (discord.Interaction): Interaction that the slash command originated from
         """
+        # Check if user is a lead
+        if not self.bot.check_if_lead(interaction.user):
+            # Return error message if user is not Lead
+            msg = f"<@{interaction.user.id}>, you do not have permission to pull this report!"
+            await interaction.response.send_message(content=msg, ephemeral=True, delete_after=180)
+
+            return
+
         await interaction.response.defer(ephemeral=True)  # Wait in case process takes a long time
     
         total_hd_cases, total_checked_cases, total_pinged_cases, total_kudos_cases = await self.get_data(interaction.guild, month,year)
@@ -56,7 +66,7 @@ class GenEvalCommand(commands.Cog):
                 data[user_id]
             )
 
-            title = f"evals/{user.full_name.split(' ')[-1]} {now.strftime('%B').upper()} {now.strftime('%Y')}.docx"
+            title = f"evals/{user.full_name.split(' ')[-1]} {month_number_to_name(month).upper()} {year}.docx"
             filenames.append(title)
             self.create_document(template_name, title, fields)
         
