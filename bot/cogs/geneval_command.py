@@ -94,17 +94,19 @@ class GenEvalCommand(commands.Cog):
         kudos = data["kudos"]
         pings = data["pings"]
 
+        checkmark = " " + u"\U00002705"
+        
         fields = {
             18: username,
             20: 0,
 
             31: date.strftime("%m/%d/%Y"),
 
-            37: kudos[0] if len(kudos) > 0 else "",
-            38: kudos[1] if len(kudos) > 1 else "",
-            39: kudos[2] if len(kudos) > 2 else "",
-            40: kudos[3] if len(kudos) > 3 else "",
-            41: kudos[4] if len(kudos) > 4 else "",
+            37: kudos[0] + checkmark if len(kudos) > 0 else "",
+            38: kudos[1] + checkmark if len(kudos) > 1 else "",
+            39: kudos[2] + checkmark if len(kudos) > 2 else "",
+            40: kudos[3] + checkmark if len(kudos) > 3 else "",
+            41: kudos[4] + checkmark if len(kudos) > 4 else "",
 
             52: pings[0] if len(pings) > 0 else "",
             53: pings[1] if len(pings) > 1 else "",
@@ -192,7 +194,7 @@ class GenEvalCommand(commands.Cog):
                 "ping_percent": len(pinged[user_id]) / claim_count
             }
 
-        median_claim = int(statistics.median(claim_median_list))
+        median_claim = statistics.median(claim_median_list)
         median_ping = statistics.median(ping_median_list)
 
         return total_case_count, median_claim, median_ping, top_claim / total_case_count, organized_data
@@ -206,18 +208,27 @@ class GenEvalCommand(commands.Cog):
         total_pinged_cases = {}
         total_kudos_cases = {}
 
+
+        is_lead = {}
+
         for case in all_cases:
             if case.status == str(Status.DONE):
                 continue
-
+            
             total_hd_cases += 1
+            
+            if not case.tech.discord_id in is_lead:    
+                print(f"searching {case.tech.full_name}")
+                try:
+                    discord_user = await guild.fetch_member(case.tech.discord_id)
+                except:
+                    pass # user is not in server
+                
+                print("done")
 
-            try:
-                discord_user = await guild.fetch_member(case.tech.discord_id)
-            except:
-                pass # user is not in server
+                is_lead[case.tech.discord_id] = self.bot.check_if_lead(discord_user)
 
-            if self.bot.check_if_lead(discord_user):
+            if is_lead[case.tech.discord_id]:
                 continue
             
             # Initialize tech data
