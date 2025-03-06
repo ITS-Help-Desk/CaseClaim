@@ -228,14 +228,11 @@ class GenEvalCommand(commands.Cog):
             total_hd_cases += 1
             
             if not case.tech.discord_id in is_lead:    
-                print(f"searching {case.tech.full_name}")
                 try:
                     discord_user = await guild.fetch_member(case.tech.discord_id)
                 except:
                     pass # user is not in server
                 
-                print("done")
-
                 is_lead[case.tech.discord_id] = self.bot.check_if_lead(discord_user)
 
             if is_lead[case.tech.discord_id]:
