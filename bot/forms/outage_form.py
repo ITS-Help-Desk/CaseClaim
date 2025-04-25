@@ -53,7 +53,7 @@ class OutageForm(ui.Modal, title='Outage Form'):
             return
 
         announcement_embed = discord.Embed(colour=discord.Color.red())
-        announcement_embed.set_author(name=f"{service} Outage", icon_url="https://www.route66sodas.com/wp-content/uploads/2019/01/Alert.gif")
+        announcement_embed.set_author(name=f"{service}", icon_url="https://www.route66sodas.com/wp-content/uploads/2019/01/Alert.gif")
 
         try:
             announcement_embed.set_footer(text=user.full_name, icon_url=interaction.user.avatar.url)
@@ -82,7 +82,7 @@ class OutageForm(ui.Modal, title='Outage Form'):
         announcement_message = await announcement_channel.send(content="@here", embed=announcement_embed, view=OutageView(self.bot))
 
         # Create case embed
-        case_embed = discord.Embed(title=f"{service} Outage", colour=discord.Color.red())
+        case_embed = discord.Embed(title=f"{service}", colour=discord.Color.red())
         case_embed.description = f"{announcement_message.jump_url}"
 
         if parent_case is not None and len(str(parent_case)) != 0:

@@ -46,7 +46,7 @@ class OutageView(ui.View):
             announcement_message: discord.Message = await interaction.channel.fetch_message(outage.message_id)
             announcement_embed = announcement_message.embeds[0]
             announcement_embed.set_footer()
-            announcement_embed.set_author(name=f"{outage.service} Outage")
+            announcement_embed.set_author(name=f"{outage.service}")
             announcement_embed.timestamp = None
             announcement_embed.colour = self.bot.embed_color
             announcement_embed.add_field(name="Marked as Resolved",
