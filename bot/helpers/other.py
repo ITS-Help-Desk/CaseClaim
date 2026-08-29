@@ -114,29 +114,21 @@ def create_paginator_embeds(data: list[str], title: str, embed_color: discord.Co
 def get_semester(t: datetime.datetime) -> str:
     """Returns the semester that the datetime object is located in.
 
-    Jan - May -> Spring
-    Jun - Aug 20 -> Summer
-    Aug 21 - Dec -> Winter
-
     Args:
         t (datetime.datetime): The datetime object
 
     Returns:
         str - The name of the semester
     """
-    if t.month == 1 and t.day < 29:
+    # Store date and time components for clean comparison
+    date_key = (t.month, t.day)
+    time_key = (t.month, t.day, t.hour)
+
+    if date_key < (1, 25):
         return "Winter"
-    
-    if 1 <= t.month <= 5:
+    if date_key < (6, 2):
         return "Spring"
-
-    if 6 <= t.month < 8:
+    if time_key < (9, 1):
         return "Summer"
-
-    if t.month == 8 and t.day < 25:
-        return "Summer"
-
-    if t.month == 8 and t.day == 25 and t.hour < 15:
-        return "Summer"
-
+        
     return "Fall"
