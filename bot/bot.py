@@ -2,7 +2,7 @@ from aiohttp import ClientSession
 import asyncio
 from discord.ext import commands, tasks
 from mysql.connector import MySQLConnection
-from typing import Any, OrderedDict
+from typing import Any
 
 from bot.cogs.claim_command import ClaimCommand
 from bot.cogs.mycases_command import MyCasesCommand
@@ -136,35 +136,6 @@ class Bot(commands.Bot):
 
             except:
                 pass  # ignore exception, usually caused by a user leaving the server
-
-        result = LeaderboardResults(CheckedClaim.get_all_leaderboard(self.connection, datetime.datetime.now().year), TeamPoint.get_all(self.connection), datetime.datetime.now(), None)
-        await self.update_icon(result.ordered_team_month)
-
-    async def update_icon(self, team_ranks: OrderedDict):
-        """Updates the server icon using the team that is in first place for the month
-        on the leaderboard
-
-        Args:
-            team_ranks (OrderedDict): An ordered dictionary of all the teams and their counts
-        """
-        if len(list(team_ranks.keys())) == 0:
-            return
-
-        first_place = list(team_ranks.keys())[0]
-        first_place_team = Team.from_role_id(self.connection, first_place)
-
-        new_icon = first_place_team.image_url
-        ch = await self.fetch_channel(self.cases_channel)
-
-        # Use aiohttp Clientsession to asynchronously scrape the attachment url and read the data to a variable
-        async with ClientSession() as session:
-            async with session.get(new_icon) as response:
-                # If site response, read the response data into img_data
-                if response.status == 200:
-                    img_data = await response.read()
-
-        # Update the guild icon with the data stored in img_data
-        await ch.guild.edit(icon=img_data)
 
     @tasks.loop(seconds=5)  # repeat after every 5 seconds
     async def resend_outages_loop(self):
