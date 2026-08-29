@@ -73,7 +73,7 @@ class GenEvalCommand(commands.Cog):
         zipname = f"evals/eval{month}{year}.zip"
         self.create_zip(filenames, zipname)
 
-        await interaction.followup.send(content="hello", file=discord.File(zipname), ephemeral=True)
+        await interaction.followup.send(content="Generated Evals", file=discord.File(zipname), ephemeral=True)
 
     def create_zip(self, filenames: list[str], zipname: str):
         with zipfile.ZipFile(zipname, 'w') as zipf:
@@ -231,7 +231,7 @@ class GenEvalCommand(commands.Cog):
                 try:
                     discord_user = await guild.fetch_member(case.tech.discord_id)
                 except:
-                    pass # user is not in server
+                    continue # user is not in server
                 
                 is_lead[case.tech.discord_id] = self.bot.check_if_lead(discord_user)
 
